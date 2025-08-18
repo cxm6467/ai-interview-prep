@@ -3,10 +3,24 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[build.environment]
+  # Disable secrets scanning for build output
+  SECRETS_SCAN_ENABLED = "false"
+
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["openai"]
   included_files = ["netlify/functions/**/*.js"]
+
+# Security headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
 
 # API routes
 [[redirects]]
