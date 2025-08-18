@@ -13,6 +13,7 @@ interface FileUploadProps {
   label?: string;
   description?: string;
   className?: string;
+  children?: React.ReactNode;
 }
 
 export const FileUpload: React.FC<FileUploadProps> = ({
@@ -27,6 +28,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   label = 'Upload File',
   description = 'Drag & drop or click to browse',
   className,
+  children,
 }) => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop: (acceptedFiles) => onDrop(acceptedFiles),
@@ -36,41 +38,66 @@ export const FileUpload: React.FC<FileUploadProps> = ({
 
   return (
     <div className={clsx(styles.container, className)}>
-      {label && (
-        <Text variant="h3" className={styles.label}>
-          {label}
-        </Text>
+      {children || (
+        <>
+          {label && (
+            <Text variant="h3" className={styles.label}>
+              {label}
+            </Text>
+          )}
+          <Card variant="outlined" className={styles.dropzone}>
+            <div
+              {...getRootProps()}
+              className={clsx(
+                styles.dropzoneContent,
+                isDragActive && styles.dragActive
+              )}
+            >
+              <input {...getInputProps()} />
+              <div className={styles.uploadContent}>
+                <svg
+                  className={styles.uploadIcon}
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M21 15V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V15"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M17 8L12 3L7 8"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                  <path
+                    d="M12 3V15"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                <Text variant="body" className={styles.uploadText}>
+                  {isDragActive ? 'Drop the files here' : description}
+                </Text>
+                {file && (
+                  <Text variant="caption" className={styles.fileName}>
+                    {file.name}
+                  </Text>
+                )}
+              </div>
+            </div>
+          </Card>
+        </>
       )}
-      <Card variant="outlined" className={styles.dropzone}>
-        <div
-          {...getRootProps()}
-          className={clsx(
-            styles.dropzoneContent,
-            isDragActive && styles.dragActive
-          )}
-        >
-          <input {...getInputProps()} />
-          {file ? (
-            <div className={styles.fileInfo}>
-              <span className={styles.fileIcon}>📎</span>
-              <Text variant="body">{file.name}</Text>
-              <Text variant="caption" color="secondary">
-                {(file.size / 1024).toFixed(1)} KB
-              </Text>
-            </div>
-          ) : (
-            <div className={styles.uploadPrompt}>
-              <span className={styles.uploadIcon}>⬆️</span>
-              <Text variant="body" align="center">
-                {isDragActive ? 'Drop file here' : description}
-              </Text>
-              <Text variant="caption" color="secondary" align="center">
-                Supports PDF, DOC, DOCX
-              </Text>
-            </div>
-          )}
-        </div>
-      </Card>
     </div>
   );
 };

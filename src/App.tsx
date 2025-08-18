@@ -10,12 +10,6 @@ import { DocumentParser } from './services/documentParser';
 import { AIAnalysisService } from './services/aiAnalysis';
 import { useAppStore } from './store/appStore';
 import { FiSun, FiMoon, FiUpload, FiFileText, FiAward, FiMessageSquare, FiChevronRight } from 'react-icons/fi';
-declare module 'react' {
-  interface CSSProperties {
-    '--gradient-start'?: string;
-    '--gradient-end'?: string;
-  }
-}
 import './App.css';
 
 const App = () => {
@@ -23,6 +17,8 @@ const App = () => {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobInput, setJobInput] = useState('');
   const [jobFile, setJobFile] = useState<File | null>(null);
+  const [jobUrl, setJobUrl] = useState('');
+  const [isAnalyzingUrl, setIsAnalyzingUrl] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [_, setError] = useState('');
   const [activeTab, setActiveTab] = useState('interview');
@@ -57,7 +53,35 @@ const App = () => {
     if (files.length > 0) {
       setJobFile(files[0]);
       setJobInput('');
-      setError('');
+      setJobUrl('');
+    }
+  };
+
+  const handleJobUrlSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!jobUrl.trim()) return;
+    
+    try {
+      // Simple URL validation
+      new URL(jobUrl);
+      setIsAnalyzingUrl(true);
+      setJobInput('');
+      setJobFile(null);
+      
+      // Fetch and analyze the job description from URL
+      const jobText = await DocumentParser.fetchJobDescription(jobUrl);
+      const jobData = await AIAnalysisService.analyzeJobDescription(jobText);
+      setJobDescription(jobData);
+      
+      // If we have a resume, analyze it with the job description
+      if (resumeFile) {
+        await handleAnalyze();
+      }
+    } catch (err: any) {
+      console.error('Error processing job URL:', err);
+      setError(err.message || 'Failed to process job URL. Please try again.');
+    } finally {
+      setIsAnalyzingUrl(false);
     }
   };
 
@@ -67,7 +91,7 @@ const App = () => {
       return;
     }
 
-    if (!jobInput && !jobFile) {
+    if (!jobInput && !jobFile && !jobUrl) {
       setError('Please provide a job description');
       return;
     }
@@ -85,7 +109,9 @@ const App = () => {
       // Parse job description
       const jobText = jobFile 
         ? await DocumentParser.parseResume(jobFile)
-        : await DocumentParser.fetchJobDescription(jobInput);
+        : jobUrl
+          ? await DocumentParser.fetchJobDescription(jobUrl)
+          : await DocumentParser.fetchJobDescription(jobInput);
       console.log('Job description parsed, analyzing with AI...');
       const jobData = await AIAnalysisService.analyzeJobDescription(jobText);
       setJobDescription(jobData);
@@ -116,8 +142,8 @@ const App = () => {
       <div className="app">
         <header className="app-header">
           <div className="header-content">
-            <Text as="h1" variant="h2" className="logo">
-              <span className="gradient-text">AI Interview Prep</span>
+            <Text as="h1" variant="h1" className="logo">
+              <Text variant="h1" as="h1" className="gradient-text">AI Interview Prep</Text>
             </Text>
             <button 
               className="theme-toggle"
@@ -133,7 +159,7 @@ const App = () => {
           <div className="grid-container">
             {/* Resume Upload Card */}
             <Card className="upload-section">
-              <Text as="h2" className="section-header">
+              <Text as="h2" variant="h2" className="section-header">
                 <FiUpload className="icon" /> Upload Your Resume
               </Text>
               <FileUpload 
@@ -157,22 +183,33 @@ const App = () => {
 
             {/* Job Description Card */}
             <Card className="upload-section">
-              <Text as="h2" className="section-header">
+              <Text as="h2" variant="h2" className="section-header">
                 <FiFileText className="icon" /> Job Description
               </Text>
               <div className="job-input-container">
-                <textarea
-                  className="job-textarea"
-                  value={jobInput}
-                  onChange={(e) => setJobInput(e.target.value)}
-                  placeholder="Paste job description here..."
-                  rows={6}
-                  disabled={!!jobFile}
-                />
-                <div className="divider">
-                  <span>OR</span>
-                </div>
-                <FileUpload
+                <form onSubmit={handleJobUrlSubmit} className="flex flex-col gap-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      className="job-textarea flex-1"
+                      value={jobUrl}
+                      onChange={(e) => setJobUrl(e.target.value)}
+                      placeholder="Enter job posting URL (e.g., LinkedIn, Indeed, company career page)"
+                      required
+                    />
+                    <Button 
+                      type="submit" 
+                      variant="primary"
+                      disabled={isAnalyzingUrl}
+                    >
+                      {isAnalyzingUrl ? 'Analyzing...' : 'Analyze'}
+                    </Button>
+                  </div>
+                </form>
+                
+                <div className="divider">or</div>
+                
+                <FileUpload 
                   onDrop={handleJobUpload}
                   accept={{
                     'application/pdf': ['.pdf'],
@@ -181,16 +218,27 @@ const App = () => {
                     'text/plain': ['.txt']
                   }}
                   maxFiles={1}
-                  label="Upload job description file"
-                  description="Supports PDF, DOC, DOCX, TXT (Max 5MB)"
+                >
+                  <Button variant="secondary" size="medium" fullWidth>
+                    <FiUpload className="button-icon" /> Upload Job Description
+                  </Button>
+                </FileUpload>
+                
+                <div className="divider">or</div>
+                
+                <textarea
+                  className="job-textarea"
+                  value={jobInput}
+                  onChange={(e) => setJobInput(e.target.value)}
+                  placeholder="Or paste job description here..."
                 />
-                {jobFile && (
-                  <div className="file-preview">
-                    <FiFileText className="file-icon" />
-                    <span>{jobFile.name}</span>
-                  </div>
-                )}
               </div>
+              {jobFile && (
+                <div className="file-preview">
+                  <FiFileText className="file-icon" />
+                  <span>{jobFile.name}</span>
+                </div>
+              )}
             </Card>
           </div>
 
@@ -200,7 +248,7 @@ const App = () => {
               variant="primary"
               size="large"
               onClick={handleAnalyze}
-              disabled={!resumeFile || (!jobInput && !jobFile) || isAnalyzing}
+              disabled={!resumeFile || (!jobInput && !jobFile && !jobUrl) || isAnalyzing}
               className="analyze-button"
             >
               {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
@@ -247,8 +295,8 @@ const App = () => {
       <header className="app-header">
         <div className="header-content">
           <div>
-            <Text as="h1" variant="h2" className="logo">
-              <span className="gradient-text">Interview Dashboard</span>
+            <Text as="h1" variant="h1" className="logo">
+              <Text variant="h1" as="h1" className="gradient-text">Interview Dashboard</Text>
             </Text>
             <Text variant="body" color="secondary">AI-Powered Personalized Preparation</Text>
           </div>
@@ -276,7 +324,7 @@ const App = () => {
         <div className="container">
           <div className="stats-grid">
             <Card className="stat-card">
-              <Text variant="h3">📊 ATS Score</Text>
+              <Text variant="h2">Interview Dashboard</Text>
               <div className="score">{atsScore?.score || 85}/100</div>
               <Text variant="caption" color="secondary">AI Analysis</Text>
             </Card>
@@ -290,7 +338,7 @@ const App = () => {
               <Text variant="caption" color="secondary">Keywords Found</Text>
             </Card>
             <Card className="stat-card">
-              <Text variant="h3">💡 Topics Ready</Text>
+              <Text variant="h2">Upload Your Resume</Text>
               <div className="score">{presentationTopics.length || 3}</div>
               <Text variant="caption" color="secondary">Presentations</Text>
             </Card>
@@ -448,7 +496,7 @@ const App = () => {
             {activeTab === 'jokes' && (
               <div className="content-section">
                 <Text variant="h2">Take a Laugh Break</Text>
-                <Text variant="body" color="secondary" align="center" className="jokes-subtitle">
+                <Text variant="body" color="secondary" className="jokes-subtitle mb-2">
                   Reduce interview stress with some dad jokes! Studies show laughter helps with confidence.
                 </Text>
                 <DadJoke />
