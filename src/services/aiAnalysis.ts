@@ -4,7 +4,7 @@ import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, 
 export class AIAnalysisService {
   private static async callOpenAI(prompt: string, maxTokens: number = 1000): Promise<string> {
     try {
-      const response = await fetch('/.netlify/functions/ai-handler', {
+      const response = await fetch('/api/ai-handler', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
