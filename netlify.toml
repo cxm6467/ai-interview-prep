@@ -6,6 +6,14 @@
 [build.environment]
   # Disable secrets scanning for build output
   SECRETS_SCAN_ENABLED = "false"
+  # Specify Node.js version
+  NODE_VERSION = "20.0.0"
+
+[context.production.environment]
+  NODE_VERSION = "20.0.0"
+
+[context.deploy-preview.environment]
+  NODE_VERSION = "20.0.0"
 
 [functions]
   node_bundler = "esbuild"
