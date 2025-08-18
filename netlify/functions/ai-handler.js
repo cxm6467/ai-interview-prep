@@ -10,6 +10,13 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
+const headers = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Content-Type': 'application/json'
+};
+
 exports.handler = async function(event, context) {
   console.log('Received event:', {
     httpMethod: event.httpMethod,
@@ -58,7 +65,7 @@ exports.handler = async function(event, context) {
     
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers,
       body: JSON.stringify(result)
     };
   } catch (error) {
@@ -72,7 +79,7 @@ exports.handler = async function(event, context) {
     
     return {
       statusCode: error.status || 500,
-      headers: { 'Content-Type': 'application/json' },
+      headers: headers,
       body: JSON.stringify({ 
         error: error.message || 'Internal Server Error',
         type: error.type || 'server_error',
