@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
   /* Monokai Pro Dark Theme - 16-bit colors */
   --bg-primary: #2D2A2E;

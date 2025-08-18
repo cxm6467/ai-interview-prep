@@ -1,12 +1,60 @@
+/* Using app's theme variables */
+:root {
+  --card-bg: var(--bg-secondary, #ffffff);
+  --card-border: var(--border, #e2e8f0);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --card-shadow-hover: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --card-radius: var(--border-radius, 12px);
+  --card-transition: var(--transition, all 0.3s cubic-bezier(0.4, 0, 0.2, 1));
+  --card-accent: var(--gradient-start, #4f46e5);
+  --space-sm: 0.5rem;
+  --space-md: 0.75rem;
+  --space-lg: 1rem;
+  --space-xl: 1.5rem;
+}
+
+/* Base Card Styles */
 .card {
   background: var(--card-bg);
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  transition: all 0.3s ease;
+  border-radius: var(--card-radius);
+  border: 1px solid var(--card-border);
+  transition: var(--card-transition);
   position: relative;
   overflow: hidden;
-  /* Mobile-first: full width on small screens */
   width: 100%;
+  color: var(--text-primary);
+  box-shadow: var(--card-shadow);
+  margin-bottom: 1rem;
+}
+
+/* Card hover effect */
+.card:hover {
+  box-shadow: var(--card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* Card variants */
+.elevated {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.outlined {
+  border: 1px solid var(--card-border);
+  box-shadow: none;
+}
+
+.outlined:hover {
+  border-color: var(--card-accent);
+}
+
+.clickable {
+  cursor: pointer;
+  transition: var(--card-transition);
+}
+
+.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 /* Padding variants */
@@ -24,6 +72,15 @@
 
 .padding-large {
   padding: var(--space-lg);
+}
+
+/* Ensure proper spacing in card content */
+.card > *:first-child {
+  margin-top: 0;
+}
+
+.card > *:last-child {
+  margin-bottom: 0;
 }
 
 /* Card variants */
@@ -77,4 +134,26 @@
 .clickable:focus-visible {
   outline: 2px solid var(--accent-purple);
   outline-offset: 2px;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --card-bg: #1e293b;
+    --card-border: #334155;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  
+  .default {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  
+  .elevated {
+    box-shadow: var(--shadow);
+  }
+  
+  .elevated:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
 }

@@ -5,6 +5,17 @@ import path from 'path'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    include: ['pdfjs-dist'],
+    esbuildOptions: {
+      target: 'es2020',
+      supported: { bigint: true }
+    }
+  },
+  esbuild: {
+    // Ignore eval warnings from PDF.js
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -24,24 +35,70 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    proxy: {
+      // Proxy API requests to a backend server
+      '/api': {
+        target: 'http://localhost:3002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    },
     open: true
   },
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
     sourcemap: true,
+    chunkSizeWarningLimit: 1000, // Increase chunk size warning limit (in kB)
     rollupOptions: {
       output: {
-        manualChunks: {
-          'pdf-worker': ['pdfjs-dist']
-        }
+        manualChunks: (id) => {
+          // Handle PDF.js worker separately
+          if (id.includes('pdf.worker.entry')) {
+            return 'pdf.worker';
+          }
+          
+          // Split node_modules into separate chunks
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react';
+            }
+            if (id.includes('@radix-ui')) {
+              return 'vendor-radix';
+            }
+            if (id.includes('pdfjs-dist')) {
+              return 'pdf-worker';
+            }
+            return 'vendor-other';
+          }
+          
+          // Split components into separate chunks
+          if (id.includes('/components/')) {
+            if (id.includes('/organisms/')) {
+              return 'chunk-organisms';
+            }
+            if (id.includes('/molecules/')) {
+              return 'chunk-molecules';
+            }
+            if (id.includes('/atoms/')) {
+              return 'chunk-atoms';
+            }
+          }
+          
+          // Split services into a separate chunk
+          if (id.includes('/services/')) {
+            return 'chunk-services';
+          }
+        },
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js',
+        assetFileNames: 'assets/[name]-[hash][extname]'
       }
     }
   },
-  optimizeDeps: {
-    exclude: ['pdfjs-dist']
-  },
   assetsInclude: ['**/*.pdf'],
   define: {
-    global: 'globalThis',
+    'process.env': {},
+    global: 'window',
   }
 })

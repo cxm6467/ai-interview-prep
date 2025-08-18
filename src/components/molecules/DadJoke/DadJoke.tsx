@@ -1,28 +1,57 @@
-import React, { useState } from 'react';
-import { Card } from '@atoms/Card';
-import { Button } from '@atoms/Button';
-import { Text } from '@atoms/Text';
-import { DadJokeService } from '@services/dadJokeService';
+import React, { useState, useEffect } from 'react';
+import { Button } from '../../atoms/Button/Button';
+import { Card } from '../../atoms/Card/Card';
+import { Text } from '../../atoms/Text/Text';
+import { DadJokeService } from '../../../services/dadJokeService';
 import styles from './DadJoke.module.css';
 
-export const DadJoke: React.FC = () => {
-  const [joke, setJoke] = useState<string>('Click the button to get a dad joke! 😄');
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState<string>('');
+interface DadJokeProps {
+  className?: string;
+}
 
-  const fetchJoke = async () => {
-    setIsLoading(true);
-    setMessage('');
+export const DadJoke: React.FC<DadJokeProps> = ({ className = '' }) => {
+  const [joke, setJoke] = useState('Ready for a laugh? Click the button below!');
+  const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
+  const retryDelay = 1000; // Start with 1 second delay
+
+  const fetchJoke = async (isRetry = false) => {
+    if (isLoading) return;
     
     try {
+      setIsLoading(true);
+      setError(null);
+      
+      if (!isRetry) {
+        setJoke('Getting a fresh joke...');
+      }
+      
       const result = await DadJokeService.getRandomJoke();
       setJoke(result.joke);
+      setRetryCount(0); // Reset retry count on success
       
       if (result.message) {
         setMessage(result.message);
       }
-    } catch (_) {
-      setJoke('Why don\'t scientists trust atoms? Because they make up everything! 🔬 (Offline mode)');
+    } catch (error) {
+      console.error('Error fetching joke:', error);
+      
+      if (retryCount < maxRetries) {
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = retryDelay * Math.pow(2, retryCount);
+        setTimeout(() => {
+          setRetryCount(c => c + 1);
+          fetchJoke(true);
+        }, delay);
+        
+        setJoke(`Having trouble connecting... (Retry ${retryCount + 1}/${maxRetries})`);
+      } else {
+        setError('Failed to load a joke. Please try again later.');
+        setJoke('Oops! Something went wrong.');
+      }
       setMessage('Unable to fetch new jokes - using cached content');
     } finally {
       setIsLoading(false);
@@ -31,53 +60,74 @@ export const DadJoke: React.FC = () => {
 
   const resetCache = () => {
     DadJokeService.resetJokeCache();
+    setError(null);
     setMessage('Joke cache reset! You\'ll see fresh jokes now.');
-    setJoke('Cache cleared! Click "Get Another Joke" for fresh content.');
+    setJoke('Cache cleared! Click "Get A Joke" for fresh content.');
+    setRetryCount(0);
+  };
+  
+  const handleRetry = () => {
+    setRetryCount(0);
+    fetchJoke();
   };
 
   return (
-    <Card variant="elevated" className={styles.container}>
-      <div className={styles.jokeDisplay}>
-        <span className={styles.jokeIcon}>😄</span>
-        <Text variant="body" align="center" className={styles.jokeText}>
+    <div className="dad-joke-container">
+      <Card className={`dad-joke-card max-w-[500px] mx-auto ${className} ${error ? 'error' : ''}`}>
+        <div className={`joke-emoji ${isLoading ? 'pulse' : ''}`}>
+          {error ? '😕' : isLoading ? '⏳' : '😄'}
+        </div>
+        
+        <Text variant="body" align="center" className="joke-text">
           {joke}
         </Text>
-      </div>
-      
-      {message && (
-        <Card variant="outlined" className={styles.messageCard}>
-          <Text variant="caption" color="secondary" align="center">
-            💡 {message}
-          </Text>
-        </Card>
-      )}
-      
-      <div className={styles.buttons}>
-        <Button 
-          variant="primary" 
-          onClick={fetchJoke} 
-          disabled={isLoading}
-          icon={isLoading ? '⏳' : '🎭'}
-          fullWidth
-        >
-          {isLoading ? 'Getting Joke...' : 'Get Another Joke'}
-        </Button>
         
-        <Button 
-          variant="ghost" 
-          size="small" 
-          onClick={resetCache}
-          icon="🔄"
-        >
-          Reset Cache
-        </Button>
-      </div>
-      
-      <div className={styles.stats}>
-        <Text variant="caption" color="tertiary" align="center">
-          Dad jokes help reduce interview stress! Studies show laughter improves confidence and memory recall.
-        </Text>
-      </div>
-    </Card>
+        {error && (
+          <div className="error-message">
+            <p>{error}</p>
+            <Button 
+              onClick={handleRetry}
+              variant="primary"
+              size="small"
+              className="retry-button"
+              icon="🔄"
+            >
+              Try Again
+            </Button>
+          </div>
+        )}
+        
+        <div className="button-group">
+          <Button 
+            onClick={() => fetchJoke()} 
+            variant="primary" 
+            size="medium"
+            disabled={isLoading}
+            icon={isLoading ? '⏳' : '🎭'}
+            className={`action-button ${isLoading ? 'loading' : ''}`}
+          >
+            {isLoading ? 'Loading...' : 'Get A Joke'}
+          </Button>
+          <Button 
+            onClick={resetCache} 
+            variant="secondary" 
+            size="medium"
+            icon="🔄"
+            className="action-button"
+            disabled={isLoading}
+          >
+            Reset Session Cache
+          </Button>
+          
+          {message && !error && (
+            <div className="message">
+              💡 {message}
+            </div>
+          )}
+        </div>
+      </Card>
+    </div>
   );
 };
+
+export default DadJoke;

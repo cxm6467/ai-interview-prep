@@ -48,6 +48,76 @@ export class AIAnalysisService {
     }
   }
 
+  static async calculateATSScore(
+    resume: ResumeData,
+    job: JobDescription
+  ): Promise<ATSScore> {
+    const prompt = `You are an expert ATS (Applicant Tracking System) analyzer. 
+      
+TASK: Analyze the following resume against the job requirements and calculate an ATS compatibility score.
+
+RESUME INFORMATION:
+- Skills: ${resume.skills.join(', ')}
+- Experience: ${resume.experience?.map(exp => exp.description.join(', ')).join(' ') || 'No experience listed'}
+- Education: ${resume.education?.map(edu => `${edu.degree} at ${edu.school}`).join('; ') || 'Not specified'}
+
+JOB REQUIREMENTS:
+- Required Skills: ${job.requirements.join(', ')}
+- Preferred Skills: ${job.preferredSkills?.join(', ') || 'None specified'}
+
+INSTRUCTIONS:
+1. Calculate an ATS score from 0-100 based on how well the resume matches the job requirements
+2. Provide specific strengths in the candidate's profile
+3. List actionable improvements to increase ATS score
+4. Identify matched and missing keywords
+
+RESPONSE FORMAT (must be valid JSON):
+{
+  "score": 75,
+  "strengths": ["string"],
+  "improvements": ["string"],
+  "keywordMatches": ["string"],
+  "missingKeywords": ["string"]
+}
+
+IMPORTANT: Return ONLY the JSON object, without any markdown formatting or additional text.`;
+
+    try {
+      const response = await this.callOpenAI(prompt, 2000);
+      
+      // Clean up the response to extract just the JSON
+      let cleanResponse = response.trim();
+      
+      // Remove markdown code blocks if present
+      cleanResponse = cleanResponse.replace(/```(?:json)?\s*|```/g, '').trim();
+      
+      // Try to find JSON object in the response
+      const jsonMatch = cleanResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        cleanResponse = jsonMatch[0];
+      }
+      
+      try {
+        const result = JSON.parse(cleanResponse);
+        
+        // Validate and ensure all required fields exist with proper types
+        return {
+          score: typeof result.score === 'number' ? Math.max(0, Math.min(100, result.score)) : 0,
+          strengths: Array.isArray(result.strengths) ? result.strengths : [],
+          improvements: Array.isArray(result.improvements) ? result.improvements : [],
+          keywordMatches: Array.isArray(result.keywordMatches) ? result.keywordMatches : [],
+          missingKeywords: Array.isArray(result.missingKeywords) ? result.missingKeywords : []
+        };
+      } catch (jsonError) {
+        console.error('Failed to parse ATS response as JSON. Response:', cleanResponse);
+        console.error('JSON Parse Error:', jsonError);
+        return this.getMockATSScore();
+      }
+    } catch (error) {
+      console.error('Error in calculateATSScore:', error);
+      return this.getMockATSScore();
+    }
+  }
   static async analyzeResume(resumeText: string): Promise<ResumeData> {
     const prompt = `
 Analyze this resume and extract structured information. Return a JSON object with the following structure:
@@ -90,7 +160,6 @@ Return only valid JSON without any additional text or formatting.`;
       return this.getMockResumeData();
     }
   }
-
   static async analyzeJobDescription(jobText: string): Promise<JobDescription> {
     const prompt = `
 Analyze this job posting and extract structured information. Return a JSON object with:
@@ -117,6 +186,30 @@ Return only valid JSON without any additional text.`;
     } catch (error) {
       console.error('Job analysis failed:', error);
       return this.getMockJobDescription(jobText);
+    }
+  }
+  static async generateInterviewResponse(
+    userResponse: string,
+    currentQuestion: string,
+    resume: ResumeData,
+    conversationHistory: string[]
+  ): Promise<string> {
+    try {
+      const prompt = `You are conducting a technical interview. The candidate's resume shows experience with: ${JSON.stringify(resume.skills || [])}
+      
+Current interview question: "${currentQuestion}"
+      
+Candidate's response: "${userResponse}"
+      
+Conversation history so far:
+${conversationHistory.join('\n')}
+      
+Provide constructive feedback on the candidate's response, then ask a follow-up question or move to the next question.`;
+
+      return await this.callOpenAI(prompt);
+    } catch (error) {
+      console.error('Error generating interview response:', error);
+      return "Thank you for your response. Let's move on to the next question.";
     }
   }
 
@@ -165,153 +258,149 @@ Make questions specific to their background at ${resume.experience[0]?.company} 
       return this.getMockQuestions();
     }
   }
-
   static async generatePresentationTopics(
     resume: ResumeData,
     job: JobDescription
   ): Promise<PresentationTopic[]> {
-    const prompt = `
-Create 3 presentation topics for a ${job.title} interview based on the candidate's background.
-
-Candidate Experience:
-${resume.experience.map(exp => `- ${exp.position} at ${exp.company}: ${exp.description.join(', ')}`).join('\n')}
-
-Skills: ${resume.skills.join(', ')}
-
-Job Requirements: ${job.requirements.join(', ')}
-
-Return JSON array:
-[
-  {
-    "id": "string",
-    "title": "string (engaging presentation title)",
-    "bullets": ["array of 6-8 detailed bullet points"],
-    "relevance": number (0-100)
-  }
-]
-
-Make topics highly relevant to their actual experience and the target role.`;
-
     try {
-      const response = await this.callOpenAI(prompt, 1500);
-      const cleanResponse = response.trim().replace(/```json\n?|\n?```/g, '');
-      return JSON.parse(cleanResponse);
+      const prompt = `Generate 3 presentation topics based on the following resume and job description. 
+      For each topic, include a title and 3-5 bullet points.
+      
+      Resume:
+      ${JSON.stringify(resume, null, 2)}
+      
+      Job Description:
+      ${JSON.stringify(job, null, 2)}
+      
+      Format the response as a valid JSON array of objects with properties: id, title, and bullets (array).
+      Example format:
+      [
+        {
+          "id": "topic1",
+          "title": "Presentation Title 1",
+          "bullets": ["Point 1", "Point 2", "Point 3"]
+        }
+      ]`;
+
+      const response = await this.callOpenAI(prompt, 1000);
+      
+      // Clean the response
+      const cleanResponse = response
+        .replace(/^```(?:json)?\s*|\s*```$/g, '') // Remove code block markers
+        .trim();
+      
+      // Try to parse the response directly first
+      try {
+        const parsed = JSON.parse(cleanResponse);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch (e) {
+        // If direct parsing fails, try to extract JSON from the response
+        const jsonMatch = cleanResponse.match(/\[\s*\{.*\}\s*\]/s);
+        if (jsonMatch) {
+          try {
+            return JSON.parse(jsonMatch[0]);
+          } catch (e) {
+            console.error('Failed to parse extracted JSON:', e);
+          }
+        }
+        console.error('Failed to parse presentation response:', e);
+        console.log('Raw response:', response);
+        return this.getMockPresentations();
+      }
     } catch (error) {
       console.error('Presentation generation failed:', error);
       return this.getMockPresentations();
     }
   }
 
-  static async calculateATSScore(
-    resume: ResumeData,
-    job: JobDescription
-  ): Promise<ATSScore> {
-    const prompt = `
-Analyze this resume against the job requirements for ATS optimization.
-
-Resume Skills: ${resume.skills.join(', ')}
-Resume Experience: ${resume.experience.map(exp => exp.description.join(', ')).join(' ')}
-
-Job Requirements: ${job.requirements.join(', ')}
-Preferred Skills: ${job.preferredSkills.join(', ')}
-
-Calculate an ATS score (0-100) and provide specific feedback:
-
-{
-  "score": number,
-  "strengths": ["array of specific strengths"],
-  "improvements": ["array of actionable improvements"],
-  "keywordMatches": ["array of matched keywords"],
-  "missingKeywords": ["array of important missing keywords"]
-}
-
-Be specific about what keywords are present vs missing and why.`;
-
-    try {
-      const response = await this.callOpenAI(prompt, 1200);
-      const cleanResponse = response.trim().replace(/```json\n?|\n?```/g, '');
-      return JSON.parse(cleanResponse);
-    } catch (error) {
-      console.error('ATS analysis failed:', error);
-      return this.getMockATSScore();
-    }
-  }
-
-  // Enhanced AI Interview Chat Response
-  static async generateInterviewResponse(
-    userMessage: string,
-    questionContext: any,
-    resumeData: ResumeData,
-    conversationHistory: string[]
-  ): Promise<string> {
-    const prompt = `
-You are conducting a mock interview for a ${resumeData.experience[0]?.position || 'software developer'} position.
-
-Candidate Background:
-- Current/Recent Role: ${resumeData.experience[0]?.position} at ${resumeData.experience[0]?.company}
-- Skills: ${resumeData.skills.join(', ')}
-
-Current Question Context: ${questionContext?.question || 'General conversation'}
-Question Type: ${questionContext?.type || 'general'}
-
-Conversation History:
-${conversationHistory.slice(-3).join('\n')}
-
-Candidate's Response: "${userMessage}"
-
-As an experienced interviewer:
-1. Provide specific feedback on their answer
-2. Ask relevant follow-up questions if appropriate
-3. Reference their actual experience when giving advice
-4. Keep response conversational but professional
-5. Limit response to 2-3 sentences
-
-Response:`;
-
-    try {
-      const response = await this.callOpenAI(prompt, 300);
-      return response.trim();
-    } catch (error) {
-      console.error('Interview response generation failed:', error);
-      return "Thank you for that response. Could you provide more specific details about your experience with this technology?";
-    }
-  }
-
   // Fallback mock data methods
+  private static getMockPresentations(): PresentationTopic[] {
+    return [
+      {
+        id: '1',
+        title: 'The Future of Web Development',
+        bullets: [
+          'Emerging technologies in 2024',
+          'Best practices for modern web apps',
+          'Case studies of innovative web apps',
+          'Predictions for the next 5 years'
+        ]
+      },
+      {
+        id: '2',
+        title: 'Building Scalable Frontend Architecture',
+        bullets: [
+          'Micro-frontends vs monoliths',
+          'State management strategies',
+          'Performance optimization techniques',
+          'Challenges and solutions',
+          'Real-world implementation examples'
+        ]
+      }
+    ];
+  }
+
+  private static getMockATSScore(): ATSScore {
+    return {
+      score: 78,
+      strengths: [
+        'Strong experience with React and TypeScript',
+        'Good understanding of cloud platforms',
+        'Experience with CI/CD pipelines'
+      ],
+      improvements: [
+        'Add more specific metrics to quantify achievements',
+        'Include more industry-specific keywords',
+        'Highlight leadership experience more prominently'
+      ],
+      keywordMatches: ['React', 'TypeScript', 'AWS', 'Docker', 'CI/CD'],
+      missingKeywords: ['GraphQL', 'Microservices', 'Kubernetes']
+    };
+  }
+
   private static getMockResumeData(): ResumeData {
     return {
       name: 'John Doe',
-      email: 'john.doe@email.com',
-      phone: '+1-555-0123',
-      summary: 'Experienced full-stack developer with strong technical skills in modern web technologies',
+      email: 'john.doe@example.com',
+      phone: '(123) 456-7890',
+      summary: 'Experienced software engineer with 5+ years of experience in web development.',
+      skills: ['JavaScript', 'TypeScript', 'React', 'Node.js', 'AWS'],
       experience: [
         {
           company: 'Tech Corp',
-          position: 'Senior Developer',
-          duration: '2021-Present',
-          description: ['Led development of React applications', 'Mentored junior developers']
+          position: 'Senior Software Engineer',
+          duration: '2020 - Present',
+          description: [
+            'Developed and maintained web applications using React and Node.js',
+            'Led a team of 5 developers to deliver key features'
+          ]
         }
       ],
-      skills: ['React', 'Node.js', 'TypeScript', 'AWS', 'PostgreSQL'],
       education: [
         {
-          degree: 'Computer Science',
-          school: 'State University',
-          year: '2019'
+          school: 'University of Technology',
+          degree: 'B.Sc. in Computer Science',
+          year: '2015 - 2019'
         }
-      ],
-      certifications: []
+      ]
     };
   }
 
   private static getMockJobDescription(jobText: string): JobDescription {
     return {
-      title: 'Senior Full Stack Developer',
-      company: 'Amazing Tech Co',
-      requirements: ['5+ years React experience', 'Node.js expertise', 'AWS knowledge'],
-      responsibilities: ['Build scalable applications', 'Lead development team'],
-      preferredSkills: ['TypeScript', 'GraphQL', 'Docker'],
-      description: jobText
+      title: 'Senior Frontend Developer',
+      company: 'Innovate Inc',
+      description: jobText || 'Looking for an experienced frontend developer...',
+      requirements: [
+        '5+ years of experience with React',
+        'Strong TypeScript skills',
+        'Experience with modern frontend tooling'
+      ],
+      responsibilities: [
+        'Develop and maintain high-quality frontend code',
+        'Collaborate with design and backend teams'
+      ],
+      preferredSkills: ['GraphQL', 'AWS', 'Docker']
     };
   }
 
@@ -320,31 +409,17 @@ Response:`;
       {
         id: '1',
         type: 'technical',
-        question: 'Tell me about your experience with React and modern JavaScript.',
-        suggestedAnswer: 'Focus on your specific projects and technical challenges you\'ve solved.',
-        tips: ['Mention specific projects', 'Discuss performance optimizations']
-      }
-    ];
-  }
-
-  private static getMockPresentations(): PresentationTopic[] {
-    return [
+        question: 'Can you explain how you would optimize a React application for better performance?',
+        suggestedAnswer: 'I would use techniques like code splitting, lazy loading, memoization...',
+        tips: ['Focus on specific React optimizations', 'Mention tools like React.memo and useCallback']
+      },
       {
-        id: '1',
-        title: 'Modern Web Development',
-        bullets: ['Component architecture', 'State management', 'Performance optimization'],
-        relevance: 90
+        id: '2',
+        type: 'behavioral',
+        question: 'Tell me about a time you had to work with a difficult team member.',
+        suggestedAnswer: 'In my previous role, I worked with a colleague who...',
+        tips: ['Be diplomatic', 'Focus on the resolution']
       }
     ];
-  }
-
-  private static getMockATSScore(): ATSScore {
-    return {
-      score: 75,
-      strengths: ['Technical skills match'],
-      improvements: ['Add more keywords'],
-      keywordMatches: ['React', 'JavaScript'],
-      missingKeywords: ['Docker', 'GraphQL']
-    };
   }
 }

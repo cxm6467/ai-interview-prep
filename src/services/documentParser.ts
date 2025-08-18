@@ -1,11 +1,21 @@
-import * as pdfjsLib from 'pdfjs-dist';
+// Import mammoth for Word document parsing
 import mammoth from 'mammoth';
 
-// Use local worker instead of CDN
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url
-).toString();
+// This function will be used to dynamically import PDF.js
+async function getPdfJs() {
+  // Import PDF.js with proper typing
+  const pdfjsLib = await import('pdfjs-dist/build/pdf');
+  
+  // Import worker with proper typing
+  const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
+  
+  // Set worker source
+  if (typeof window !== 'undefined' && 'GlobalWorkerOptions' in pdfjsLib) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+  }
+  
+  return pdfjsLib;
+}
 
 export class DocumentParser {
   static async parseResume(file: File): Promise<string> {
@@ -34,6 +44,7 @@ export class DocumentParser {
 
   private static async parsePDF(file: File): Promise<string> {
     try {
+      const pdfjsLib = await getPdfJs();
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       let fullText = '';

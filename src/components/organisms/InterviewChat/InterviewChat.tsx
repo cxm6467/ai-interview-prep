@@ -70,7 +70,7 @@ Take your time to think about your answer, and I'll provide feedback to help you
       if (hasOpenAI && resumeData) {
         aiResponse = await AIAnalysisService.generateInterviewResponse(
           input.trim(),
-          currentQuestion,
+          currentQuestion.question, // Pass the question text instead of the object
           resumeData,
           conversationHistory
         );

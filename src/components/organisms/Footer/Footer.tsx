@@ -28,7 +28,7 @@ export const Footer: React.FC = () => {
         </div>
         
         <div className={styles.section}>
-          <Text variant="h3" color="accent">🏗️ Built With</Text>
+          <Text variant="h3" color="accent">💻 Built With</Text>
           <div className={styles.techStack}>
             <span className={styles.tech}>React</span>
             <span className={styles.tech}>TypeScript</span>

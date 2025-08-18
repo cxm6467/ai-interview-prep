@@ -47,7 +47,6 @@ export interface PresentationTopic {
   id: string;
   title: string;
   bullets: string[];
-  relevance: number;
 }
 
 // Analysis interfaces

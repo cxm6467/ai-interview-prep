@@ -1,1 +1,0 @@
-export { InterviewChat } from './InterviewChat';

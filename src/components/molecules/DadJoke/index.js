@@ -1,1 +1,0 @@
-export { DadJoke } from './DadJoke';
