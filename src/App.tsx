@@ -4,20 +4,27 @@ import { Button } from '@atoms/Button';
 import { Text } from '@atoms/Text';
 import { FileUpload } from '@molecules/FileUpload';
 import { DadJoke } from '@molecules/DadJoke';
-import { SessionInspector } from '@molecules/SessionInspector/SessionInspector';
 import { InterviewChat } from '@organisms/InterviewChat';
 import { Footer } from '@organisms/Footer';
 import { DocumentParser } from './services/documentParser';
 import { AIAnalysisService } from './services/aiAnalysis';
 import { useAppStore } from './store/appStore';
+import { FiSun, FiMoon, FiUpload, FiFileText, FiAward, FiMessageSquare, FiChevronRight } from 'react-icons/fi';
+declare module 'react' {
+  interface CSSProperties {
+    '--gradient-start'?: string;
+    '--gradient-end'?: string;
+  }
+}
 import './App.css';
 
-function App() {
+const App = () => {
+  // ... existing code ...
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [jobInput, setJobInput] = useState('');
   const [jobFile, setJobFile] = useState<File | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState('');
+  const [_, setError] = useState('');
   const [activeTab, setActiveTab] = useState('interview');
 
   const {
@@ -103,102 +110,132 @@ function App() {
     }
   };
 
+  // Render Upload View
   if (currentStep === 'upload') {
     return (
       <div className="app">
-        <header className="header">
+        <header className="app-header">
           <div className="header-content">
-            <Text variant="h1" className="logo">🚀 Interview Prep</Text>
-            <Text variant="caption" color="secondary">AI-Powered Career Success</Text>
+            <Text as="h1" variant="h2" className="logo">
+              <span className="gradient-text">AI Interview Prep</span>
+            </Text>
+            <button 
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
+            </button>
           </div>
-          <Button variant="ghost" size="small" onClick={toggleTheme} icon={theme === 'dark' ? '🌙' : '☀️'}>
-            {theme === 'dark' ? 'Dark' : 'Light'}
-          </Button>
         </header>
-        
-        <main className="main">
-          <div className="container">
-            <Card variant="elevated" className="upload-card">
-              <Text variant="h1" align="center" className="title">
-                Let's Prepare You for Success
-              </Text>
-              <Text variant="body" color="secondary" align="center" className="subtitle">
-                Upload your resume and job description for AI-powered personalized interview preparation
-              </Text>
-              
-              <div className="upload-sections">
-                <div className="section">
-                  <FileUpload
-                    label="📄 Your Resume"
-                    description="Drop your resume or click to browse"
-                    file={resumeFile}
-                    onDrop={handleResumeUpload}
-                  />
-                </div>
 
-                <div className="section">
-                  <Text variant="h3" className="section-title">💼 Job Description</Text>
-                  
-                  <input
-                    type="url"
-                    placeholder="Paste job posting URL..."
-                    value={jobInput}
-                    onChange={(e) => {
-                      setJobInput(e.target.value);
-                      setJobFile(null);
-                    }}
-                    className="url-input"
-                    disabled={!!jobFile}
-                  />
-                  
-                  <Text variant="caption" color="secondary" align="center" className="divider">
-                    OR
-                  </Text>
-                  
-                  <FileUpload
-                    description="Upload job description file"
-                    file={jobFile}
-                    onDrop={handleJobUpload}
-                  />
+        <main className="main-content">
+          <div className="grid-container">
+            {/* Resume Upload Card */}
+            <Card className="upload-section">
+              <Text as="h2" className="section-header">
+                <FiUpload className="icon" /> Upload Your Resume
+              </Text>
+              <FileUpload 
+                onDrop={handleResumeUpload}
+                accept={{
+                  'application/pdf': ['.pdf'],
+                  'application/msword': ['.doc'],
+                  'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+                }}
+                maxFiles={1}
+                label="Drag & drop your resume here"
+                description="Supports PDF, DOC, DOCX (Max 5MB)"
+              />
+              {resumeFile && (
+                <div className="file-preview">
+                  <FiFileText className="file-icon" />
+                  <span>{resumeFile.name}</span>
                 </div>
-              </div>
-
-              {error && (
-                <Card variant="outlined" className="error-card">
-                  <Text variant="body" className="error-text">⚠️ {error}</Text>
-                  {error.includes('OpenAI') && (
-                    <Text variant="small" color="secondary" className="error-help">
-                      💡 Add your OpenAI API key to the .env file to use real AI analysis.
-                    </Text>
-                  )}
-                </Card>
               )}
+            </Card>
 
-              <Button
-                variant="primary"
-                size="large"
-                fullWidth
-                onClick={handleAnalyze}
-                disabled={!resumeFile || (!jobInput && !jobFile) || isAnalyzing}
-                icon={isAnalyzing ? '⏳' : '🤖'}
-              >
-                {isAnalyzing ? 'Analyzing with AI...' : 'Generate AI Interview Prep'}
-              </Button>
-
-              <Card className="features-card">
-                <Text variant="h3" color="accent">What you'll get:</Text>
-                <ul className="features">
-                  <li>✅ Real AI-generated personalized interview questions</li>
-                  <li>🤖 Interactive AI interview coach with GPT-powered responses</li>
-                  <li>📊 Smart ATS score optimization with detailed analysis</li>
-                  <li>🎯 Skills gap analysis with actionable improvements</li>
-                  <li>💡 Custom presentation topics with comprehensive outlines</li>
-                  <li>😄 Dad jokes to keep you relaxed and confident</li>
-                </ul>
-              </Card>
+            {/* Job Description Card */}
+            <Card className="upload-section">
+              <Text as="h2" className="section-header">
+                <FiFileText className="icon" /> Job Description
+              </Text>
+              <div className="job-input-container">
+                <textarea
+                  className="job-textarea"
+                  value={jobInput}
+                  onChange={(e) => setJobInput(e.target.value)}
+                  placeholder="Paste job description here..."
+                  rows={6}
+                  disabled={!!jobFile}
+                />
+                <div className="divider">
+                  <span>OR</span>
+                </div>
+                <FileUpload
+                  onDrop={handleJobUpload}
+                  accept={{
+                    'application/pdf': ['.pdf'],
+                    'application/msword': ['.doc'],
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                    'text/plain': ['.txt']
+                  }}
+                  maxFiles={1}
+                  label="Upload job description file"
+                  description="Supports PDF, DOC, DOCX, TXT (Max 5MB)"
+                />
+                {jobFile && (
+                  <div className="file-preview">
+                    <FiFileText className="file-icon" />
+                    <span>{jobFile.name}</span>
+                  </div>
+                )}
+              </div>
             </Card>
           </div>
+
+          {/* Action Button */}
+          <div className="action-container">
+            <Button
+              variant="primary"
+              size="large"
+              onClick={handleAnalyze}
+              disabled={!resumeFile || (!jobInput && !jobFile) || isAnalyzing}
+              className="analyze-button"
+            >
+              {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
+              <FiChevronRight className="button-icon" />
+            </Button>
+          </div>
+
+          {/* Features Grid */}
+          <div className="features-grid">
+            <Card className="feature-card">
+              <div className="feature-icon">
+                <FiMessageSquare />
+              </div>
+              <Text as="h3" variant="h3">AI-Powered Questions</Text>
+              <Text variant="body" color="secondary">
+                Get personalized interview questions based on your resume and job description.
+              </Text>
+            </Card>
+
+            <Card className="feature-card">
+              <div className="feature-icon">
+                <FiAward />
+              </div>
+              <Text as="h3" variant="h3">ATS Score</Text>
+              <Text variant="body" color="secondary">
+                See how well your resume matches the job requirements with our ATS scoring system.
+              </Text>
+            </Card>
+          </div>
+
+          <div className="text-center">
+            <DadJoke />
+          </div>
         </main>
+
         <Footer />
       </div>
     );
@@ -207,22 +244,35 @@ function App() {
   // Dashboard View
   return (
     <div className="app">
-      <header className="header">
+      <header className="app-header">
         <div className="header-content">
-          <Text variant="h1" className="logo">🚀 Interview Dashboard</Text>
-          <Text variant="caption" color="secondary">AI-Powered Personalized Preparation</Text>
-        </div>
-        <div className="header-actions">
-          <Button variant="ghost" size="small" onClick={() => setCurrentStep('upload')} icon="←">
-            New Analysis
-          </Button>
-          <Button variant="ghost" size="small" onClick={toggleTheme} icon={theme === 'dark' ? '🌙' : '☀️'}>
-            {theme === 'dark' ? 'Dark' : 'Light'}
-          </Button>
+          <div>
+            <Text as="h1" variant="h2" className="logo">
+              <span className="gradient-text">Interview Dashboard</span>
+            </Text>
+            <Text variant="body" color="secondary">AI-Powered Personalized Preparation</Text>
+          </div>
+          <div className="header-actions">
+            <Button 
+              variant="secondary" 
+              size="medium" 
+              onClick={() => setCurrentStep('upload')}
+              className="new-analysis-btn"
+            >
+              <FiUpload className="button-icon" /> New Analysis
+            </Button>
+            <button 
+              className="theme-toggle"
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
+            </button>
+          </div>
         </div>
       </header>
       
-      <main className="main">
+      <main className="main-content">
         <div className="container">
           <div className="stats-grid">
             <Card className="stat-card">
@@ -402,7 +452,7 @@ function App() {
                   Reduce interview stress with some dad jokes! Studies show laughter helps with confidence.
                 </Text>
                 <DadJoke />
-                <SessionInspector />
+                {/* Session history will be implemented here */}
               </div>
             )}
           </div>

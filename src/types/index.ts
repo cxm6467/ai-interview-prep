@@ -1,13 +1,4 @@
-import type { ReactNode, ElementType } from 'react';
-
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      [elemName: string]: any;
-    }
-  }
-}
-
+import type { ReactNode, ElementType, JSX } from 'react';
 
 // Core data interfaces
 export interface ResumeData {
