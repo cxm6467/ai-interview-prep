@@ -24,7 +24,7 @@ const InterviewPrepPro: React.FC = () => {
         <div className="container">
           <div className="header-container">
             <div className="header-left">
-              <h1>🚀 Interview Prep Pro</h1>
+              <h1>🚀 Interview Prep</h1>
               <span className="subtitle">Full Stack Engineer Edition</span>
             </div>
             <button className="theme-toggle" onClick={toggleTheme}>

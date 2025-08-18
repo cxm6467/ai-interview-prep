@@ -75,7 +75,7 @@ Create a `.env` file for local development:
 
 ```env
 VITE_API_URL=your_api_url
-VITE_APP_NAME=Interview Prep Pro
+VITE_APP_NAME=Interview Prep
 ```
 
 ## Contributing
