@@ -3,7 +3,7 @@ import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, 
 // Real AI Analysis Service using OpenAI GPT
 export class AIAnalysisService {
   private static getOpenAIKey(): string {
-    const key = import.meta.env.VITE_OPENAI_API_KEY;
+    const key = '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';
     if (!key) {
       throw new Error('OpenAI API key not found. Please add VITE_OPENAI_API_KEY to your .env file.');
     }
