@@ -1,0 +1,8 @@
+{
+  "name": "netlify-functions",
+  "version": "1.0.0",
+  "main": "ai-handler.js",
+  "dependencies": {
+    "openai": "^4.0.0"
+  }
+}
