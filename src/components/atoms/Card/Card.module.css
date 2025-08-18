@@ -1,0 +1,80 @@
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  /* Mobile-first: full width on small screens */
+  width: 100%;
+}
+
+/* Padding variants */
+.padding-none {
+  padding: 0;
+}
+
+.padding-small {
+  padding: var(--space-sm);
+}
+
+.padding-medium {
+  padding: var(--space-md);
+}
+
+.padding-large {
+  padding: var(--space-lg);
+}
+
+/* Card variants */
+.default {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.elevated {
+  box-shadow: var(--shadow);
+}
+
+.elevated:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.outlined {
+  background: transparent;
+  border: 2px solid var(--accent-purple);
+  box-shadow: none;
+}
+
+/* Clickable cards */
+.clickable {
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.clickable:hover {
+  border-color: var(--accent-purple);
+  transform: translateY(-2px);
+}
+
+.clickable:active {
+  transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (min-width: 768px) {
+  .padding-medium {
+    padding: var(--space-lg);
+  }
+  
+  .padding-large {
+    padding: var(--space-xl);
+  }
+}
+
+/* Accessibility */
+.clickable:focus-visible {
+  outline: 2px solid var(--accent-purple);
+  outline-offset: 2px;
+}

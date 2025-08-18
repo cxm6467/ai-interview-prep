@@ -1,0 +1,88 @@
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.jokeDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+  padding: var(--space-lg);
+  background: var(--code-bg);
+  border-radius: 12px;
+  min-height: 120px;
+  justify-content: center;
+}
+
+.jokeIcon {
+  font-size: 3rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.jokeText {
+  line-height: 1.7;
+  font-size: var(--text-lg);
+  color: var(--text-primary);
+  padding: 0 var(--space-md);
+}
+
+.messageCard {
+  margin-bottom: var(--space-md);
+  border-color: var(--accent-yellow);
+  background: rgba(255, 216, 102, 0.1);
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.stats {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .jokeDisplay {
+    padding: var(--space-md);
+    min-height: 100px;
+  }
+  
+  .jokeText {
+    font-size: var(--text-base);
+    padding: 0 var(--space-sm);
+  }
+}
+
+/* Desktop layout */
+@media (min-width: 768px) {
+  .buttons {
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .buttons button:first-child {
+    flex: 1;
+    max-width: 200px;
+  }
+}
