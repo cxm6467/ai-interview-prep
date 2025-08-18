@@ -8,12 +8,14 @@
   external_node_modules = ["openai"]
   included_files = ["netlify/functions/**/*.js"]
 
+# API routes
 [[redirects]]
-  from = "/api/ai-handler"
-  to = "/.netlify/functions/ai-handler"
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
   status = 200
   force = true
 
+# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
