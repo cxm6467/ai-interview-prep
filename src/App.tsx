@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@atoms/Card';
 import { Button } from '@atoms/Button';
 import { Text } from '@atoms/Text';
 import { FileUpload } from '@molecules/FileUpload';
 import { DadJoke } from '@molecules/DadJoke';
-import { SessionInspector } from '@molecules/SessionInspector';
+import { SessionInspector } from '@molecules/SessionInspector/SessionInspector';
 import { InterviewChat } from '@organisms/InterviewChat';
 import { Footer } from '@organisms/Footer';
-import { DocumentParser } from '@services/documentParser';
-import { AIAnalysisService } from '@services/aiAnalysis';
-import { useAppStore } from '@store/appStore';
+import { DocumentParser } from './services/documentParser';
+import { AIAnalysisService } from './services/aiAnalysis';
+import { useAppStore } from './store/appStore';
 import './App.css';
 
 function App() {
@@ -304,7 +304,7 @@ function App() {
                             <div className="tips">
                               <Text variant="body" weight="bold" color="accent">💡 Pro Tips:</Text>
                               <ul>
-                                {question.tips.map((tip, i) => (
+                                {question.tips?.map((tip: string, i: number) => (
                                   <li key={i}>
                                     <Text variant="small" color="secondary">{tip}</Text>
                                   </li>
@@ -338,7 +338,7 @@ function App() {
                       </div>
                       <Text variant="h3">{topic.title}</Text>
                       <ul>
-                        {topic.bullets.map((bullet, i) => (
+                        {topic.bullets.map((bullet: string, i: number) => (
                           <li key={i}>{bullet}</li>
                         ))}
                       </ul>
@@ -355,7 +355,7 @@ function App() {
                   <Card className="skills-category">
                     <Text variant="h3" color="accent">✅ Strengths</Text>
                     <ul>
-                      {atsScore?.strengths.map((strength, i) => (
+                      {atsScore?.strengths.map((strength: string, i: number) => (
                         <li key={i}>{strength}</li>
                       )) || ['Strong technical skills match', 'Relevant experience']}
                     </ul>
@@ -364,7 +364,7 @@ function App() {
                   <Card className="skills-category">
                     <Text variant="h3" color="accent">🎯 Improvements</Text>
                     <ul>
-                      {atsScore?.improvements.map((improvement, i) => (
+                      {atsScore?.improvements.map((improvement: string, i: number) => (
                         <li key={i}>{improvement}</li>
                       )) || ['Add quantifiable achievements', 'Include industry keywords']}
                     </ul>
@@ -373,7 +373,7 @@ function App() {
                   <Card className="skills-category">
                     <Text variant="h3" color="accent">🔑 Keyword Matches</Text>
                     <div className="keywords-grid">
-                      {atsScore?.keywordMatches.map((keyword, i) => (
+                      {atsScore?.keywordMatches.map((keyword: string, i: number) => (
                         <span key={i} className="keyword matched">{keyword}</span>
                       )) || ['React', 'Node.js', 'JavaScript'].map((keyword, i) => (
                         <span key={i} className="keyword matched">{keyword}</span>
@@ -384,7 +384,7 @@ function App() {
                   <Card className="skills-category">
                     <Text variant="h3" color="accent">⚠️ Missing Keywords</Text>
                     <div className="keywords-grid">
-                      {atsScore?.missingKeywords.map((keyword, i) => (
+                      {atsScore?.missingKeywords.map((keyword: string, i: number) => (
                         <span key={i} className="keyword missing">{keyword}</span>
                       )) || ['Docker', 'GraphQL', 'Kubernetes'].map((keyword, i) => (
                         <span key={i} className="keyword missing">{keyword}</span>

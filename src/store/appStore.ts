@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, ATSScore } from '@types';
+import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, ATSScore } from '../types';
 
 interface AppState {
   resumeData: ResumeData | null;

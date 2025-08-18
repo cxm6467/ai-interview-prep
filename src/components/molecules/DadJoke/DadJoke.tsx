@@ -21,7 +21,7 @@ export const DadJoke: React.FC = () => {
       if (result.message) {
         setMessage(result.message);
       }
-    } catch (error) {
+    } catch (_) {
       setJoke('Why don\'t scientists trust atoms? Because they make up everything! 🔬 (Offline mode)');
       setMessage('Unable to fetch new jokes - using cached content');
     } finally {

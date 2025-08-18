@@ -1,4 +1,4 @@
-import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, ATSScore } from '@types';
+import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, ATSScore } from '../types';
 
 // Real AI Analysis Service using OpenAI GPT
 export class AIAnalysisService {

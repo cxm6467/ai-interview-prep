@@ -1,15 +1,21 @@
+import type { ElementType, ReactNode } from 'react';
 import React from 'react';
 import clsx from 'clsx';
 import styles from './Text.module.css';
 
+type TextVariant = 'h1' | 'h2' | 'h3' | 'body' | 'small' | 'caption';
+type TextColor = 'primary' | 'secondary' | 'tertiary' | 'accent';
+type TextAlign = 'left' | 'center' | 'right';
+type TextWeight = 'normal' | 'medium' | 'bold';
+
 interface TextProps {
-  children: React.ReactNode;
-  variant?: 'h1' | 'h2' | 'h3' | 'body' | 'small' | 'caption';
-  color?: 'primary' | 'secondary' | 'tertiary' | 'accent';
-  align?: 'left' | 'center' | 'right';
-  weight?: 'normal' | 'medium' | 'bold';
+  children: ReactNode;
+  variant?: TextVariant;
+  color?: TextColor;
+  align?: TextAlign;
+  weight?: TextWeight;
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: ElementType;
 }
 
 export const Text: React.FC<TextProps> = ({
@@ -21,7 +27,7 @@ export const Text: React.FC<TextProps> = ({
   className,
   as,
 }) => {
-  const Component = as || (variant.startsWith('h') ? variant : 'p') as keyof JSX.IntrinsicElements;
+  const Component = as || (variant.startsWith('h') ? variant : 'p');
   
   return (
     <Component

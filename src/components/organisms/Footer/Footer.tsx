@@ -44,7 +44,7 @@ export const Footer: React.FC = () => {
             Built with 💜 using Atomic Design principles and Mobile-First development
           </Text>
           <Text variant="caption" color="tertiary" align="center">
-            © ${new Date().getFullYear()} Dynamic Interview Prep. Open source project for educational purposes.
+            © {new Date().getFullYear()} Dynamic Interview Prep. Open source project for educational purposes.
           </Text>
         </div>
       </Card>

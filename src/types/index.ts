@@ -1,3 +1,14 @@
+import type { ReactNode, ElementType } from 'react';
+
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      [elemName: string]: any;
+    }
+  }
+}
+
+
 // Core data interfaces
 export interface ResumeData {
   name?: string;
@@ -87,7 +98,7 @@ export interface FileUploadProps {
 }
 
 export interface ButtonProps {
-  children: React.ReactNode;
+  children: ReactNode;
   onClick?: () => void;
   variant?: 'primary' | 'secondary' | 'ghost';
   size?: 'small' | 'medium' | 'large';
@@ -99,7 +110,7 @@ export interface ButtonProps {
 }
 
 export interface CardProps {
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
   padding?: 'none' | 'small' | 'medium' | 'large';
   variant?: 'default' | 'elevated' | 'outlined';
@@ -107,11 +118,11 @@ export interface CardProps {
 }
 
 export interface TextProps {
-  children: React.ReactNode;
+  children: ReactNode;
   variant?: 'h1' | 'h2' | 'h3' | 'body' | 'small' | 'caption';
   color?: 'primary' | 'secondary' | 'tertiary' | 'accent';
   align?: 'left' | 'center' | 'right';
   weight?: 'normal' | 'medium' | 'bold';
   className?: string;
-  as?: keyof JSX.IntrinsicElements;
+  as?: ElementType<keyof JSX.IntrinsicElements>;
 }
