@@ -1,7 +1,9 @@
-import * as pdfjsLib from 'pdfjs-dist';
+import * as pdfjsLib from 'pdfjs-dist/build/pdf';
+import * as pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs';
 import mammoth from 'mammoth';
-// Use local worker instead of CDN
-pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.js', import.meta.url).toString();
+
+// Set the worker source
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
 export class DocumentParser {
     static async parseResume(file) {
         const fileType = file.type;
