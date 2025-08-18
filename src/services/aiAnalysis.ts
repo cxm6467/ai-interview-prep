@@ -2,24 +2,14 @@ import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, 
 
 // Real AI Analysis Service using OpenAI GPT
 export class AIAnalysisService {
-  private static getOpenAIKey(): string {
-    const key = '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';
-    if (!key) {
-      throw new Error('OpenAI API key not found. Please add VITE_OPENAI_API_KEY to your .env file.');
-    }
-    return key;
-  }
-
   private static async callOpenAI(prompt: string, maxTokens: number = 1000): Promise<string> {
     try {
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      const response = await fetch('/.netlify/functions/ai-handler', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.getOpenAIKey()}`
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
           messages: [
             {
               role: 'system',
@@ -30,18 +20,17 @@ export class AIAnalysisService {
               content: prompt
             }
           ],
-          max_tokens: maxTokens,
-          temperature: 0.7
+          maxTokens
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`AI service error: ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      return data.choices[0]?.message?.content || '';
+      return data.content || '';
     } catch (error) {
       console.error('OpenAI API call failed:', error);
       throw new Error(`AI analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
