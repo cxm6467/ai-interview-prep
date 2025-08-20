@@ -7,9 +7,10 @@ interface AppState {
   interviewQuestions: InterviewQuestion[];
   presentationTopics: PresentationTopic[];
   atsScore: ATSScore | null;
+  interviewerRole: string;
   
   isLoading: boolean;
-  currentStep: 'upload' | 'analysis' | 'dashboard';
+  currentStep: 'upload' | 'analysis' | 'dashboard' | 'interview';
   theme: 'light' | 'dark';
   
   setResumeData: (data: ResumeData) => void;
@@ -17,8 +18,9 @@ interface AppState {
   setInterviewQuestions: (questions: InterviewQuestion[]) => void;
   setPresentationTopics: (topics: PresentationTopic[]) => void;
   setATSScore: (score: ATSScore) => void;
+  setInterviewerRole: (role: string) => void;
   setLoading: (loading: boolean) => void;
-  setCurrentStep: (step: 'upload' | 'analysis' | 'dashboard') => void;
+  setCurrentStep: (step: 'upload' | 'analysis' | 'dashboard' | 'interview') => void;
   toggleTheme: () => void;
   reset: () => void;
 }
@@ -29,6 +31,7 @@ export const useAppStore = create<AppState>((set) => ({
   interviewQuestions: [],
   presentationTopics: [],
   atsScore: null,
+  interviewerRole: '',
   isLoading: false,
   currentStep: 'upload',
   theme: 'dark',
@@ -38,6 +41,7 @@ export const useAppStore = create<AppState>((set) => ({
   setInterviewQuestions: (questions) => set({ interviewQuestions: questions }),
   setPresentationTopics: (topics) => set({ presentationTopics: topics }),
   setATSScore: (score) => set({ atsScore: score }),
+  setInterviewerRole: (role) => set({ interviewerRole: role }),
   setLoading: (loading) => set({ isLoading: loading }),
   setCurrentStep: (step) => set({ currentStep: step }),
   toggleTheme: () => set((state) => ({ 
@@ -49,6 +53,7 @@ export const useAppStore = create<AppState>((set) => ({
     interviewQuestions: [],
     presentationTopics: [],
     atsScore: null,
+    interviewerRole: '',
     currentStep: 'upload'
   })
 }));

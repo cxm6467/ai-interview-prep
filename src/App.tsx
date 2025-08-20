@@ -1,4 +1,4 @@
-import React, { useState, useEffect, SetStateAction } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@atoms/Card';
 import { Button } from '@atoms/Button';
 import { Text } from '@atoms/Text';
@@ -8,9 +8,31 @@ import { InterviewChat } from '@organisms/InterviewChat';
 import { Footer } from '@organisms/Footer';
 import { DocumentParser } from '@/services/documentParser';
 import { AIAnalysisService } from '@/services/aiAnalysis';
+import { CacheService } from '@/services/cacheService';
 import { useAppStore } from '@/store/appStore';
-import { FiSun, FiMoon, FiUpload, FiFileText, FiAward, FiMessageSquare, FiChevronRight } from 'react-icons/fi';
+import { FiSun, FiMoon, FiUpload, FiFileText, FiChevronRight } from 'react-icons/fi';
+import { LoadingOverlay } from './components/atoms/LoadingOverlay/LoadingOverlay';
+import { SkillBubble } from './components/atoms/SkillBubble';
+import { CookieConsent } from './components/molecules/CookieConsent';
 import './App.css';
+
+/**
+ * Main Application Component
+ * 
+ * The root component that handles the core functionality of the AI Interview Prep application.
+ * Manages the two main views: upload/analysis view and dashboard view.
+ * 
+ * Features:
+ * - File upload for resume and job descriptions
+ * - AI-powered analysis of documents
+ * - Caching system for performance optimization
+ * - Theme switching (light/dark mode)
+ * - Multi-step workflow management
+ * - Real-time loading states and error handling
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered application
+ */
 const App = () => {
     // State management
     const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -19,10 +41,36 @@ const App = () => {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('interview');
-    const { currentStep, theme, toggleTheme, setCurrentStep, setResumeData, setJobDescription, setInterviewQuestions, setPresentationTopics, setATSScore, atsScore, interviewQuestions, presentationTopics } = useAppStore();
+    
+    const { 
+        currentStep, 
+        theme, 
+        toggleTheme, 
+        setCurrentStep, 
+        setResumeData, 
+        setJobDescription, 
+        setInterviewQuestions, 
+        setPresentationTopics, 
+        setATSScore,
+        setInterviewerRole,
+        interviewerRole,
+        interviewQuestions,
+        presentationTopics,
+        atsScore
+    } = useAppStore();
+
     useEffect(() => {
         document.body.setAttribute('data-theme', theme);
     }, [theme]);
+
+    /**
+     * Handles resume file upload
+     * 
+     * Processes the uploaded resume file and clears any previous errors.
+     * Only accepts the first file if multiple files are dropped.
+     * 
+     * @param {File[]} files - Array of uploaded files
+     */
     const handleResumeUpload = (files: File[]) => {
         if (files.length > 0) {
             setResumeFile(files[0]);
@@ -30,13 +78,42 @@ const App = () => {
         }
     };
 
+    /**
+     * Handles job description file upload
+     * 
+     * Processes the uploaded job description file and clears the text input
+     * to prevent confusion between file and text input methods.
+     * 
+     * @param {File[]} files - Array of uploaded files
+     */
     const handleJobFileUpload = (files: File[]) => {
         if (files.length > 0) {
             setJobFile(files[0]);
-            setJobInput('');
+            setJobInput(''); // Clear text input when file is uploaded
+            setError('');
         }
     };
+
+
+    /**
+     * Main analysis handler
+     * 
+     * Orchestrates the complete analysis workflow including:
+     * 1. Input validation
+     * 2. Document parsing (resume and job description)
+     * 3. Cache checking for performance optimization
+     * 4. AI analysis calls with parallel processing
+     * 5. State updates and navigation to dashboard
+     * 
+     * Uses intelligent caching to avoid redundant API calls for identical content.
+     * All AI operations run in parallel for optimal performance.
+     * 
+     * @async
+     * @function
+     * @throws {Error} When document parsing or AI analysis fails
+     */
     const handleAnalyze = async () => {
+        // Input validation
         if (!resumeFile) {
             setError('Please upload your resume');
             return;
@@ -45,407 +122,506 @@ const App = () => {
             setError('Please provide a job description');
             return;
         }
+        
         setIsAnalyzing(true);
         setError('');
+        
+        // Store the interviewer role for use in interview responses
+        setInterviewerRole(interviewerRole);
+        
         try {
-            // Parse resume
+            // Phase 1: Parse resume with caching optimization
+            console.log('📄 Parsing your resume...');
             const resumeText = await DocumentParser.parseResume(resumeFile);
-            console.log('Resume parsed, analyzing with AI...');
-            const resumeData = await AIAnalysisService.analyzeResume(resumeText);
+            
+            // Check cache first to avoid redundant API calls
+            let resumeData = CacheService.getCachedResume(resumeText);
+            if (!resumeData) {
+                console.log('🤖 AI is analyzing your resume...');
+                resumeData = await AIAnalysisService.analyzeResume(resumeText);
+                CacheService.cacheResume(resumeText, resumeData);
+            }
             setResumeData(resumeData);
-            // Parse job description
-            const jobText = jobFile
-                ? await DocumentParser.parseResume(jobFile)
-                : jobInput;
-            console.log('Job description parsed, analyzing with AI...');
-            const jobData = await AIAnalysisService.analyzeJobDescription(jobText);
+            console.log('✅ Resume analysis complete!');
+            
+            // Phase 2: Parse job description with caching optimization
+            const jobText = jobFile ? await DocumentParser.parseResume(jobFile) : jobInput;
+            
+            // Check cache first to avoid redundant API calls
+            let jobData = CacheService.getCachedJobDescription(jobText);
+            if (!jobData) {
+                console.log('💼 Analyzing job description...');
+                jobData = await AIAnalysisService.analyzeJobDescription(jobText);
+                CacheService.cacheJobDescription(jobText, jobData);
+            }
             setJobDescription(jobData);
-            // Generate personalized content with real AI
-            console.log('Generating interview questions with AI...');
+            console.log('✅ Job analysis complete!');
+            
+            // Phase 3: Generate personalized content with parallel AI calls
+            console.log('🎯 Generating your personalized interview prep...');
             const [questions, topics, atsScoreData] = await Promise.all([
-                AIAnalysisService.generateInterviewQuestions(resumeData, jobData),
+                AIAnalysisService.generateInterviewQuestions(resumeData, jobData, interviewerRole),
                 AIAnalysisService.generatePresentationTopics(resumeData, jobData),
                 AIAnalysisService.calculateATSScore(resumeData, jobData)
             ]);
+            
+            // Update application state with results
             setInterviewQuestions(questions);
             setPresentationTopics(topics);
             setATSScore(atsScoreData);
+            console.log('🎉 All done! Your interview prep is ready!');
             setCurrentStep('dashboard');
-        }
-        catch (err) {
-            console.error('Analysis error:', err);
+        } catch (err) {
+            console.error('💥 Analysis error:', err);
             const errorMessage = err instanceof Error ? err.message : 'An error occurred during analysis. Check console for details.';
             setError(errorMessage);
-        }
-        finally {
+        } finally {
             setIsAnalyzing(false);
         }
     };
+
     // Render Upload View
     if (currentStep === 'upload') {
-      return (
-    <div className="app">
-      <header className="app-header">
-        <div className="header-content">
-          <Text as="h1" variant="h1" className="logo gradient-text">
-            AI Interview Prep
-          </Text>
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          >
-            {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
-          </button>
-        </div>
-      </header>
-      <main className="main-content">
-        <div className="grid-container">
-          <Card className="upload-section">
-            <Text as="h2" variant="h2" className="section-header">
-              <FiUpload className="icon" /> Upload Your Resume
-            </Text>
-            <FileUpload
-              onDrop={handleResumeUpload}
-              accept={{
-                'application/pdf': ['.pdf'],
-                'application/msword': ['.doc'],
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
-              }}
-              maxFiles={1}
-              label="Drag & drop your resume here"
-              description="Supports PDF, DOC, DOCX (Max 5MB)"
-            />
-            {resumeFile && (
-              <div className="file-preview">
-                <FiFileText className="file-icon" />
-                <span>{resumeFile?.name}</span>
-              </div>
-            )}
-          </Card>
+        return (
+            <>
+                {isAnalyzing && <LoadingOverlay message="Analyzing your resume and job description..." />}
+                <div className="app">
+                    <header className="app-header">
+                        <div className="header-content">
+                            <Text as="h1" variant="h1" className="logo gradient-text">
+                                AI Interview Prep
+                            </Text>
+                            <button
+                                className="theme-toggle"
+                                onClick={toggleTheme}
+                                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                            >
+                                {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
+                            </button>
+                        </div>
+                    </header>
+                    <main className="main-content">
+                        <div className="grid-container">
+                            <Card className="upload-section">
+                                <Text as="h2" variant="h2" className="section-header">
+                                    <FiUpload className="icon" /> Upload Your Resume
+                                </Text>
+                                <FileUpload
+                                    onDrop={handleResumeUpload}
+                                    accept={{
+                                        'application/pdf': ['.pdf'],
+                                        'application/msword': ['.doc'],
+                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx']
+                                    }}
+                                    maxFiles={1}
+                                    label="📄 Upload your resume"
+                                    description="PDF, DOC, DOCX files up to 5MB"
+                                />
+                                {resumeFile && (
+                                    <div className="file-preview">
+                                        <FiFileText className="file-icon" />
+                                        <span>{resumeFile.name}</span>
+                                    </div>
+                                )}
+                            </Card>
 
-          <Card className="upload-section">
-            <Text as="h2" variant="h2" className="section-header">
-              <FiFileText className="icon" /> Job Description
-            </Text>
-            <div className="job-input-container">
-              <textarea
-                className="job-textarea"
-                placeholder="Paste url or job description here..."
-                value={jobInput}
-                onChange={(e) => setJobInput(e.target.value)}
-                rows={6}
-              />
-            </div>
-          </Card>
-        </div>
+                            <Card className="upload-section">
+                                <Text as="h2" variant="h2" className="section-header">
+                                    <FiFileText className="icon" /> Job Description
+                                </Text>
+                                <div className="job-input-container">
+                                    <textarea
+                                        className="job-textarea"
+                                        placeholder="📄 Paste job URL or description here..."
+                                        value={jobInput}
+                                        onChange={(e) => {
+                                            setJobInput(e.target.value);
+                                            if (e.target.value && jobFile) {
+                                                setJobFile(null); // Clear file when typing
+                                            }
+                                        }}
+                                        rows={4}
+                                        disabled={!!jobFile}
+                                    />
+                                    {jobFile && (
+                                        <div className="file-preview">
+                                            <FiFileText className="file-icon" />
+                                            <span>{jobFile.name}</span>
+                                            <button 
+                                                onClick={() => setJobFile(null)}
+                                                className="ml-2 text-red-500 hover:text-red-700"
+                                                title="Remove file"
+                                            >
+                                                ✕
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="relative my-8">
+                                    <div className="absolute inset-0 flex items-center">
+                                        <div className="w-full border-t border-gray-300"></div>
+                                    </div>
+                                    <div className="relative flex justify-center text-sm">
+                                        <span className="bg-white px-4 text-gray-500 font-medium">or</span>
+                                    </div>
+                                </div>
+                                <div>
+                                    {!jobInput.trim() && (
+                                        <FileUpload
+                                            onDrop={handleJobFileUpload}
+                                            accept={{
+                                                'application/pdf': ['.pdf'],
+                                                'application/msword': ['.doc'],
+                                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                                                'text/plain': ['.txt']
+                                            }}
+                                            maxFiles={1}
+                                            label="💼 Upload job description"
+                                            description="PDF, DOC, DOCX, TXT files up to 5MB"
+                                        />
+                                    )}
+                                    {jobInput.trim() && (
+                                        <div className="p-4 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
+                                            <Text variant="small" color="secondary" className="text-center">
+                                                File upload disabled while text is entered. Clear the text above to upload a file instead.
+                                            </Text>
+                                        </div>
+                                    )}
+                                </div>
+                            </Card>
 
-        <div className="action-container">
-          <Button
-            variant="primary"
-            size="large"
-            onClick={handleAnalyze}
-            disabled={!resumeFile || (!jobInput && !jobFile) || isAnalyzing}
-            className="analyze-button"
-          >
-            {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
-            <FiChevronRight className="button-icon" />
-          </Button>
-        </div>
+                            <Card className="upload-section">
+                                <Text as="h2" variant="h2" className="section-header">
+                                    <FiFileText className="icon" /> Interviewer Role (Optional)
+                                </Text>
+                                <div className="job-input-container">
+                                    <select
+                                        className="job-textarea"
+                                        value={interviewerRole}
+                                        onChange={(e) => setInterviewerRole(e.target.value)}
+                                        style={{ height: '44px', padding: '8px 12px', resize: 'none' }}
+                                    >
+                                        <option value="">Select interviewer role (optional)</option>
+                                        <option value="recruiter">Recruiter / HR Representative</option>
+                                        <option value="hiring-manager">Hiring Manager</option>
+                                        <option value="tech-lead">Technical Lead / Senior Engineer</option>
+                                        <option value="program-manager">Program Manager</option>
+                                        <option value="product-manager">Product Manager</option>
+                                        <option value="team-member">Team Member / Peer</option>
+                                        <option value="director">Director / VP</option>
+                                        <option value="cto">CTO / Chief Technology Officer</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                    <Text variant="small" color="secondary" className="mt-2">
+                                        💡 This helps tailor interview questions to the interviewer's perspective and priorities
+                                    </Text>
+                                </div>
+                            </Card>
+                        </div>
 
-        <div className="features-grid">
-          <Card className="feature-card">
-            <div className="feature-icon">
-              <FiMessageSquare />
-            </div>
-            <Text as="h3" variant="h3">AI-Powered Questions</Text>
-            <Text variant="body" color="secondary">
-              Get personalized interview questions based on your resume and job description.
-            </Text>
-          </Card>
+                        <div className="action-container">
+                            <Button
+                                variant="primary"
+                                size="large"
+                                onClick={handleAnalyze}
+                                disabled={!resumeFile || (!jobInput && !jobFile) || isAnalyzing}
+                                className="analyze-button green-button"
+                            >
+                                {isAnalyzing ? 'Analyzing...' : 'Start Analysis'}
+                            </Button>
+                        </div>
 
-          <Card className="feature-card">
-            <div className="feature-icon">
-              <FiAward />
-            </div>
-            <Text as="h3" variant="h3">ATS Score</Text>
-            <Text variant="body" color="secondary">
-              See how well your resume matches the job requirements with our ATS scoring system.
-            </Text>
-          </Card>
-        </div>
 
-        <div className="text-center">
-          <DadJoke />
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+                        {error && (
+                            <div className="p-3 bg-red-50 rounded-md mt-4">
+                                <Text as="div" variant="body" color="primary" className="text-red-600">{error}</Text>
+                            </div>
+                        )}
+
+                        <div className="text-center">
+                            <DadJoke />
+                        </div>
+                    </main>
+                    <Footer />
+                </div>
+                <CookieConsent />
+            </>
+        );
     }
+
     // Dashboard View
     return (
-      <div className="app">
-        <header className="app-header">
-          <div className="header-content">
-            <div>
-              <Text as="h1" variant="h1" className="logo gradient-text">
-                Interview Dashboard
-              </Text>
-              <Text variant="body" color="secondary">
-                AI-Powered Personalized Preparation
-              </Text>
-            </div>
-            <div className="header-actions">
-              <Button
-                variant="secondary"
-                size="medium"
-                onClick={() => setCurrentStep('upload')}
-                className="new-analysis-btn"
-              >
-                <FiUpload className="button-icon" />
-                New Analysis
-              </Button>
-              <button
-                className="theme-toggle"
-                onClick={toggleTheme}
-                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-              >
-                {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
-              </button>
-            </div>
-          </div>
-        </header>
-        <main className="main-content">
-          <div className="container">
-            <div className="stats-grid">
-              <Card className="stat-card">
-                <div className="emoji">📊</div>
-                <div className="score">
-                  {atsScore?.score || 85}
-                </div>
-                <div className="label">ATS Score <small>(Applicant Tracking System)</small></div>
-              </Card>
-              <Card className="stat-card">
-                <div className="emoji">🎯</div>
-                <div className="score">
-                  {atsScore?.keywordMatches
-                    ? Math.round((atsScore.keywordMatches.length / (atsScore.keywordMatches.length + (atsScore.missingKeywords?.length || 0))) * 100)
-                    : 92}
-                </div>
-                <div className="label">Skill Match</div>
-              </Card>
-              <Card className="stat-card">
-                <div className="emoji">📄</div>
-                <div className="score">
-                  {presentationTopics.length || 3}
-                </div>
-                <div className="label">Topics</div>
-              </Card>
-              <Card className="stat-card">
-                <div className="emoji">❓</div>
-                <div className="score">
-                  {interviewQuestions.length || 6}
-                </div>
-                <div className="label">Questions</div>
-              </Card>
-            </div>
-            <div className="nav-tabs">
-              <Button
-                variant={activeTab === 'interview' ? 'primary' : 'ghost'}
-                onClick={() => setActiveTab('interview')}
-              >
-                💬 Interview Q&A
-              </Button>
-              <Button
-                variant={activeTab === 'chat' ? 'primary' : 'ghost'}
-                onClick={() => setActiveTab('chat')}
-              >
-                🤖 AI Interview Coach
-              </Button>
-              <Button
-                variant={activeTab === 'presentations' ? 'primary' : 'ghost'}
-                onClick={() => setActiveTab('presentations')}
-              >
-                📈 Presentations
-              </Button>
-              <Button
-                variant={activeTab === 'skills' ? 'primary' : 'ghost'}
-                onClick={() => setActiveTab('skills')}
-              >
-                🎯 Skills Analysis
-              </Button>
-              <Button
-                variant={activeTab === 'jokes' ? 'primary' : 'ghost'}
-                onClick={() => setActiveTab('jokes')}
-              >
-                😄 Dad Jokes
-              </Button>
-            </div>
-            <div className="content-area">
-              {activeTab === 'interview' && (
-                <div className="content-section">
-                  <Text variant="h2">Interview Prep</Text>
-                  <div className="interview-questions">
-                    {interviewQuestions?.map((question) => (
-                      <Card key={question.id} className="question-card">
-                        <Text variant="body">{question.question}</Text>
-                        {question.suggestedAnswer && (
-                          <div className="suggested-answer">
-                            <Text variant="small" color="secondary">Suggested Answer:</Text>
-                            <Text variant="body">{question.suggestedAnswer}</Text>
-                          </div>
-                        )}
-                      </Card>
-                    ))}
-                  </div>
-                </div>
-              )}
-              {activeTab === 'skills' && (
-                <div className="content-section">
-                  <Text variant="h2" className="mb-6">AI Skills Analysis</Text>
-                  <div className="skills-analysis grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card className="p-6">
-                      <Text variant="h3" color="accent" className="mb-4">
-                        ✅ Strengths
-                      </Text>
-                      <ul className="space-y-2">
-                        {atsScore?.strengths?.map((strength, i) => (
-                          <li key={i} className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <Text variant="body">{strength}</Text>
-                          </li>
-                        )) || (
-                          <>
-                            <li className="flex items-start">
-                              <span className="mr-2">•</span>
-                              <Text variant="body">Strong technical skills match</Text>
-                            </li>
-                            <li className="flex items-start">
-                              <span className="mr-2">•</span>
-                              <Text variant="body">Relevant experience</Text>
-                            </li>
-                          </>
-                        )}
-                      </ul>
-                    </Card>
-                    <Card className="p-6">
-                      <Text variant="h3" color="accent" className="mb-4">
-                        🎯 Improvements
-                      </Text>
-                      <ul className="space-y-2">
-                        {atsScore?.improvements?.map((improvement, i) => (
-                          <li key={i} className="flex items-start">
-                            <span className="mr-2">•</span>
-                            <Text variant="body">{improvement}</Text>
-                          </li>
-                        )) || (
-                          <>
-                            <li className="flex items-start">
-                              <span className="mr-2">•</span>
-                              <Text variant="body">Add quantifiable achievements</Text>
-                            </li>
-                            <li className="flex items-start">
-                              <span className="mr-2">•</span>
-                              <Text variant="body">Include industry keywords</Text>
-                            </li>
-                          </>
-                        )}
-                      </ul>
-                    </Card>
-                    <Card className="p-6">
-                      <Text variant="h3" color="accent" className="mb-4">
-                        🔑 Keyword Matches
-                      </Text>
-                      <div className="flex flex-wrap gap-2">
-                        {atsScore?.keywordMatches?.map((keyword, i) => (
-                          <span key={i} className="keyword-match">
-                            {keyword}
-                          </span>
-                        )) || (
-                          <>
-                            <span className="keyword-match">React</span>
-                            <span className="keyword-match">Node.js</span>
-                            <span className="keyword-match">JavaScript</span>
-                          </>
-                        )}
-                      </div>
-                    </Card>
-                    <Card className="p-6">
-                      <Text variant="h3" color="accent" className="mb-4">
-                        ⚠️ Missing Keywords
-                      </Text>
-                      <div className="flex flex-wrap gap-2">
-                        {atsScore?.missingKeywords?.map((keyword, i) => (
-                          <span key={i} className="keyword-missing">
-                            {keyword}
-                          </span>
-                        )) || (
-                          <>
-                            <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium">Docker</span>
-                            <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium">GraphQL</span>
-                            <span className="px-3 py-1 rounded-full bg-yellow-100 text-yellow-800 text-sm font-medium">Kubernetes</span>
-                          </>
-                        )}
-                      </div>
-                    </Card>
-                  </div>
-                </div>
-              )}
-              {activeTab === 'chat' && (
-                <div className="content-section">
-                  <Text variant="h2">AI Interview Coach</Text>
-                  <Text variant="body" color="secondary" className="mb-4">
-                    Practice your interview skills with our AI coach. Get instant feedback on your answers!
-                  </Text>
-                  <InterviewChat />
-                </div>
-              )}
-              {activeTab === 'presentations' && (
-                <div className="content-section">
-                  <Text variant="h2" className="mb-2">Presentation Topics</Text>
-                  <Text variant="body" color="secondary" className="mb-6">
-                    Here are some presentation topics based on your resume and the job description.
-                  </Text>
-                  <div className="space-y-6">
-                    {presentationTopics?.length > 0 ? (
-                      presentationTopics.map((topic) => (
-                        <Card key={topic.id} className="p-6 hover:shadow-md transition-shadow">
-                          <Text variant="h3" className="text-xl font-semibold mb-4">{topic.title}</Text>
-                          <ul className="space-y-2">
-                            {topic.bullets.map((bullet, i) => (
-                              <li key={i} className="flex items-start">
-                                <span className="mr-2 text-blue-500">•</span>
-                                <Text variant="body">{bullet}</Text>
-                              </li>
-                            ))}
-                          </ul>
-                        </Card>
-                      ))
-                    ) : (
-                      <Card className="p-6 text-center">
-                        <Text variant="body" color="secondary">
-                          No presentation topics generated yet. Please analyze a job description first.
+        <div className="app">
+            <header className="app-header">
+                <div className="header-content">
+                    <div>
+                        <Text as="h1" variant="h1" className="logo gradient-text">
+                            Interview Dashboard
                         </Text>
-                      </Card>
-                    )}
-                  </div>
+                        <Text variant="body" color="secondary">
+                            AI-Powered Personalized Preparation
+                        </Text>
+                    </div>
+                    <div className="header-actions">
+                        <Button
+                            variant="primary"
+                            size="medium"
+                            onClick={() => setCurrentStep('dashboard')}
+                            className="current-analysis-btn"
+                        >
+                            Current Analysis
+                        </Button>
+                        <Button
+                            variant="secondary"
+                            size="medium"
+                            onClick={() => setCurrentStep('upload')}
+                            className="new-analysis-btn green-button"
+                        >
+                            <FiUpload className="button-icon" />
+                            Start New
+                        </Button>
+                        <button
+                            className="theme-toggle"
+                            onClick={toggleTheme}
+                            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+                        >
+                            {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
+                        </button>
+                    </div>
                 </div>
-              )}
-              {activeTab === 'jokes' && (
-                <div className="content-section">
-                  <Text variant="h2">Take a Laugh Break</Text>
-                  <Text variant="body" color="secondary" className="jokes-subtitle mb-2">
-                    Reduce interview stress with some dad jokes! Studies show laughter helps with confidence.
-                  </Text>
-                  <DadJoke />
+            </header>
+            <main className="main-content">
+                <div className="container">
+                    <div className="stats-grid">
+                        <Card className="stat-card">
+                            <div className="emoji">📊</div>
+                            <div className="score">
+                                {atsScore?.score || 85}
+                            </div>
+                            <div className="label">ATS Score <small>(Applicant Tracking System)</small></div>
+                        </Card>
+                        <Card className="stat-card">
+                            <div className="emoji">🎯</div>
+                            <div className="score">
+                                {atsScore?.keywordMatches
+                                    ? Math.round((atsScore.keywordMatches.length / (atsScore.keywordMatches.length + (atsScore.missingKeywords?.length || 0))) * 100)
+                                    : 92}
+                                <span className="hidden sm:inline">/100</span>
+                                <span className="sm:hidden">%</span>
+                            </div>
+                            <div className="label">Skill Match</div>
+                        </Card>
+                        <Card className="stat-card">
+                            <div className="emoji">📄</div>
+                            <div className="score">
+                                {presentationTopics.length || 3}
+                            </div>
+                            <div className="label">Topics</div>
+                        </Card>
+                        <Card className="stat-card">
+                            <div className="emoji">❓</div>
+                            <div className="score">
+                                {interviewQuestions.length || 6}
+                            </div>
+                            <div className="label">Questions</div>
+                        </Card>
+                    </div>
+                    <div className="nav-tabs">
+                        <Button
+                            variant={activeTab === 'interview' ? 'primary' : 'ghost'}
+                            onClick={() => setActiveTab('interview')}
+                        >
+                            💬 Interview Q&A
+                        </Button>
+                        <Button
+                            variant={activeTab === 'chat' ? 'primary' : 'ghost'}
+                            onClick={() => setActiveTab('chat')}
+                        >
+                            🤖 AI Interview Coach
+                        </Button>
+                        <Button
+                            variant={activeTab === 'presentations' ? 'primary' : 'ghost'}
+                            onClick={() => setActiveTab('presentations')}
+                        >
+                            📈 Presentations
+                        </Button>
+                        <Button
+                            variant={activeTab === 'skills' ? 'primary' : 'ghost'}
+                            onClick={() => setActiveTab('skills')}
+                        >
+                            🎯 Skills Analysis
+                        </Button>
+                        <Button
+                            variant={activeTab === 'jokes' ? 'primary' : 'ghost'}
+                            onClick={() => setActiveTab('jokes')}
+                        >
+                            😄 Dad Jokes
+                        </Button>
+                    </div>
+                    <div className="content-area">
+                        {activeTab === 'interview' && (
+                            <div className="content-section">
+                                <div className="interview-questions">
+                                    {interviewQuestions?.map((question) => (
+                                        <Card key={question.id} className="question-card">
+                                            <Text variant="body" className="mb-6">{question.question}</Text>
+                                            {question.suggestedAnswer && (
+                                                <div className="suggested-answer">
+                                                    <Text variant="small" color="secondary" className="py-2">Suggested Answer:</Text>
+                                                    <Text variant="body">{question.suggestedAnswer}</Text>
+                                                </div>
+                                            )}
+                                        </Card>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {activeTab === 'skills' && (
+                            <div className="content-section">
+                                <div className="skills-analysis grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                                    <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+                                                <span className="text-white text-sm font-bold">✓</span>
+                                            </div>
+                                            <Text variant="h3" className="text-blue-700 font-bold">Strengths</Text>
+                                        </div>
+                                        <ul className="space-y-3">
+                                            {atsScore?.strengths?.map((strength, i) => (
+                                                <li key={i} className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-blue-200/50">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                    <Text variant="body" className="text-blue-800 leading-relaxed">{strength}</Text>
+                                                </li>
+                                            )) || (
+                                                <>
+                                                    <li className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-blue-200/50">
+                                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                        <Text variant="body" className="text-blue-800 leading-relaxed">Strong technical skills match</Text>
+                                                    </li>
+                                                    <li className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-blue-200/50">
+                                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                        <Text variant="body" className="text-blue-800 leading-relaxed">Relevant experience</Text>
+                                                    </li>
+                                                </>
+                                            )}
+                                        </ul>
+                                    </Card>
+                                    <Card className="p-6 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+                                                <span className="text-white text-sm font-bold">!</span>
+                                            </div>
+                                            <Text variant="h3" className="text-orange-700 font-bold">Improvements</Text>
+                                        </div>
+                                        <ul className="space-y-3">
+                                            {atsScore?.improvements?.map((improvement, i) => (
+                                                <li key={i} className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-orange-200/50">
+                                                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                    <Text variant="body" className="text-orange-800 leading-relaxed">{improvement}</Text>
+                                                </li>
+                                            )) || (
+                                                <>
+                                                    <li className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-orange-200/50">
+                                                        <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                        <Text variant="body" className="text-orange-800 leading-relaxed">Add quantifiable achievements</Text>
+                                                    </li>
+                                                    <li className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-orange-200/50">
+                                                        <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
+                                                        <Text variant="body" className="text-orange-800 leading-relaxed">Include industry keywords</Text>
+                                                    </li>
+                                                </>
+                                            )}
+                                        </ul>
+                                    </Card>
+                                    <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                                                <span className="text-white text-sm font-bold">✓</span>
+                                            </div>
+                                            <Text variant="h3" className="text-green-700 font-bold">Keyword Matches</Text>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {atsScore?.keywordMatches?.map((keyword, i) => (
+                                                <SkillBubble key={i} variant="success">
+                                                    {keyword}
+                                                </SkillBubble>
+                                            )) || (
+                                                <>
+                                                    <SkillBubble variant="success">React</SkillBubble>
+                                                    <SkillBubble variant="success">Node.js</SkillBubble>
+                                                    <SkillBubble variant="success">JavaScript</SkillBubble>
+                                                </>
+                                            )}
+                                        </div>
+                                    </Card>
+                                    <Card className="p-6 bg-gradient-to-br from-red-50 to-pink-50 border-red-200">
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                                <span className="text-white text-sm font-bold">!</span>
+                                            </div>
+                                            <Text variant="h3" className="text-red-700 font-bold">Missing Keywords</Text>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {atsScore?.missingKeywords?.map((keyword, i) => (
+                                                <SkillBubble key={i} variant="warning">
+                                                    {keyword}
+                                                </SkillBubble>
+                                            )) || (
+                                                <>
+                                                    <SkillBubble variant="warning">Docker</SkillBubble>
+                                                    <SkillBubble variant="warning">GraphQL</SkillBubble>
+                                                    <SkillBubble variant="warning">Kubernetes</SkillBubble>
+                                                </>
+                                            )}
+                                        </div>
+                                    </Card>
+                                </div>
+                            </div>
+                        )}
+                        {activeTab === 'chat' && (
+                            <div className="content-section">
+                                <InterviewChat />
+                            </div>
+                        )}
+                        {activeTab === 'presentations' && (
+                            <div className="content-section">
+                                <div className="space-y-6">
+                                    {presentationTopics?.length > 0 ? (
+                                        presentationTopics.map((topic) => (
+                                            <Card key={topic.id} className="p-6 hover:shadow-md transition-shadow">
+                                                <Text variant="h3" className="text-xl font-semibold mb-4">{topic.title}</Text>
+                                                <ul className="space-y-4">
+                                                    {topic.bullets.map((bullet, i) => (
+                                                        <li key={i} className="flex items-start">
+                                                            <span className="mr-3 text-blue-500">•</span>
+                                                            <Text variant="body">{bullet}</Text>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </Card>
+                                        ))
+                                    ) : (
+                                        <Card className="p-6 text-center">
+                                            <Text variant="body" color="secondary">
+                                                No presentation topics generated yet. Please analyze a job description first.
+                                            </Text>
+                                        </Card>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {activeTab === 'jokes' && (
+                            <div className="content-section">
+                                <DadJoke />
+                            </div>
+                        )}
+                    </div>
                 </div>
-              )}
-            </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
+            </main>
+            <Footer />
+            <CookieConsent />
+        </div>
     );
 };
+
 export default App;

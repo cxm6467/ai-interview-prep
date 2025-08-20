@@ -1,39 +1,105 @@
 import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, ATSScore } from '../types';
 
-// Real AI Analysis Service using OpenAI GPT
+/**
+ * AI Analysis Service
+ * 
+ * Core service class that handles all AI-powered analysis functionality for the application.
+ * Integrates with OpenAI GPT models via Netlify Functions to provide intelligent resume analysis,
+ * job matching, interview question generation, and interactive coaching.
+ * 
+ * Features:
+ * - Resume parsing and structured data extraction
+ * - Job description analysis and requirement extraction
+ * - ATS score calculation with keyword matching
+ * - Personalized interview question generation
+ * - Dynamic presentation topic creation
+ * - Interactive interview coaching with role-specific feedback
+ * - Intelligent caching and fallback mechanisms
+ * 
+ * Architecture:
+ * - Uses Netlify Functions for secure API key management
+ * - Implements timeout handling (30s) for AI operations
+ * - Provides mock data fallbacks for offline/error scenarios
+ * - Supports multiple interviewer role perspectives
+ * 
+ * @class AIAnalysisService
+ */
 export class AIAnalysisService {
+  /**
+   * Core OpenAI API Integration Method
+   * 
+   * Handles secure communication with OpenAI GPT models via Netlify Functions.
+   * Automatically detects production vs development environment and routes requests accordingly.
+   * 
+   * @private
+   * @static
+   * @async
+   * @param {string} prompt - The prompt to send to the AI model
+   * @param {number} [maxTokens=1000] - Maximum tokens for the AI response
+   * @returns {Promise<string>} The AI-generated response text
+   * @throws {Error} When API call fails or times out
+   */
   private static async callOpenAI(prompt: string, maxTokens: number = 1000): Promise<string> {
+    // Environment-aware API routing for development vs production
+    const isProduction = import.meta.env.PROD;
+    const apiUrl = isProduction 
+      ? '/.netlify/functions/ai-handler'  // Production: Use Netlify Functions
+      : '/api/ai-handler';                // Development: Use Vite proxy
+    const requestBody = {
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an expert career coach and HR professional with 15+ years of experience helping candidates prepare for technical interviews. Always provide specific, actionable advice.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      maxTokens
+    };
+
+    console.log('🚀 Calling AI service...');
+
     try {
-      const response = await fetch('/api/ai-handler', {
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'system',
-              content: 'You are an expert career coach and HR professional with 15+ years of experience helping candidates prepare for technical interviews. Always provide specific, actionable advice.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          maxTokens
-        })
+        body: JSON.stringify(requestBody),
+        // Add timeout for AI API calls (30 seconds)
+        signal: AbortSignal.timeout(30000)
       });
 
+      const responseText = await response.text();
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`AI service error: ${errorData.error || 'Unknown error'}`);
+        console.log('❌ AI service error:', response.status, response.statusText);
+      } else {
+        console.log('🎯 AI service responded successfully!');
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        let errorData;
+        try {
+          errorData = responseText ? JSON.parse(responseText) : {};
+        } catch (e) {
+          errorData = { error: responseText || 'Invalid JSON response' };
+        }
+        throw new Error(`AI service error (${response.status}): ${errorData.error || 'Unknown error'}`);
+      }
+
+      const data = responseText ? JSON.parse(responseText) : {};
       return data.content || '';
     } catch (error) {
-      console.error('OpenAI API call failed:', error);
-      throw new Error(`AI analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('🚨 AI service call failed:', errorMessage);
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Failed to connect to the AI service. Please make sure the backend server is running.');
+      }
+      
+      throw new Error(`AI analysis failed: ${errorMessage}`);
     }
   }
 
@@ -98,12 +164,11 @@ IMPORTANT: Return ONLY the JSON object, without any markdown formatting or addit
           missingKeywords: Array.isArray(result.missingKeywords) ? result.missingKeywords : []
         };
       } catch (jsonError) {
-        console.error('Failed to parse ATS response as JSON. Response:', cleanResponse);
-        console.error('JSON Parse Error:', jsonError);
+        console.error('⚠️ Failed to parse ATS response as JSON:', jsonError instanceof Error ? jsonError.message : 'Parse error');
         return this.getMockATSScore();
       }
     } catch (error) {
-      console.error('Error in calculateATSScore:', error);
+      console.error('📊 ATS score calculation failed:', error instanceof Error ? error.message : 'Unknown error');
       return this.getMockATSScore();
     }
   }
@@ -144,7 +209,7 @@ Return only valid JSON without any additional text or formatting.`;
       const cleanResponse = response.trim().replace(/```json\n?|\n?```/g, '');
       return JSON.parse(cleanResponse);
     } catch (error) {
-      console.error('Resume analysis failed:', error);
+      console.error('📄 Resume analysis failed:', error instanceof Error ? error.message : 'Unknown error');
       // Fallback to mock data if AI fails
       return this.getMockResumeData();
     }
@@ -173,7 +238,7 @@ Return only valid JSON without any additional text.`;
       parsed.description = jobText; // Keep original text
       return parsed;
     } catch (error) {
-      console.error('Job analysis failed:', error);
+      console.error('💼 Job analysis failed:', error instanceof Error ? error.message : 'Unknown error');
       return this.getMockJobDescription(jobText);
     }
   }
@@ -181,10 +246,15 @@ Return only valid JSON without any additional text.`;
     userResponse: string,
     currentQuestion: string,
     resume: ResumeData,
-    conversationHistory: string[]
+    conversationHistory: string[],
+    interviewerRole?: string
   ): Promise<string> {
     try {
-      const prompt = `You are conducting a technical interview. The candidate's resume shows experience with: ${JSON.stringify(resume.skills || [])}
+      const interviewerContext = interviewerRole ? this.getInterviewerFeedbackContext(interviewerRole) : '';
+      
+      const prompt = `You are conducting an interview as a ${interviewerRole || 'interviewer'}. The candidate's resume shows experience with: ${JSON.stringify(resume.skills || [])}
+
+${interviewerContext}
       
 Current interview question: "${currentQuestion}"
       
@@ -193,19 +263,22 @@ Candidate's response: "${userResponse}"
 Conversation history so far:
 ${conversationHistory.join('\n')}
       
-Provide constructive feedback on the candidate's response, then ask a follow-up question or move to the next question.`;
+Provide constructive feedback on the candidate's response from your perspective as a ${interviewerRole || 'interviewer'}, then ask a follow-up question or move to the next question.`;
 
       return await this.callOpenAI(prompt);
     } catch (error) {
-      console.error('Error generating interview response:', error);
+      console.error('🤖 Interview response generation failed:', error instanceof Error ? error.message : 'Unknown error');
       return "Thank you for your response. Let's move on to the next question.";
     }
   }
 
   static async generateInterviewQuestions(
     resume: ResumeData,
-    job: JobDescription
+    job: JobDescription,
+    interviewerRole?: string
   ): Promise<InterviewQuestion[]> {
+    const interviewerContext = interviewerRole ? this.getInterviewerContext(interviewerRole) : '';
+    
     const prompt = `
 Based on this resume and job description, generate 6 personalized interview questions.
 
@@ -218,6 +291,8 @@ Job Details:
 - Title: ${job.title}
 - Company: ${job.company}
 - Requirements: ${job.requirements.join(', ')}
+
+${interviewerContext}
 
 Generate questions that:
 1. Test technical skills relevant to both resume and job
@@ -243,7 +318,7 @@ Make questions specific to their background at ${resume.experience[0]?.company} 
       const cleanResponse = response.trim().replace(/```json\n?|\n?```/g, '');
       return JSON.parse(cleanResponse);
     } catch (error) {
-      console.error('Question generation failed:', error);
+      console.error('❓ Question generation failed:', error instanceof Error ? error.message : 'Unknown error');
       return this.getMockQuestions();
     }
   }
@@ -289,17 +364,199 @@ Make questions specific to their background at ${resume.experience[0]?.company} 
           try {
             return JSON.parse(jsonMatch[0]);
           } catch (e) {
-            console.error('Failed to parse extracted JSON:', e);
+            console.error('⚠️ Failed to parse extracted JSON:', e instanceof Error ? e.message : 'Parse error');
           }
         }
-        console.error('Failed to parse presentation response:', e);
-        console.log('Raw response:', response);
+        console.error('🎤 Presentation generation failed - parsing error:', e instanceof Error ? e.message : 'Parse error');
         return this.getMockPresentations();
       }
     } catch (error) {
-      console.error('Presentation generation failed:', error);
+      console.error('🎤 Presentation generation failed:', error instanceof Error ? error.message : 'Unknown error');
       return this.getMockPresentations();
     }
+  }
+
+  private static getInterviewerContext(role: string): string {
+    const roleContextMap: Record<string, string> = {
+      'recruiter': `
+Interviewer Context: This interview will be conducted by a RECRUITER/HR representative.
+Focus on:
+- Cultural fit and soft skills
+- Career motivations and goals
+- Behavioral questions (STAR method)
+- General technical knowledge (not deep technical details)
+- Compensation and benefits discussions
+- Team dynamics and collaboration`,
+
+      'hiring-manager': `
+Interviewer Context: This interview will be conducted by the HIRING MANAGER.
+Focus on:
+- Job-specific requirements and expectations
+- Past performance and achievements
+- Leadership potential and growth mindset
+- Project management and delivery capabilities
+- Team fit and management style
+- Strategic thinking and problem-solving`,
+
+      'tech-lead': `
+Interviewer Context: This interview will be conducted by a TECHNICAL LEAD/SENIOR ENGINEER.
+Focus on:
+- Deep technical knowledge and expertise
+- Code quality and best practices
+- System design and architecture
+- Problem-solving approaches and algorithms
+- Technical leadership and mentoring
+- Code review and technical communication`,
+
+      'program-manager': `
+Interviewer Context: This interview will be conducted by a PROGRAM MANAGER.
+Focus on:
+- Cross-functional collaboration
+- Project planning and execution
+- Stakeholder management
+- Risk assessment and mitigation
+- Process improvement and efficiency
+- Communication and coordination skills`,
+
+      'product-manager': `
+Interviewer Context: This interview will be conducted by a PRODUCT MANAGER.
+Focus on:
+- Product thinking and user empathy
+- Data-driven decision making
+- Feature prioritization and roadmapping
+- Customer needs and market understanding
+- Cross-functional collaboration
+- Technical feasibility and trade-offs`,
+
+      'team-member': `
+Interviewer Context: This interview will be conducted by a TEAM MEMBER/PEER.
+Focus on:
+- Day-to-day collaboration and teamwork
+- Technical skills and code quality
+- Communication and knowledge sharing
+- Problem-solving in team settings
+- Pair programming and code reviews
+- Team culture and working style`,
+
+      'director': `
+Interviewer Context: This interview will be conducted by a DIRECTOR/VP.
+Focus on:
+- Strategic vision and big-picture thinking
+- Leadership potential and scalability
+- Business impact and value creation
+- Long-term career goals and growth
+- Organizational fit and culture alignment
+- Executive presence and communication`,
+
+      'cto': `
+Interviewer Context: This interview will be conducted by the CTO/CHIEF TECHNOLOGY OFFICER.
+Focus on:
+- Technical vision and innovation
+- Scalability and system thinking
+- Technology strategy and decisions
+- Technical leadership and influence
+- Engineering culture and best practices
+- Long-term technical roadmap contribution`,
+
+      'other': `
+Interviewer Context: This interview will be conducted by a senior stakeholder.
+Focus on:
+- Well-rounded assessment of technical and soft skills
+- Adaptability and learning agility
+- Communication across different audiences
+- Problem-solving and critical thinking
+- Cultural fit and value alignment
+- Growth potential and career aspirations`
+    };
+
+    return roleContextMap[role] || '';
+  }
+
+  private static getInterviewerFeedbackContext(role: string): string {
+    const feedbackContextMap: Record<string, string> = {
+      'recruiter': `
+As a RECRUITER, when evaluating responses, focus on:
+- Cultural fit and alignment with company values
+- Communication skills and professionalism
+- Enthusiasm and motivation for the role
+- Soft skills and interpersonal abilities
+- Career goals and long-term fit
+- Red flags in behavior or attitude`,
+
+      'hiring-manager': `
+As a HIRING MANAGER, when evaluating responses, focus on:
+- Practical application of skills to job requirements
+- Past performance indicators and achievements
+- Problem-solving approach and critical thinking
+- Leadership potential and growth mindset
+- Ability to meet deadlines and deliver results
+- Team collaboration and management style`,
+
+      'tech-lead': `
+As a TECHNICAL LEAD, when evaluating responses, focus on:
+- Technical depth and accuracy of answers
+- Code quality and best practices knowledge
+- System design thinking and scalability
+- Debugging and problem-solving methodology
+- Mentoring and knowledge sharing abilities
+- Technical communication and documentation`,
+
+      'program-manager': `
+As a PROGRAM MANAGER, when evaluating responses, focus on:
+- Cross-functional collaboration examples
+- Project planning and execution skills
+- Stakeholder management and communication
+- Risk identification and mitigation strategies
+- Process improvement and efficiency gains
+- Metrics and data-driven decision making`,
+
+      'product-manager': `
+As a PRODUCT MANAGER, when evaluating responses, focus on:
+- User-centric thinking and empathy
+- Data analysis and metric interpretation
+- Feature prioritization and trade-off decisions
+- Market understanding and competitive awareness
+- Cross-team collaboration and influence
+- Product vision and strategic thinking`,
+
+      'team-member': `
+As a TEAM MEMBER, when evaluating responses, focus on:
+- Day-to-day collaboration and teamwork
+- Code review and peer feedback skills
+- Knowledge sharing and mentoring willingness
+- Problem-solving in team contexts
+- Communication in technical discussions
+- Cultural fit within the team dynamics`,
+
+      'director': `
+As a DIRECTOR, when evaluating responses, focus on:
+- Strategic thinking and big-picture vision
+- Leadership impact and influence
+- Business acumen and value creation
+- Scalability and organizational thinking
+- Executive presence and communication
+- Long-term potential and career growth`,
+
+      'cto': `
+As a CTO, when evaluating responses, focus on:
+- Technical vision and innovation thinking
+- Architectural decisions and trade-offs
+- Technology strategy and future planning
+- Engineering leadership and culture building
+- Technical risk assessment and mitigation
+- Industry trends and technological evolution`,
+
+      'other': `
+As a senior stakeholder, when evaluating responses, focus on:
+- Well-rounded assessment of capabilities
+- Adaptability and continuous learning
+- Clear communication across audiences
+- Problem-solving methodology and creativity
+- Cultural alignment and value demonstration
+- Growth potential and career trajectory`
+    };
+
+    return feedbackContextMap[role] || '';
   }
 
   // Fallback mock data methods

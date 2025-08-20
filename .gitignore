@@ -4,14 +4,22 @@ node_modules
 .pnp.js
 
 # Testing
-coverage
+coverage/
 *.lcov
+.nyc_output
+test-results/
+playwright-report/
+test-artifacts/
+.vitest/
 
-# Production
-dist
-dist-ssr
+# Production builds
+dist/
+dist-ssr/
+build/
+out/
 *.local
-build
+*.tsbuildinfo
+*.tsbuildinfo.*
 
 # Editor directories and files
 .vscode/*
@@ -22,7 +30,6 @@ build
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
 
 # Environment variables
 .env
@@ -43,5 +50,31 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 
-# Netlify
-.netlify
+# Deployment
+.netlify/
+.vercel/
+.aws/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+*.temp
+
+# IDE and tool specific files
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Miscellaneous
+.eslintcache
+.stylelintcache

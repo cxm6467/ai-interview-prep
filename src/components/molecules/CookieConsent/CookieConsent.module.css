@@ -1,0 +1,132 @@
+.overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(2px);
+  padding: var(--space-md);
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: var(--card-bg);
+  border: 2px solid var(--accent-purple);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.content {
+  padding: var(--space-lg);
+}
+
+.title {
+  margin-bottom: var(--space-sm);
+  color: var(--accent-purple);
+}
+
+.description {
+  margin-bottom: var(--space-md);
+  line-height: 1.6;
+}
+
+.details {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: var(--space-md);
+  margin: var(--space-md) 0;
+}
+
+.detailsTitle {
+  margin-bottom: var(--space-sm);
+  color: var(--accent-blue);
+}
+
+.detailsList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-sm) 0;
+}
+
+.detailsList li {
+  padding: var(--space-xs) 0;
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.detailsList strong {
+  color: var(--text-primary);
+}
+
+.note {
+  font-style: italic;
+  padding: var(--space-sm);
+  background: var(--bg-tertiary);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent-blue);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin: var(--space-lg) 0 var(--space-md) 0;
+}
+
+.acceptButton {
+  flex: 1;
+  min-width: 120px;
+}
+
+.declineButton {
+  flex: 1;
+  min-width: 120px;
+}
+
+.customizeButton {
+  flex: 1;
+  min-width: 120px;
+}
+
+.footer {
+  margin-top: var(--space-md);
+  padding-top: var(--space-sm);
+  border-top: 1px solid var(--border);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .overlay {
+    padding: var(--space-sm);
+  }
+  
+  .content {
+    padding: var(--space-md);
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+  
+  .acceptButton,
+  .declineButton,
+  .customizeButton {
+    flex: none;
+    width: 100%;
+  }
+}

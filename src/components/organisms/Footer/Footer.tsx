@@ -1,6 +1,7 @@
 import React from 'react';
 import { Text } from '@atoms/Text';
 import { Card } from '@atoms/Card';
+import { FiGithub, FiLinkedin, FiExternalLink } from 'react-icons/fi';
 import styles from './Footer.module.css';
 
 export const Footer: React.FC = () => {
@@ -36,6 +37,42 @@ export const Footer: React.FC = () => {
             <span className={styles.tech}>Zustand</span>
             <span className={styles.tech}>Atomic Design</span>
             <span className={styles.tech}>Mobile-First</span>
+          </div>
+        </div>
+        
+        <div className={styles.section}>
+          <Text variant="h3" color="accent">🔗 Connect</Text>
+          <div className={styles.socialLinks}>
+            <a 
+              href="https://www.linkedin.com/in/chris-marasco-4-/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <FiLinkedin className={styles.socialIcon} />
+              <span>LinkedIn</span>
+              <FiExternalLink className={styles.externalIcon} />
+            </a>
+            <a 
+              href="https://github.com/cxm6467" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <FiGithub className={styles.socialIcon} />
+              <span>My GitHub</span>
+              <FiExternalLink className={styles.externalIcon} />
+            </a>
+            <a 
+              href="https://github.com/cxm6467/ai-interview-prep" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={styles.socialLink}
+            >
+              <FiGithub className={styles.socialIcon} />
+              <span>This Project</span>
+              <FiExternalLink className={styles.externalIcon} />
+            </a>
           </div>
         </div>
         

@@ -1,7 +1,7 @@
 const OpenAI = require('openai');
 
-console.log('Netlify function starting...');
-console.log('Environment variables:', {
+console.log('🚀 AI Handler starting up...');
+console.log('🔑 Environment check:', {
   hasOpenAIKey: !!process.env.OPENAI_API_KEY,
   nodeEnv: process.env.NODE_ENV
 });
@@ -18,17 +18,12 @@ const headers = {
 };
 
 exports.handler = async function(event, context) {
-  console.log('Received event:', {
-    httpMethod: event.httpMethod,
-    path: event.path,
-    headers: event.headers,
-    body: event.body ? JSON.parse(event.body) : null
-  });
+  console.log('📨 Incoming request:', event.httpMethod, event.path);
 
   // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     const error = 'Method Not Allowed';
-    console.error('Method not allowed:', event.httpMethod);
+    console.error('❌ Method not allowed:', event.httpMethod);
     return {
       statusCode: 405,
       headers: { 'Content-Type': 'application/json' },
@@ -42,15 +37,15 @@ exports.handler = async function(event, context) {
     }
 
     const requestBody = JSON.parse(event.body);
-    console.log('Parsed request body:', requestBody);
-    
     const { messages, maxTokens = 1000 } = requestBody;
+    
+    console.log('📋 Processing request with', messages?.length || 0, 'messages');
     
     if (!Array.isArray(messages)) {
       throw new Error('Messages must be an array');
     }
 
-    console.log('Calling OpenAI API with messages:', messages);
+    console.log('🤖 Asking OpenAI...');
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: messages,
@@ -58,7 +53,7 @@ exports.handler = async function(event, context) {
       temperature: 0.7
     });
 
-    console.log('OpenAI response received');
+    console.log('✨ OpenAI responded successfully!');
     const result = {
       content: response.choices[0]?.message?.content || ''
     };
@@ -69,13 +64,7 @@ exports.handler = async function(event, context) {
       body: JSON.stringify(result)
     };
   } catch (error) {
-    console.error('Error in Netlify Function:', {
-      error: error.message,
-      stack: error.stack,
-      name: error.name,
-      status: error.status,
-      code: error.code
-    });
+    console.error('💥 Function error:', error.message);
     
     return {
       statusCode: error.status || 500,

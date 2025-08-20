@@ -44,7 +44,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({ data, className = '' }) 
   // Format the data with proper indentation and apply syntax highlighting
   const formattedJson = useMemo(() => {
     try {
-      if (!data) return 'No data to display';
+      if (!data) {return 'No data to display';}
       
       // Convert data to formatted JSON string with 2-space indentation
       const jsonString = JSON.stringify(data, null, 2);

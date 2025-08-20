@@ -20,7 +20,7 @@ export const InterviewChat: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const { interviewQuestions, resumeData } = useAppStore();
+  const { interviewQuestions, resumeData, interviewerRole } = useAppStore();
   
   useEffect(() => {
     // Initialize with welcome message and first question
@@ -40,11 +40,13 @@ Take your time to think about your answer, and I'll provide feedback to help you
   }, [interviewQuestions, messages.length]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll to top of messages container instead of bottom
+    const messagesContainer = document.querySelector(`.${styles.messagesContainer}`);
+    messagesContainer?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [messages]);
 
   const handleSendMessage = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading) {return;}
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -72,7 +74,8 @@ Take your time to think about your answer, and I'll provide feedback to help you
           input.trim(),
           currentQuestion.question, // Pass the question text instead of the object
           resumeData,
-          conversationHistory
+          conversationHistory,
+          interviewerRole
         );
       } else {
         // Fallback to contextual mock responses
@@ -151,7 +154,9 @@ ${interviewQuestions[nextIndex].question}`,
   return (
     <Card className={styles.chatContainer}>
       <div className={styles.header}>
-        <Text variant="h2">🤖 AI Interview Coach</Text>
+        <Text variant="h2">
+          🤖 AI Interview Coach{interviewerRole ? ` - ${interviewerRole.charAt(0).toUpperCase() + interviewerRole.slice(1).replace(/-/g, ' ')}` : ''}
+        </Text>
         <Button variant="ghost" size="small" onClick={resetChat} icon="🔄">
           Reset Chat
         </Button>
@@ -207,17 +212,6 @@ ${interviewQuestions[nextIndex].question}`,
         </Button>
       </div>
       
-      <div className={styles.progress}>
-        <Text variant="caption" color="secondary">
-          Question {currentQuestionIndex + 1} of {interviewQuestions.length}
-        </Text>
-        <div className={styles.progressBar}>
-          <div 
-            className={styles.progressFill}
-            style={{ width: `${((currentQuestionIndex + 1) / interviewQuestions.length) * 100}%` }}
-          />
-        </div>
-      </div>
     </Card>
   );
 };

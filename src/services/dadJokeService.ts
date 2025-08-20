@@ -10,7 +10,7 @@ export class DadJokeService {
   private static readonly CACHE_EXPIRY = 'dadJoke_cacheExpiry';
   private static readonly API_URL = 'https://icanhazdadjoke.com';
   private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-  private static readonly PREFETCH_COUNT = 10;
+  private static readonly PREFETCH_COUNT = 5;
 
   private static getUsedIds(): Set<string> {
     try {
@@ -34,7 +34,7 @@ export class DadJokeService {
       const cached = sessionStorage.getItem(this.CACHE_KEY);
       const expiry = sessionStorage.getItem(this.CACHE_EXPIRY);
       
-      if (!cached || !expiry) return [];
+      if (!cached || !expiry) {return [];}
       
       const expiryTime = parseInt(expiry, 10);
       if (Date.now() > expiryTime) {
@@ -99,7 +99,7 @@ export class DadJokeService {
       }
       
       // Small delay to be respectful to the API
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 50));
     }
     
     return jokes;
@@ -115,17 +115,29 @@ export class DadJokeService {
       
       if (availableJokes.length === 0) {
         console.log('Prefetching new jokes...');
+        
+        // Add a small delay before starting prefetch to improve UX
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
         const newJokes = await this.prefetchJokes();
         
         if (newJokes.length === 0) {
-          // If we can't get any new jokes, reset the cache
-          console.log('No new jokes available, resetting cache...');
+          // If we can't get any new jokes, reset the cache and use fallback
+          console.log('No new jokes available, using fallback...');
           this.resetJokeCache();
           
+          const fallbackJokes = [
+            "Why don't scientists trust atoms? Because they make up everything! 🔬",
+            "What do you call a fake noodle? An impasta! 🍝",
+            "Why did the scarecrow win an award? He was outstanding in his field! 🌾"
+          ];
+          
+          const randomFallback = fallbackJokes[Math.floor(Math.random() * fallbackJokes.length)];
+          
           return {
-            joke: "Why don't scientists trust atoms? Because they make up everything! 🔬 (Cache has been reset - fresh jokes incoming!)",
+            joke: `${randomFallback} (Using cached joke - API temporarily unavailable)`,
             isLastJoke: false,
-            message: "Joke cache has been reset! You'll see fresh jokes now."
+            message: "Using offline jokes - try again in a moment for fresh content"
           };
         }
         

@@ -19,7 +19,7 @@ export const DadJoke: React.FC<DadJokeProps> = ({ className = '' }) => {
   const retryDelay = 1000; // Start with 1 second delay
 
   const fetchJoke = async (isRetry = false) => {
-    if (isLoading) return;
+    if (isLoading) {return;}
     
     try {
       setIsLoading(true);
@@ -105,18 +105,9 @@ export const DadJoke: React.FC<DadJokeProps> = ({ className = '' }) => {
             disabled={isLoading}
             icon={isLoading ? '⏳' : '🎭'}
             className={`action-button ${isLoading ? 'loading' : ''}`}
+            style={{ backgroundColor: '#22c55e', borderColor: '#22c55e' }}
           >
             {isLoading ? 'Loading...' : 'Get A Joke'}
-          </Button>
-          <Button 
-            onClick={resetCache} 
-            variant="secondary" 
-            size="medium"
-            icon="🔄"
-            className="action-button"
-            disabled={isLoading}
-          >
-            Reset Session Cache
           </Button>
           
           {message && !error && (

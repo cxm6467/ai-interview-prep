@@ -1,51 +1,127 @@
 import type { ReactNode, ElementType, JSX } from 'react';
 
-// Core data interfaces
+/**
+ * Core TypeScript interfaces and types for the AI Interview Prep application.
+ * 
+ * This module contains all type definitions used throughout the application,
+ * organized by functional area (data models, components, state management).
+ * 
+ * @fileoverview Type definitions for AI Interview Prep application
+ */
+
+// ==================== CORE DATA INTERFACES ====================
+
+/**
+ * Represents parsed resume data structure
+ * 
+ * Contains all information extracted from a user's resume including
+ * personal details, work experience, skills, and education.
+ * 
+ * @interface ResumeData
+ */
 export interface ResumeData {
+  /** Full name of the candidate */
   name?: string;
+  /** Email address */
   email?: string;
+  /** Phone number */
   phone?: string;
+  /** Professional summary or objective */
   summary?: string;
+  /** Array of work experience entries */
   experience: ExperienceItem[];
+  /** List of technical and soft skills */
   skills: string[];
+  /** Educational background entries */
   education: EducationItem[];
+  /** Professional certifications (optional) */
   certifications?: string[];
 }
 
+/**
+ * Individual work experience entry from resume
+ * 
+ * @interface ExperienceItem
+ */
 export interface ExperienceItem {
+  /** Company or organization name */
   company: string;
+  /** Job title or position held */
   position: string;
+  /** Employment duration (e.g., "Jan 2020 - Present") */
   duration: string;
+  /** Array of job responsibilities and achievements */
   description: string[];
 }
 
+/**
+ * Educational background entry
+ * 
+ * @interface EducationItem
+ */
 export interface EducationItem {
+  /** Degree type and field of study */
   degree: string;
+  /** Educational institution name */
   school: string;
+  /** Graduation year or attendance period */
   year: string;
 }
 
+/**
+ * Parsed job description structure
+ * 
+ * Contains structured information extracted from job postings
+ * used for matching against candidate profiles.
+ * 
+ * @interface JobDescription
+ */
 export interface JobDescription {
+  /** Job title */
   title: string;
+  /** Hiring company name */
   company: string;
+  /** Required qualifications and skills */
   requirements: string[];
+  /** Key job responsibilities */
   responsibilities: string[];
+  /** Nice-to-have skills and qualifications */
   preferredSkills: string[];
+  /** Full job description text */
   description: string;
 }
 
-// Interview and presentation interfaces
+// ==================== INTERVIEW & PRESENTATION INTERFACES ====================
+
+/**
+ * AI-generated interview question with metadata
+ * 
+ * @interface InterviewQuestion
+ */
 export interface InterviewQuestion {
+  /** Unique identifier for the question */
   id: string;
+  /** Category of interview question */
   type: 'technical' | 'behavioral' | 'situational';
+  /** The interview question text */
   question: string;
+  /** AI-generated suggested response (optional) */
   suggestedAnswer?: string;
+  /** Additional tips for answering (optional) */
   tips?: string[];
 }
 
+/**
+ * Presentation topic with structured talking points
+ * 
+ * @interface PresentationTopic
+ */
 export interface PresentationTopic {
+  /** Unique identifier for the topic */
   id: string;
+  /** Presentation topic title */
   title: string;
+  /** Array of key points to cover */
   bullets: string[];
 }
 
@@ -72,7 +148,7 @@ export interface AppState {
   presentationTopics: PresentationTopic[];
   atsScore: ATSScore | null;
   isLoading: boolean;
-  currentStep: 'upload' | 'analysis' | 'dashboard';
+  currentStep: 'upload' | 'analysis' | 'dashboard' | 'interview';
   theme: 'light' | 'dark';
 }
 
