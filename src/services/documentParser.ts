@@ -1,5 +1,8 @@
-// Import mammoth for Word document parsing
-import mammoth from 'mammoth';
+// Dynamic import for Word document parsing to reduce initial bundle size
+async function getMammoth() {
+  const mammoth = await import('mammoth');
+  return mammoth.default;
+}
 
 // This function will be used to dynamically import PDF.js
 async function getPdfJs() {
@@ -68,6 +71,7 @@ export class DocumentParser {
   private static async parseWord(file: File): Promise<string> {
     try {
       const arrayBuffer = await file.arrayBuffer();
+      const mammoth = await getMammoth();
       const result = await mammoth.extractRawText({ arrayBuffer });
       return result.value || this.getMockResumeText(file.name);
     } catch (error) {
