@@ -45,7 +45,7 @@ export interface RouteConfig {
 // Create a wrapper component for the home page
 const HomePage: FC = () => {
   const handleFileUpload = (files: File[]) => {
-    console.log('Files uploaded:', files);
+    // Files uploaded
     // Handle file upload logic here
   };
 

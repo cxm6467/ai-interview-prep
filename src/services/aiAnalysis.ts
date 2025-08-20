@@ -71,7 +71,7 @@ export class AIAnalysisService {
       ? '/.netlify/functions/consolidated-ai-handler'
       : '/.netlify/functions/consolidated-ai-handler';
 
-    console.log('🚀 Starting consolidated analysis...');
+    // Starting consolidated analysis
 
     try {
       const response = await fetch(apiUrl, {
@@ -117,7 +117,7 @@ export class AIAnalysisService {
       maxTokens: maxTokens
     };
 
-    console.log('🚀 Calling AI service...');
+    // Calling AI service
 
     try {
       const response = await fetch(apiUrl, {
@@ -132,9 +132,9 @@ export class AIAnalysisService {
 
       const responseText = await response.text();
       if (!response.ok) {
-        console.log('❌ AI service error:', response.status, response.statusText);
+        console.error('AI service error:', response.status, response.statusText);
       } else {
-        console.log('🎯 AI service responded successfully!');
+        // AI service responded successfully
       }
 
       if (!response.ok) {

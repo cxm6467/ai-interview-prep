@@ -158,7 +158,7 @@ const AppContent = () => {
         
         try {
             // Parse documents
-            console.log('📄 Parsing documents...');
+            // Parsing documents
             const resumeText = await DocumentParser.parseResume(resumeFile);
             const jobText = jobFile ? await DocumentParser.parseResume(jobFile) : jobInput;
             
@@ -182,7 +182,7 @@ const AppContent = () => {
         setInterviewerRole(interviewerRole);
         
         try {
-            console.log('🚀 Starting comprehensive analysis...');
+            // Starting comprehensive analysis
             
             // Single consolidated API call for all analysis
             const analysis = await AIAnalysisService.performConsolidatedAnalysis(resumeText, jobText);
@@ -255,7 +255,7 @@ const AppContent = () => {
                 missingKeywords: analysis.atsScore.missingKeywords || []
             });
             
-            console.log('🎉 All done! Your interview prep is ready!');
+            // Analysis complete - interview prep is ready
             setCurrentStep('dashboard');
         } catch (err) {
             console.error('💥 Analysis error:', err);
