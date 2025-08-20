@@ -34,21 +34,14 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    open: true,
     proxy: {
-      // Proxy API requests to Netlify Functions
-      '/api/ai-handler': {
-        target: 'http://localhost:8888',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      },
-      '/api/consolidated-ai-handler': {
+      '/api': {
         target: 'http://localhost:8888',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
-    },
-    open: true
+    }
   },
   build: {
     outDir: 'dist',

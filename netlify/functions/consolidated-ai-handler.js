@@ -90,12 +90,17 @@ async function generateComprehensiveAnalysis(resumeText, jobDescription) {
   ${jobDescription}
 
   Please provide a comprehensive analysis including:
-  1. ATS Score (0-100) and detailed feedback
+  1. ATS Score (0-100) and detailed feedback with keyword matching analysis
   2. Top 10 technical interview questions with answers
   3. Top 5 behavioral interview questions with sample answers
   4. 3 presentation topics with key points
   5. 5 strategic questions for the candidate to ask
   6. Key strengths and areas for improvement
+
+  For the ATS analysis, perform detailed keyword matching between the resume and job description:
+  - Extract all technical skills, tools, frameworks, and relevant keywords from both documents
+  - Compare them to find matches and missing keywords
+  - Consider variations and synonyms (e.g., "React.js" vs "ReactJS", "JavaScript" vs "JS")
 
   Format your response as a JSON object with these keys:
   {
@@ -103,7 +108,9 @@ async function generateComprehensiveAnalysis(resumeText, jobDescription) {
       "score": number,
       "feedback": string,
       "strengths": string[],
-      "improvements": string[]
+      "improvements": string[],
+      "keywordMatches": string[],
+      "missingKeywords": string[]
     },
     "technicalQuestions": Array<{ question: string, answer: string }>,
     "behavioralQuestions": Array<{ question: string, answer: string }>,
@@ -125,6 +132,8 @@ async function generateComprehensiveAnalysis(resumeText, jobDescription) {
       temperature: 0.7,
       max_tokens: 4000,
       response_format: { type: 'json_object' }
+    }, {
+      timeout: 90000 // 90 second timeout for OpenAI API call
     });
 
     const responseText = completion.choices[0]?.message?.content;

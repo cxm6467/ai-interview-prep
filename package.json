@@ -14,6 +14,10 @@
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@types/node": "^24.3.0",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^5.0.0",
     "clsx": "^2.1.1",
     "cors": "^2.8.5",
     "date-fns": "^4.1.0",
@@ -24,6 +28,7 @@
     "multer": "^2.0.2",
     "openai": "^5.12.2",
     "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^3.11.174",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
@@ -31,13 +36,8 @@
     "react-router-dom": "^7.8.1",
     "typescript": "^5.9.2",
     "vite": "^7.1.2",
-    "@vitejs/plugin-react": "^5.0.0",
-    "@types/node": "^24.3.0",
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
-    "pdfjs-dist": "^3.11.174",
-    "vite-tsconfig-paths": "^5.1.0",
     "vite-plugin-static-copy": "^3.1.1",
+    "vite-tsconfig-paths": "^5.1.0",
     "zod": "^3.25.76",
     "zustand": "^5.0.7"
   },
@@ -60,6 +60,7 @@
     "husky": "^9.1.2",
     "jsdom": "^26.1.0",
     "lint-staged": "^16.1.5",
+    "netlify-cli": "^23.1.4",
     "prettier": "^3.6.2",
     "typescript-eslint": "^8.39.1"
   }
