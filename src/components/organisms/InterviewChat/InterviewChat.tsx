@@ -4,6 +4,7 @@ import { Button } from '@atoms/Button';
 import { Text } from '@atoms/Text';
 import { useAppStore } from '@store/appStore';
 import { AIAnalysisService } from '@services/aiAnalysis';
+import { useAutoScrollToBottom } from '../../../hooks/useScrollFix';
 import styles from './InterviewChat.module.css';
 
 interface ChatMessage {
@@ -22,6 +23,9 @@ export const InterviewChat: React.FC = () => {
   
   const { interviewQuestions, resumeData, interviewerRole } = useAppStore();
   
+  // Use the auto-scroll hook to scroll to bottom when new messages are added
+  const messagesContainerRef = useAutoScrollToBottom<HTMLDivElement>(messages);
+  
   useEffect(() => {
     // Initialize with welcome message and first question
     if (interviewQuestions.length > 0 && messages.length === 0) {
@@ -39,11 +43,7 @@ Take your time to think about your answer, and I'll provide feedback to help you
     }
   }, [interviewQuestions, messages.length]);
 
-  useEffect(() => {
-    // Scroll to top of messages container instead of bottom
-    const messagesContainer = document.querySelector(`.${styles.messagesContainer}`);
-    messagesContainer?.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [messages]);
+  // Removed scroll-to-top effect - now using useAutoScrollToBottom hook
 
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) {return;}
@@ -160,7 +160,7 @@ ${interviewQuestions[nextIndex].question}`,
         </Button>
       </div>
       
-      <div className={styles.messagesContainer}>
+      <div className={styles.messagesContainer} ref={messagesContainerRef}>
         {messages.map((message) => (
           <div
             key={message.id}
