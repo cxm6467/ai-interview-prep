@@ -4,13 +4,26 @@ interface DadJoke {
   status: number;
 }
 
+interface JokeSearchResponse {
+  current_page: number;
+  limit: number;
+  next_page: number;
+  previous_page: number;
+  results: DadJoke[];
+  search_term: string;
+  status: number;
+  total_jokes: number;
+  total_pages: number;
+}
+
 export class DadJokeService {
   private static readonly STORAGE_KEY = 'dadJoke_usedIds';
   private static readonly CACHE_KEY = 'dadJoke_cache';
   private static readonly CACHE_EXPIRY = 'dadJoke_cacheExpiry';
   private static readonly API_URL = 'https://icanhazdadjoke.com';
+  private static readonly SEARCH_URL = 'https://icanhazdadjoke.com/search';
   private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-  private static readonly PREFETCH_COUNT = 50;
+  private static readonly JOKES_PER_BATCH = 30; // Max allowed by API
 
   private static getUsedIds(): Set<string> {
     try {
@@ -82,43 +95,47 @@ export class DadJokeService {
     return await response.json();
   }
 
-  private static async prefetchJokes(): Promise<DadJoke[]> {
-    const jokes: DadJoke[] = [];
-    const usedIds = this.getUsedIds();
-    const batchSize = 10; // Process in batches to avoid overwhelming the API
-    
-    for (let batch = 0; batch < Math.ceil(this.PREFETCH_COUNT / batchSize); batch++) {
-      const batchPromises: Promise<DadJoke | null>[] = [];
-      
-      // Create batch of requests
-      for (let i = 0; i < batchSize && (batch * batchSize + i) < this.PREFETCH_COUNT; i++) {
-        batchPromises.push(
-          this.fetchJoke()
-            .then(joke => !usedIds.has(joke.id) ? joke : null)
-            .catch(error => {
-              console.warn(`Failed to fetch joke ${batch * batchSize + i + 1}:`, error);
-              return null;
-            })
-        );
+  private static async fetchJokeBatch(page = 1): Promise<DadJoke[]> {
+    const response = await fetch(`${this.SEARCH_URL}?page=${page}&limit=${this.JOKES_PER_BATCH}`, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Interview Prep App (https://github.com/user/repo)'
       }
-      
-      // Wait for current batch to complete
-      const batchResults = await Promise.all(batchPromises);
-      
-      // Add successful, unique jokes
-      batchResults.forEach(joke => {
-        if (joke) {
-          jokes.push(joke);
-        }
-      });
-      
-      // Small delay between batches to be respectful to the API
-      if (batch < Math.ceil(this.PREFETCH_COUNT / batchSize) - 1) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch joke batch: ${response.status}`);
     }
-    
-    return jokes;
+
+    const searchResponse: JokeSearchResponse = await response.json();
+    return searchResponse.results;
+  }
+
+  private static async prefetchJokes(): Promise<DadJoke[]> {
+    try {
+      const usedIds = this.getUsedIds();
+      
+      // Fetch first batch (30 jokes)
+      const firstBatch = await this.fetchJokeBatch(1);
+      let allJokes = firstBatch.filter(joke => !usedIds.has(joke.id));
+      
+      // If we need more jokes and there are more pages available, fetch second batch
+      if (allJokes.length < 25) { // If we got fewer than 25 unused jokes, get more
+        try {
+          const secondBatch = await this.fetchJokeBatch(2);
+          const unusedSecondBatch = secondBatch.filter(joke => !usedIds.has(joke.id));
+          allJokes = [...allJokes, ...unusedSecondBatch];
+        } catch (error) {
+          console.warn('Failed to fetch second batch of jokes:', error);
+          // Continue with first batch only
+        }
+      }
+      
+      return allJokes;
+    } catch (error) {
+      console.warn('Failed to prefetch jokes:', error);
+      return [];
+    }
   }
 
   static async getRandomJoke(): Promise<{ joke: string; isLastJoke: boolean; message?: string }> {
