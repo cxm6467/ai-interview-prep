@@ -38,6 +38,7 @@ A comprehensive AI-powered interview preparation application that transforms job
 
 ### 🎭 Stress Relief & Engagement
 - **Dad Jokes Integration** - Lighten the mood with family-friendly humor during prep sessions
+- **Smart Joke Caching** - Batch prefetch up to 60 jokes using efficient search API
 - **GDPR-Compliant Caching** - Optional local data caching with cookie consent management
 - **Session Persistence** - Resume your prep sessions exactly where you left off
 
@@ -51,10 +52,11 @@ A comprehensive AI-powered interview preparation application that transforms job
 - **Component Architecture**: Atomic Design pattern (Atoms → Molecules → Organisms)
 
 ### AI & Backend
-- **AI Integration**: OpenAI GPT-3.5-turbo for intelligent analysis and coaching
+- **AI Integration**: OpenAI GPT-3.5-turbo-0125 (latest version) for intelligent analysis and coaching
 - **Serverless Functions**: Netlify Functions for secure API key management
 - **Document Processing**: Advanced PDF parsing with pdfjs-dist and DOCX support
 - **Caching Layer**: Intelligent client-side caching with cache invalidation
+- **Performance Optimizations**: Batch API requests, optimized token limits, and reduced latency
 
 ### Development & Deployment
 - **Development**: Hot module replacement, TypeScript strict mode, ESLint + Prettier
@@ -88,25 +90,21 @@ npm install
 VITE_OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-4. Start the development servers:
+4. Start the development server:
 
-**For full AI functionality (with Netlify functions):**
+**Recommended: Use Netlify Dev (includes functions):**
 ```bash
-# Terminal 1: Start Netlify functions
-netlify functions:serve --port 8888
-
-# Terminal 2: Start Vite dev server
-npm run dev
+netlify dev
 ```
 
-**For mock data development:**
+**Alternative: For mock data development only:**
 ```bash
 npm run dev
 ```
 
-5. Open [http://localhost:5173](http://localhost:5173) in your browser
+5. Open [http://localhost:8888](http://localhost:8888) (Netlify dev) or [http://localhost:5173](http://localhost:5173) (Vite only)
 
-The application will automatically proxy API requests to the Netlify functions during development.
+Netlify dev automatically handles both the frontend and serverless functions with proper routing.
 
 ## 🎨 Design System
 
@@ -158,6 +156,32 @@ src/
 - **CSS Modules**: `ComponentName.module.css`
 - **Services**: camelCase with descriptive names
 - **Types**: Exported from centralized `types/index.ts`
+
+## ⚡ Performance Optimizations
+
+### AI Response Optimization
+- **Latest OpenAI Model**: Uses `gpt-3.5-turbo-0125` for fastest response times
+- **Optimized Parameters**: Temperature reduced to 0.3 for faster, more consistent responses
+- **Smart Token Limits**: Optimized max_tokens (3500/1200) for optimal performance vs quality
+- **Request Timeout**: 90-second timeout with proper error handling
+
+### Caching & Data Management
+- **Dad Jokes Batch Fetching**: Prefetch up to 60 jokes in 1-2 API calls vs 50+ individual requests
+- **Smart Cache Management**: Proactive prefetching when cache runs low (≤5 jokes remaining)
+- **Session Storage**: Efficient client-side caching with 24-hour expiration
+- **Duplicate Prevention**: Advanced filtering prevents repeated content
+
+### Frontend Performance
+- **Code Splitting**: Lazy-loaded InterviewChat component and optimized chunks
+- **Bundle Optimization**: PDF.js worker separation and vendor chunk splitting
+- **Gzip Compression**: Automatic compression and edge optimization via Netlify
+- **Responsive Images**: Optimized assets with proper sizing
+
+### Development Experience
+- **Hot Module Replacement**: Instant updates during development
+- **Netlify Dev Integration**: Unified development server for frontend and functions
+- **TypeScript**: Full type safety with strict mode enabled
+- **ESLint + Prettier**: Consistent code quality and formatting
 
 ## 🔧 Configuration
 
@@ -224,6 +248,8 @@ Created with ❤️ by Chris Marasco - Follow for more innovative projects!
 - [x] **Strategic Questions to Ask** - AI-generated questions for candidates to ask interviewers
 - [x] **Enhanced Dashboard Layout** - 5-tab interface with optimized responsive design
 - [x] **Improved UX** - Removed distracting hover effects and optimized content width
+- [x] **Performance Optimizations** - OpenAI API speed improvements and batch joke caching
+- [x] **Development Experience** - Unified Netlify dev server and improved routing
 
 ### Phase 1: Enhanced User Experience
 - [ ] **Interview Recording & Playback** - Record practice sessions for self-review
