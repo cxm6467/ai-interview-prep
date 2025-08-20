@@ -66,10 +66,8 @@ Take your time to think about your answer, and I'll provide feedback to help you
       
       let aiResponse: string;
       
-      // Check if we have OpenAI API key for real AI responses
-      const hasOpenAI = import.meta.env.VITE_OPENAI_API_KEY;
-      
-      if (hasOpenAI && resumeData) {
+      // Use Netlify functions for AI responses
+      if (resumeData) {
         aiResponse = await AIAnalysisService.generateInterviewResponse(
           input.trim(),
           currentQuestion.question, // Pass the question text instead of the object
