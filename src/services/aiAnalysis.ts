@@ -46,17 +46,9 @@ export class AIAnalysisService {
       ? '/.netlify/functions/ai-handler'  // Production: Use Netlify Functions
       : '/api/ai-handler';                // Development: Use Vite proxy
     const requestBody = {
-      messages: [
-        {
-          role: 'system',
-          content: 'You are an expert career coach and HR professional with 15+ years of experience helping candidates prepare for technical interviews. Always provide specific, actionable advice.'
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
-      ],
-      maxTokens
+      prompt: prompt,
+      type: 'analysis',
+      maxTokens: maxTokens
     };
 
     console.log('🚀 Calling AI service...');
@@ -86,11 +78,12 @@ export class AIAnalysisService {
         } catch (e) {
           errorData = { error: responseText || 'Invalid JSON response' };
         }
-        throw new Error(`AI service error (${response.status}): ${errorData.error || 'Unknown error'}`);
+        const errorMessage = errorData.error?.message || errorData.error || 'Unknown error';
+        throw new Error(`AI service error (${response.status}): ${errorMessage}`);
       }
 
       const data = responseText ? JSON.parse(responseText) : {};
-      return data.content || '';
+      return data.response || '';
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('🚨 AI service call failed:', errorMessage);

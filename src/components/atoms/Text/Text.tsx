@@ -3,7 +3,7 @@ import React from 'react';
 import clsx from 'clsx';
 import styles from './Text.module.css';
 
-type TextVariant = 'h1' | 'h2' | 'h3' | 'body' | 'small' | 'caption';
+type TextVariant = 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'small' | 'caption';
 type TextColor = 'primary' | 'secondary' | 'tertiary' | 'accent';
 type TextAlign = 'left' | 'center' | 'right';
 type TextWeight = 'normal' | 'medium' | 'bold';

@@ -1,79 +1,183 @@
-const OpenAI = require('openai');
+/**
+ * Netlify Function: AI Handler
+ * 
+ * This function serves as a proxy to OpenAI's API, handling all AI-related requests
+ * for the interview preparation application.
+ */
 
-console.log('🚀 AI Handler starting up...');
-console.log('🔑 Environment check:', {
-  hasOpenAIKey: !!process.env.OPENAI_API_KEY,
-  nodeEnv: process.env.NODE_ENV
-});
+const { OpenAI } = require('openai');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Initialize OpenAI client
+let openai;
+try {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+} catch (error) {
+  console.error('Failed to initialize OpenAI client:', error);
+}
 
-const headers = {
+/**
+ * CORS headers for cross-origin requests
+ */
+const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Content-Type': 'application/json'
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Content-Type': 'application/json',
 };
 
-exports.handler = async function(event, context) {
-  console.log('📨 Incoming request:', event.httpMethod, event.path);
+/**
+ * Handle OPTIONS requests for CORS preflight
+ */
+function handleOptions() {
+  return {
+    statusCode: 200,
+    headers: corsHeaders,
+    body: '',
+  };
+}
 
-  // Only allow POST requests
-  if (event.httpMethod !== 'POST') {
-    const error = 'Method Not Allowed';
-    console.error('❌ Method not allowed:', event.httpMethod);
-    return {
-      statusCode: 405,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ error })
-    };
+/**
+ * Create a structured error response
+ */
+function createErrorResponse(statusCode, message, details = null) {
+  return {
+    statusCode,
+    headers: corsHeaders,
+    body: JSON.stringify({
+      error: {
+        message,
+        details,
+        timestamp: new Date().toISOString(),
+      },
+    }),
+  };
+}
+
+/**
+ * Create a successful response
+ */
+function createSuccessResponse(data) {
+  return {
+    statusCode: 200,
+    headers: corsHeaders,
+    body: JSON.stringify(data),
+  };
+}
+
+/**
+ * Call OpenAI API with error handling and retries
+ */
+async function callOpenAI(prompt, maxTokens = 1500, temperature = 0.7) {
+  if (!openai) {
+    throw new Error('OpenAI client not initialized. Please check your API key.');
   }
 
   try {
-    if (!event.body) {
-      throw new Error('Request body is missing');
-    }
-
-    const requestBody = JSON.parse(event.body);
-    const { messages, maxTokens = 1000 } = requestBody;
+    console.log('🚀 Calling OpenAI API...');
     
-    console.log('📋 Processing request with', messages?.length || 0, 'messages');
-    
-    if (!Array.isArray(messages)) {
-      throw new Error('Messages must be an array');
-    }
-
-    console.log('🤖 Asking OpenAI...');
-    const response = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages: messages,
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a professional career coach and interview expert. Provide helpful, accurate, and actionable advice.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
       max_tokens: maxTokens,
-      temperature: 0.7
+      temperature,
     });
 
-    console.log('✨ OpenAI responded successfully!');
-    const result = {
-      content: response.choices[0]?.message?.content || ''
-    };
+    const response = completion.choices[0]?.message?.content;
     
-    return {
-      statusCode: 200,
-      headers: headers,
-      body: JSON.stringify(result)
-    };
+    if (!response) {
+      throw new Error('No response received from OpenAI');
+    }
+
+    console.log('✅ OpenAI API call successful');
+    return response;
   } catch (error) {
-    console.error('💥 Function error:', error.message);
+    console.error('❌ OpenAI API error:', error);
     
-    return {
-      statusCode: error.status || 500,
-      headers: headers,
-      body: JSON.stringify({ 
-        error: error.message || 'Internal Server Error',
-        type: error.type || 'server_error',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-      })
-    };
+    if (error.status === 429) {
+      throw new Error('API rate limit exceeded. Please try again in a moment.');
+    } else if (error.status === 401) {
+      throw new Error('Invalid API key. Please check your OpenAI configuration.');
+    } else if (error.status >= 500) {
+      throw new Error('OpenAI service temporarily unavailable. Please try again later.');
+    } else {
+      throw new Error(`OpenAI API error: ${error.message}`);
+    }
+  }
+}
+
+/**
+ * Main handler function
+ */
+exports.handler = async (event, context) => {
+  // Handle CORS preflight requests
+  if (event.httpMethod === 'OPTIONS') {
+    return handleOptions();
+  }
+
+  // Only allow POST requests
+  if (event.httpMethod !== 'POST') {
+    return createErrorResponse(405, 'Method not allowed. Only POST requests are supported.');
+  }
+
+  try {
+    // Parse request body
+    let body;
+    try {
+      body = JSON.parse(event.body || '{}');
+    } catch (parseError) {
+      return createErrorResponse(400, 'Invalid JSON in request body');
+    }
+
+    const { prompt, type, maxTokens, temperature } = body;
+
+    // Validate required fields
+    if (!prompt || typeof prompt !== 'string') {
+      return createErrorResponse(400, 'Missing or invalid prompt field');
+    }
+
+    if (!type || typeof type !== 'string') {
+      return createErrorResponse(400, 'Missing or invalid type field');
+    }
+
+    console.log(`📝 Processing ${type} request`);
+
+    // Call OpenAI API
+    const aiResponse = await callOpenAI(
+      prompt,
+      maxTokens || 1500,
+      temperature || 0.7
+    );
+
+    // Return successful response
+    return createSuccessResponse({
+      response: aiResponse,
+      type,
+      timestamp: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('💥 Handler error:', error);
+    
+    // Handle specific error types
+    if (error.message.includes('API key')) {
+      return createErrorResponse(401, 'Authentication failed', error.message);
+    } else if (error.message.includes('rate limit')) {
+      return createErrorResponse(429, 'Rate limit exceeded', error.message);
+    } else if (error.message.includes('temporarily unavailable')) {
+      return createErrorResponse(503, 'Service temporarily unavailable', error.message);
+    } else {
+      return createErrorResponse(500, 'Internal server error', error.message);
+    }
   }
 };
