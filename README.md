@@ -230,6 +230,20 @@ src/
 - **ESLint + Prettier**: Consistent code quality and formatting
 - **Production Logging**: Clean console output with proper error handling and minimal noise
 
+### Testing
+- **Framework**: Vitest with React Testing Library for comprehensive component testing
+- **Coverage**: 45+ passing tests covering atoms, molecules, and critical components
+- **Mocking**: Service layer mocks with MSW for API testing
+- **CI/CD Ready**: Tests run in parallel with optimized performance
+
+**Available Test Commands:**
+```bash
+npm test                # Run all tests
+npm run test:watch      # Watch mode for development
+npm run test:coverage   # Generate coverage reports
+npm run test:ui         # Visual test runner interface
+```
+
 ## 🔧 Configuration
 
 ### OpenAI Integration
