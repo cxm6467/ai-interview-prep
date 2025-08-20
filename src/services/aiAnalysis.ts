@@ -100,8 +100,28 @@ export class AIAnalysisService {
     resume: ResumeData,
     job: JobDescription
   ): Promise<ATSScore> {
+    // Extract all skills from the resume (case-insensitive)
+    const resumeSkills = (resume.skills || []).map(skill => skill.toLowerCase());
+    
+    // Extract required and preferred skills from job (case-insensitive)
+    const requiredSkills = (job.requirements || []).map(skill => skill.toLowerCase());
+    const preferredSkills = (job.preferredSkills || []).map(skill => skill.toLowerCase());
+    
+    // Combine all job skills and remove duplicates
+    const allJobSkills = [...new Set([...requiredSkills, ...preferredSkills])];
+    
+    // Find matching and missing skills
+    const keywordMatches = allJobSkills.filter(skill => 
+      resumeSkills.some(resumeSkill => resumeSkill.includes(skill) || skill.includes(resumeSkill))
+    );
+    
+    // Find missing skills (in job but not in resume)
+    const missingKeywords = allJobSkills.filter(skill => 
+      !resumeSkills.some(resumeSkill => resumeSkill.includes(skill) || skill.includes(resumeSkill))
+    );
+
     const prompt = `You are an expert ATS (Applicant Tracking System) analyzer. 
-      
+    
 TASK: Analyze the following resume against the job requirements and calculate an ATS compatibility score.
 
 RESUME INFORMATION:
@@ -110,25 +130,31 @@ RESUME INFORMATION:
 - Education: ${resume.education?.map(edu => `${edu.degree} at ${edu.school}`).join('; ') || 'Not specified'}
 
 JOB REQUIREMENTS:
-- Required Skills: ${job.requirements.join(', ')}
-- Preferred Skills: ${job.preferredSkills?.join(', ') || 'None specified'}
+- Title: ${job.title || 'Not specified'}
+- Required Skills: ${job.requirements?.join(', ') || 'Not specified'}
+- Responsibilities: ${job.responsibilities?.join('; ') || 'Not specified'}
+- Preferred Skills: ${job.preferredSkills?.join(', ') || 'None listed'}
 
-INSTRUCTIONS:
-1. Calculate an ATS score from 0-100 based on how well the resume matches the job requirements
-2. Provide specific strengths in the candidate's profile
-3. List actionable improvements to increase ATS score
-4. Identify matched and missing keywords
+ANALYSIS INSTRUCTIONS:
+1. Score the match between resume and job (0-100) based on skills, experience, and education
+2. List 3-5 key strengths that make the candidate a good fit
+3. List 3-5 key areas for improvement to better match the job
+4. Use the following exact matches for keywords:
+   - Matching Skills: ${keywordMatches.join(', ') || 'None'}
+   - Missing Skills: ${missingKeywords.join(', ') || 'None'}
 
-RESPONSE FORMAT (must be valid JSON):
+FORMAT your response as a valid JSON object with these exact keys:
 {
-  "score": 75,
-  "strengths": ["string"],
-  "improvements": ["string"],
-  "keywordMatches": ["string"],
-  "missingKeywords": ["string"]
+  "score": number (0-100),
+  "strengths": string[],
+  "improvements": string[],
+  "keywordMatches": string[],
+  "missingKeywords": string[]
 }
 
-IMPORTANT: Return ONLY the JSON object, without any markdown formatting or additional text.`;
+IMPORTANT: 
+- Return ONLY the JSON object with no additional text or explanations.
+- Use the exact missing keywords provided above.`;
 
     try {
       const response = await this.callOpenAI(prompt, 2000);

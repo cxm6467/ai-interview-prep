@@ -425,7 +425,6 @@ const AppContent = () => {
                             onClick={() => setCurrentStep('upload')}
                             className="new-analysis-btn green-button"
                         >
-                            <FiUpload className="button-icon" />
                             Start New
                         </Button>
                         <button
@@ -575,7 +574,7 @@ const AppContent = () => {
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
                                         <div className="skills-card-modern">
                                             <div className="skills-card-header">
-                                                <div className="skills-card-icon strengths">✓</div>
+                                                <div className="skills-card-icon strengths">✨</div>
                                                 <Text variant="h3" className="font-bold">Strengths</Text>
                                             </div>
                                             <ul className="skills-list-modern">
@@ -600,7 +599,7 @@ const AppContent = () => {
                                         </div>
                                         <div className="skills-card-modern">
                                             <div className="skills-card-header">
-                                                <div className="skills-card-icon improvements">!</div>
+                                                <div className="skills-card-icon improvements">🔧</div>
                                                 <Text variant="h3" className="font-bold">Improvements</Text>
                                             </div>
                                             <ul className="skills-list-modern">
@@ -623,9 +622,11 @@ const AppContent = () => {
                                                 )}
                                             </ul>
                                         </div>
+                                    </div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem', marginTop: '1.25rem' }}>
                                         <div className="skills-card-modern">
                                             <div className="skills-card-header">
-                                                <div className="skills-card-icon matches">✓</div>
+                                                <div className="skills-card-icon matches">✅</div>
                                                 <Text variant="h3" className="font-bold">Keyword Matches</Text>
                                             </div>
                                             <div className="flex flex-wrap gap-2">
@@ -644,7 +645,7 @@ const AppContent = () => {
                                         </div>
                                         <div className="skills-card-modern">
                                             <div className="skills-card-header">
-                                                <div className="skills-card-icon missing">!</div>
+                                                <div className="skills-card-icon missing">❌</div>
                                                 <Text variant="h3" className="font-bold">Missing Keywords</Text>
                                             </div>
                                             <div className="flex flex-wrap gap-2">
