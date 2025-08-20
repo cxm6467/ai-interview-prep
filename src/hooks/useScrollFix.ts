@@ -4,7 +4,7 @@ import { useEffect, useRef, useCallback } from 'react';
  * Custom hook for auto-scrolling to bottom (useful for chat interfaces)
  * 
  * This hook automatically scrolls to the bottom of a container when
- * new content is added, similar to chat applications.
+ * new content is added, ensuring new messages are always visible.
  * 
  * @param dependency - Value to watch for changes that trigger auto-scroll
  * @param enabled - Whether auto-scroll is enabled (default: true)
@@ -22,18 +22,14 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
     }
     
     const container = containerRef.current;
-    const shouldScroll = 
-      container.scrollTop + container.clientHeight >= 
-      container.scrollHeight - 100; // 100px threshold
     
-    if (shouldScroll) {
-      requestAnimationFrame(() => {
-        container.scrollTo({
-          top: container.scrollHeight,
-          behavior: 'smooth'
-        });
+    // Always scroll to bottom on new messages
+    requestAnimationFrame(() => {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth'
       });
-    }
+    });
   }, [dependency, enabled]);
   
   return containerRef;
