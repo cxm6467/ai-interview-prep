@@ -130,13 +130,13 @@
   --color-surface-secondary: #F5F5F5;
   
   --color-text: #2D2A2E;
-  --color-text-secondary: #5B595C;
-  --color-text-tertiary: #939293;
+  --color-text-secondary: #4A474B;
+  --color-text-tertiary: #6B6669;
   --color-text-inverse: #FFFFFF;
   
-  --color-border: #E0E0E0;
-  --color-border-hover: #BDBDBD;
-  --color-border-secondary: #939293;
+  --color-border: #D1D5DB;
+  --color-border-hover: #9CA3AF;
+  --color-border-secondary: #6B7280;
   
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.05);

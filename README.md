@@ -146,7 +146,7 @@ All themes feature:
   - Toast notifications and alerts
   - File upload components
   - All borders, shadows, and accents
-- **WCAG 2.1 Accessibility**: All themes meet accessibility standards with proper contrast ratios and verified legibility across all components
+- **WCAG 2.1 AA Compliance**: All themes meet accessibility standards with enhanced contrast ratios (4.5:1 minimum) and verified legibility across all text elements
 - **Modern UI**: Dropdown selector with visual theme previews and smooth animations
 - **Persistent Storage**: Theme preference saved and restored across sessions
 - **Current Analysis Integration**: Smart detection and display of existing analysis data
@@ -309,6 +309,7 @@ Created with ❤️ by Chris Marasco - Follow for more innovative projects!
 - [x] **Open Source License** - MIT License with proper attribution for AI-generated code
 - [x] **Console Log Cleanup** - Removed non-essential warning logs for cleaner production experience
 - [x] **Light Theme Text Fix** - Improved readability of suggested answers in light theme with enhanced contrast
+- [x] **Enhanced Text Contrast** - Improved contrast ratios for secondary/tertiary text and borders in light theme for WCAG AA compliance
 
 ### Phase 1: Enhanced User Experience
 - [ ] **Interview Recording & Playback** - Record practice sessions for self-review
