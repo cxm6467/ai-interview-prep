@@ -38,7 +38,9 @@ A comprehensive AI-powered interview preparation application that transforms job
 
 ### 🎭 Stress Relief & Engagement
 - **Dad Jokes Integration** - Lighten the mood with family-friendly humor during prep sessions
-- **Smart Joke Caching** - Batch prefetch up to 60 jokes using efficient search API
+- **Persistent Joke Caching** - Smart localStorage caching with 7-day expiration across browser sessions
+- **Unique Joke Tracking** - Never see the same joke twice with intelligent uniqueness detection
+- **Batch API Optimization** - Fetch up to 60 jokes in 2 API calls with proactive prefetching
 - **GDPR-Compliant Caching** - Optional local data caching with cookie consent management
 - **Session Persistence** - Resume your prep sessions exactly where you left off
 
@@ -168,8 +170,9 @@ src/
 ### Caching & Data Management
 - **Dad Jokes Batch Fetching**: Prefetch up to 60 jokes in 1-2 API calls vs 50+ individual requests
 - **Smart Cache Management**: Proactive prefetching when cache runs low (≤5 jokes remaining)
-- **Session Storage**: Efficient client-side caching with 24-hour expiration
-- **Duplicate Prevention**: Advanced filtering prevents repeated content
+- **Persistent localStorage**: Cross-session joke caching with 7-day expiration
+- **Unique Joke Guarantee**: Advanced tracking prevents users from seeing repeat jokes
+- **Duplicate Prevention**: Advanced filtering prevents repeated content across sessions
 
 ### Frontend Performance
 - **Code Splitting**: Lazy-loaded InterviewChat component and optimized chunks
