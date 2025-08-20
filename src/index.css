@@ -599,6 +599,11 @@ html {
 
 /* Focus visible for accessibility */
 :focus-visible {
-  outline: 2px solid var(--accent-purple);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* Ensure all elements inherit theme colors properly */
+*, *::before, *::after {
+  color: inherit;
 }

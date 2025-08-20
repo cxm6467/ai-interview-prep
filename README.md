@@ -313,6 +313,8 @@ Created with ❤️ by Chris Marasco - Follow for more innovative projects!
 - [x] **Single File Upload** - Restricted file upload components to single file selection with clear user messaging
 - [x] **Purple to Blue Color Scheme** - Updated primary colors from purple to modern blue for better professional appearance
 - [x] **Loading Screen Text Fix** - Improved loading screen text contrast in light theme for better readability
+- [x] **Global Text Inheritance Fix** - Fixed white text on white background issue by ensuring proper color inheritance
+- [x] **PDF.js Build Warning Suppression** - Suppressed eval warnings from PDF.js library for cleaner build output
 
 ### Phase 1: Enhanced User Experience
 - [ ] **Interview Recording & Playback** - Record practice sessions for self-review

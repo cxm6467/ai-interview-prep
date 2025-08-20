@@ -14,7 +14,10 @@ export default defineConfig({
   },
   esbuild: {
     // Ignore eval warnings from PDF.js
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+    logOverride: { 
+      'this-is-undefined-in-esm': 'silent',
+      'eval': 'silent'
+    }
   },
   resolve: {
     alias: {
@@ -49,6 +52,13 @@ export default defineConfig({
     sourcemap: true,
     chunkSizeWarningLimit: 800, // Reasonable chunk size limit considering PDF.js requirements (in kB)
     rollupOptions: {
+      onwarn(warning, warn) {
+        // Suppress eval warnings from PDF.js
+        if (warning.code === 'EVAL' && warning.id?.includes('pdfjs-dist')) {
+          return;
+        }
+        warn(warning);
+      },
       output: {
         manualChunks: (id) => {
           // Handle PDF.js components separately for better chunking
