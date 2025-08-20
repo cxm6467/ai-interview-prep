@@ -1,8 +1,9 @@
 {
   "name": "dynamic-interview-prep",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
+  "description": "AI-powered interview preparation with strategic question generation, role-based coaching, and comprehensive skills analysis",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

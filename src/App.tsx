@@ -56,11 +56,13 @@ const AppContent = () => {
         setJobDescription, 
         setInterviewQuestions, 
         setPresentationTopics, 
+        setCandidateQuestions,
         setATSScore,
         setInterviewerRole,
         interviewerRole,
         interviewQuestions,
         presentationTopics,
+        candidateQuestions,
         atsScore
     } = useAppStore();
 
@@ -188,15 +190,17 @@ const AppContent = () => {
             
             // Phase 3: Generate personalized content with parallel AI calls
             console.log('🎯 Generating your personalized interview prep...');
-            const [questions, topics, atsScoreData] = await Promise.all([
+            const [questions, topics, candidateQuestions, atsScoreData] = await Promise.all([
                 AIAnalysisService.generateInterviewQuestions(resumeData, jobData, interviewerRole),
                 AIAnalysisService.generatePresentationTopics(resumeData, jobData),
+                AIAnalysisService.generateCandidateQuestions(jobData, interviewerRole),
                 AIAnalysisService.calculateATSScore(resumeData, jobData)
             ]);
             
             // Update application state with results
             setInterviewQuestions(questions);
             setPresentationTopics(topics);
+            setCandidateQuestions(candidateQuestions);
             setATSScore(atsScoreData);
             console.log('🎉 All done! Your interview prep is ready!');
             setCurrentStep('dashboard');
@@ -399,7 +403,7 @@ const AppContent = () => {
                             Interview Dashboard
                         </Text>
                         <Text variant="body" color="secondary">
-                            AI-Powered Personalized Preparation
+                            AI-Powered Personalized Interview Prep
                         </Text>
                     </div>
                     <div className="header-actions">
@@ -465,6 +469,13 @@ const AppContent = () => {
                             </div>
                             <div className="label">Questions</div>
                         </Card>
+                        <Card className="stat-card">
+                            <div className="emoji">💡</div>
+                            <div className="score">
+                                {candidateQuestions?.length || 5}
+                            </div>
+                            <div className="label">Questions to Ask</div>
+                        </Card>
                     </div>
                     <div className="nav-tabs">
                         <Button
@@ -484,6 +495,12 @@ const AppContent = () => {
                             onClick={() => setActiveTab('presentations')}
                         >
                             📈 Presentations
+                        </Button>
+                        <Button
+                            variant={activeTab === 'questions' ? 'primary' : 'ghost'}
+                            onClick={() => setActiveTab('questions')}
+                        >
+                            💡 Questions to Ask
                         </Button>
                         <Button
                             variant={activeTab === 'skills' ? 'primary' : 'ghost'}
@@ -639,6 +656,37 @@ const AppContent = () => {
                                         <div className="content-card topic-card" style={{ textAlign: 'center' }}>
                                             <Text variant="body" color="secondary">
                                                 No presentation topics generated yet. Please analyze a job description first.
+                                            </Text>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        {activeTab === 'questions' && (
+                            <div className="content-section">
+                                <div className="content-cards-container">
+                                    {candidateQuestions?.length > 0 ? (
+                                        candidateQuestions.map((question) => (
+                                            <div key={question.id} className="content-card question-card candidate-question-card">
+                                                <div className="question-category">
+                                                    <span className={`category-badge ${question.category}`}>
+                                                        {question.category.charAt(0).toUpperCase() + question.category.slice(1)}
+                                                    </span>
+                                                    <span className={`timing-badge ${question.timing}`}>
+                                                        {question.timing.charAt(0).toUpperCase() + question.timing.slice(1)}
+                                                    </span>
+                                                </div>
+                                                <div className="question-text">{question.question}</div>
+                                                <div className="question-rationale">
+                                                    <div className="rationale-label">Why ask this:</div>
+                                                    <Text variant="body" color="secondary">{question.rationale}</Text>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="content-card question-card" style={{ textAlign: 'center' }}>
+                                            <Text variant="body" color="secondary">
+                                                No candidate questions generated yet. Please analyze a job description first.
                                             </Text>
                                         </div>
                                     )}

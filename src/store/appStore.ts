@@ -1,10 +1,11 @@
 import { create } from 'zustand';
-import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, ATSScore } from '../types';
+import type { ResumeData, JobDescription, InterviewQuestion, CandidateQuestion, PresentationTopic, ATSScore } from '../types';
 
 interface AppState {
   resumeData: ResumeData | null;
   jobDescription: JobDescription | null;
   interviewQuestions: InterviewQuestion[];
+  candidateQuestions: CandidateQuestion[];
   presentationTopics: PresentationTopic[];
   atsScore: ATSScore | null;
   interviewerRole: string;
@@ -16,6 +17,7 @@ interface AppState {
   setResumeData: (data: ResumeData) => void;
   setJobDescription: (data: JobDescription) => void;
   setInterviewQuestions: (questions: InterviewQuestion[]) => void;
+  setCandidateQuestions: (questions: CandidateQuestion[]) => void;
   setPresentationTopics: (topics: PresentationTopic[]) => void;
   setATSScore: (score: ATSScore) => void;
   setInterviewerRole: (role: string) => void;
@@ -29,6 +31,7 @@ export const useAppStore = create<AppState>((set) => ({
   resumeData: null,
   jobDescription: null,
   interviewQuestions: [],
+  candidateQuestions: [],
   presentationTopics: [],
   atsScore: null,
   interviewerRole: '',
@@ -39,6 +42,7 @@ export const useAppStore = create<AppState>((set) => ({
   setResumeData: (data) => set({ resumeData: data }),
   setJobDescription: (data) => set({ jobDescription: data }),
   setInterviewQuestions: (questions) => set({ interviewQuestions: questions }),
+  setCandidateQuestions: (questions) => set({ candidateQuestions: questions }),
   setPresentationTopics: (topics) => set({ presentationTopics: topics }),
   setATSScore: (score) => set({ atsScore: score }),
   setInterviewerRole: (role) => set({ interviewerRole: role }),
@@ -51,6 +55,7 @@ export const useAppStore = create<AppState>((set) => ({
     resumeData: null,
     jobDescription: null,
     interviewQuestions: [],
+    candidateQuestions: [],
     presentationTopics: [],
     atsScore: null,
     interviewerRole: '',

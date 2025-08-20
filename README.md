@@ -9,6 +9,7 @@ A comprehensive AI-powered interview preparation application that transforms job
 ### 🎯 Intelligent Interview Coaching
 - **AI Interview Coach** - Practice with an AI that adapts to 8+ different interviewer roles (Technical Lead, Hiring Manager, Recruiter, Program Manager, etc.)
 - **Personalized Questions** - AI generates interview questions based on your specific resume and target job description
+- **Strategic Questions to Ask** - AI-generated questions candidates should ask interviewers, categorized by timing and purpose
 - **Real-time Feedback** - Get instant, role-specific suggestions to improve your answers
 - **Interactive Chat Interface** - Natural conversation flow with typing indicators and smooth UX
 
@@ -28,11 +29,12 @@ A comprehensive AI-powered interview preparation application that transforms job
 ### 🚀 Modern User Experience
 - **Dual Theme Support** - Beautiful light and dark themes with smooth transitions
 - **Mobile-First Design** - Fully responsive interface optimized for all devices
+- **5-Tab Dashboard** - Comprehensive interview prep with Questions, Coaching, Presentations, Strategic Questions, and Skills Analysis
 - **Progressive Web App** - Fast loading, offline-capable, and app-like experience
 - **Accessibility First** - WCAG 2.1 compliant with screen reader support and keyboard navigation
 - **Smart Caching** - Intelligent caching system reduces API calls and improves performance
 - **Chat-Style Interface** - Modern card design with asymmetric border radius and intuitive layouts
-- **Optimized Keyword Display** - Smart wrapping skill bubbles with proper container isolation
+- **Optimized Layout** - Clean, distraction-free interface with responsive grid system and optimized content width
 
 ### 🎭 Stress Relief & Engagement
 - **Dad Jokes Integration** - Lighten the mood with family-friendly humor during prep sessions
@@ -110,11 +112,11 @@ The application will automatically proxy API requests to the Netlify functions d
 
 The application features a cohesive color-coded design system:
 
-- **🔵 Blue**: Strengths and positive attributes
-- **🟠 Orange**: Areas for improvement  
-- **🟢 Green**: Keyword matches and success indicators
-- **🔴 Red**: Missing keywords and alerts
-- **🟣 Purple**: Interview questions and practice
+- **🔵 Blue**: Strengths and positive attributes, role-based questions
+- **🟠 Orange**: Areas for improvement, growth-focused questions  
+- **🟢 Green**: Keyword matches and success indicators, team and company questions
+- **🔴 Red**: Missing keywords and alerts, culture-focused questions
+- **🟣 Purple**: Interview questions and practice, presentations
 - **🔷 Teal**: Presentation topics and speaking points
 
 ## 📁 Project Architecture
@@ -217,6 +219,11 @@ Created with ❤️ by Chris Marasco - Follow for more innovative projects!
 ---
 
 ## 🎯 Future Roadmap
+
+### Recently Completed ✅
+- [x] **Strategic Questions to Ask** - AI-generated questions for candidates to ask interviewers
+- [x] **Enhanced Dashboard Layout** - 5-tab interface with optimized responsive design
+- [x] **Improved UX** - Removed distracting hover effects and optimized content width
 
 ### Phase 1: Enhanced User Experience
 - [ ] **Interview Recording & Playback** - Record practice sessions for self-review
