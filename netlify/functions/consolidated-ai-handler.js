@@ -99,7 +99,8 @@ async function generateComprehensiveAnalysis(resumeText, jobDescription) {
 
   For the ATS analysis, perform detailed keyword matching between the resume and job description:
   - Extract all technical skills, tools, frameworks, and relevant keywords from both documents
-  - Compare them to find matches and missing keywords
+  - keywordMatches: keywords/skills found in BOTH the resume and job description
+  - missingKeywords: keywords/skills found in the JOB DESCRIPTION but NOT in the resume (these are what the candidate should add to improve their resume)
   - Consider variations and synonyms (e.g., "React.js" vs "ReactJS", "JavaScript" vs "JS")
 
   Format your response as a JSON object with these keys:
