@@ -20,7 +20,7 @@ export default defineConfig({
     })
   ],
   optimizeDeps: {
-    include: ['pdfjs-dist'],
+    include: ['pdfjs-dist', 'pdfjs-dist/build/pdf', 'pdfjs-dist/build/pdf.worker.entry'],
     esbuildOptions: {
       target: 'es2020',
       supported: { bigint: true }
