@@ -1421,7 +1421,47 @@ select:focus {
   background: var(--accent-blue);
 }
 
+/* Skill Match Score */
+.score .desktop-fraction {
+  display: inline;
+}
+
+.score .mobile-percentage {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .score .desktop-fraction {
+    display: none;
+  }
+  
+  .score .mobile-percentage {
+    display: inline;
+  }
+}
+
 /* Responsive design */
+@media (max-width: 1024px) {
+  .content-cards-container,
+  .skills-analysis-modern {
+    padding: 1rem;
+  }
+  
+  .content-card,
+  .skills-card-modern {
+    padding: 1rem;
+  }
+  
+  .speech-controls {
+    gap: 0.25rem;
+  }
+  
+  .content-speech-button {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
+  }
+}
+
 @media (max-width: 768px) {
   .content-cards-container,
   .skills-analysis-modern {

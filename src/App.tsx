@@ -450,11 +450,16 @@ const AppContent = () => {
                         <Card className="stat-card">
                             <div className="emoji">🎯</div>
                             <div className="score">
-                                {atsScore?.keywordMatches
-                                    ? Math.round((atsScore.keywordMatches.length / (atsScore.keywordMatches.length + (atsScore.missingKeywords?.length || 0))) * 100)
-                                    : 92}
-                                <span className="hidden sm:inline">/100</span>
-                                <span className="sm:hidden">%</span>
+                                {atsScore?.keywordMatches ? (
+                                    <>
+                                        <span className="desktop-fraction">
+                                            {atsScore.keywordMatches.length}/{atsScore.keywordMatches.length + (atsScore.missingKeywords?.length || 0)}
+                                        </span>
+                                        <span className="mobile-percentage">
+                                            {Math.round((atsScore.keywordMatches.length / (atsScore.keywordMatches.length + (atsScore.missingKeywords?.length || 0))) * 100)}%
+                                        </span>
+                                    </>
+                                ) : 'N/A'}
                             </div>
                             <div className="label">Skill Match</div>
                         </Card>
