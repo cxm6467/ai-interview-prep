@@ -1,26 +1,12 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
-import { fileURLToPath } from 'url'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    viteStaticCopy({
-      targets: [
-        {
-          src: 'node_modules/pdfjs-dist/build/pdf.worker.min.js',
-          dest: 'assets'
-        }
-      ]
-    })
-  ],
+  plugins: [react()],
   optimizeDeps: {
-    include: ['pdfjs-dist', 'pdfjs-dist/build/pdf', 'pdfjs-dist/build/pdf.worker.entry'],
+    include: ['pdfjs-dist'],
     esbuildOptions: {
       target: 'es2020',
       supported: { bigint: true }
@@ -28,10 +14,7 @@ export default defineConfig({
   },
   esbuild: {
     // Ignore eval warnings from PDF.js
-    logOverride: { 
-      'this-is-undefined-in-esm': 'silent',
-      'eval': 'silent'
-    }
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
   },
   resolve: {
     alias: {
@@ -51,19 +34,13 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    port: 3000,
     proxy: {
-      // Proxy API requests to Netlify functions in development
-      '/.netlify/functions/': {
-        target: 'http://localhost:8888',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/\.netlify\/functions\//, '/.netlify/functions/')
-      },
-      // Fallback for any other /api routes
+      // Proxy API requests to a backend server
       '/api': {
-        target: 'http://localhost:8888',
+        target: 'http://localhost:3002',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/.netlify/functions')
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     },
     open: true
@@ -72,25 +49,13 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: true,
-    chunkSizeWarningLimit: 1500, // Increase chunk size warning limit for PDF.js (in kB)
+    chunkSizeWarningLimit: 1000, // Increase chunk size warning limit (in kB)
     rollupOptions: {
-      onwarn(warning, warn) {
-        // Suppress eval warnings from PDF.js
-        if (warning.code === 'EVAL' && warning.id?.includes('pdfjs-dist')) {
-          return;
-        }
-        warn(warning);
-      },
       output: {
         manualChunks: (id) => {
-          // Handle PDF.js worker separately (largest chunk)
-          if (id.includes('pdf.worker.entry') || id.includes('pdf.worker.js')) {
-            return 'pdf-worker';
-          }
-          
-          // Split PDF.js main library 
-          if (id.includes('pdfjs-dist') && !id.includes('pdf.worker')) {
-            return 'pdf-lib';
+          // Handle PDF.js worker separately
+          if (id.includes('pdf.worker.entry')) {
+            return 'pdf.worker';
           }
           
           // Split node_modules into separate chunks
@@ -101,20 +66,14 @@ export default defineConfig({
             if (id.includes('@radix-ui')) {
               return 'vendor-radix';
             }
-            if (id.includes('react-icons')) {
-              return 'vendor-icons';
-            }
-            if (id.includes('zustand')) {
-              return 'vendor-store';
+            if (id.includes('pdfjs-dist')) {
+              return 'pdf-worker';
             }
             return 'vendor-other';
           }
           
-          // Split components into separate chunks based on usage patterns
+          // Split components into separate chunks
           if (id.includes('/components/')) {
-            if (id.includes('/organisms/InterviewChat')) {
-              return 'chunk-chat'; // Lazy loaded, separate chunk
-            }
             if (id.includes('/organisms/')) {
               return 'chunk-organisms';
             }
@@ -141,5 +100,5 @@ export default defineConfig({
   define: {
     'process.env': {},
     global: 'window',
-  },
+  }
 })
