@@ -20,14 +20,16 @@
 
 /* Variants */
 .primary {
-  background: var(--accent-purple);
-  color: white;
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: 1px solid var(--color-primary);
 }
 
 .primary:hover:not(:disabled) {
-  background: var(--accent-pink);
+  background: var(--color-primary-hover);
+  border-color: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(171, 157, 242, 0.3);
+  box-shadow: var(--shadow-lg);
 }
 
 .primary:active:not(:disabled) {
@@ -35,25 +37,27 @@
 }
 
 .secondary {
-  background: var(--bg-tertiary);
-  color: var(--accent-blue);
-  border: 2px solid var(--accent-blue);
+  background: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
 }
 
 .secondary:hover:not(:disabled) {
-  background: var(--accent-blue);
-  color: white;
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+  color: var(--color-text);
 }
 
 .ghost {
   background: transparent;
-  color: var(--text-primary);
-  border: 2px solid transparent;
+  color: var(--color-text);
+  border: 1px solid transparent;
 }
 
 .ghost:hover:not(:disabled) {
-  background: var(--bg-tertiary);
-  border-color: var(--border);
+  background: var(--color-surface-hover);
+  border-color: var(--color-border);
+  color: var(--color-text);
 }
 
 /* Sizes - mobile optimized */

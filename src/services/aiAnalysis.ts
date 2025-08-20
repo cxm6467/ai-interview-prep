@@ -332,14 +332,41 @@ Return only valid JSON without any additional text.`;
     currentQuestion: string,
     resume: ResumeData,
     conversationHistory: string[],
-    interviewerRole?: string
+    interviewerRole?: string,
+    analysisContext?: {
+      jobDescription?: JobDescription | null;
+      atsScore?: ATSScore | null;
+      allQuestions?: InterviewQuestion[];
+      presentationTopics?: PresentationTopic[];
+      candidateQuestions?: CandidateQuestion[];
+    }
   ): Promise<string> {
     try {
       const interviewerContext = interviewerRole ? this.getInterviewerFeedbackContext(interviewerRole) : '';
       
+      // Build enhanced context from analysis data
+      let contextualInfo = '';
+      if (analysisContext) {
+        if (analysisContext.jobDescription) {
+          contextualInfo += `\nTarget Job: ${analysisContext.jobDescription.title} at ${analysisContext.jobDescription.company}`;
+        }
+        if (analysisContext.atsScore) {
+          contextualInfo += `\nATS Score: ${analysisContext.atsScore.score}/100`;
+          if (analysisContext.atsScore.strengths?.length > 0) {
+            contextualInfo += `\nCandidate Strengths: ${analysisContext.atsScore.strengths.join(', ')}`;
+          }
+          if (analysisContext.atsScore.improvements?.length > 0) {
+            contextualInfo += `\nAreas for Improvement: ${analysisContext.atsScore.improvements.join(', ')}`;
+          }
+        }
+        if (analysisContext.allQuestions && analysisContext.allQuestions.length > 0) {
+          contextualInfo += `\nTotal Interview Questions Available: ${analysisContext.allQuestions.length}`;
+        }
+      }
+      
       const prompt = `You are conducting an interview as a ${interviewerRole || 'interviewer'}. The candidate's resume shows experience with: ${JSON.stringify(resume.skills || [])}
 
-${interviewerContext}
+${interviewerContext}${contextualInfo}
       
 Current interview question: "${currentQuestion}"
       
@@ -348,7 +375,7 @@ Candidate's response: "${userResponse}"
 Conversation history so far:
 ${conversationHistory.join('\n')}
       
-Provide constructive feedback on the candidate's response from your perspective as a ${interviewerRole || 'interviewer'}, then ask a follow-up question or move to the next question.`;
+Provide constructive feedback on the candidate's response from your perspective as a ${interviewerRole || 'interviewer'}. Consider their strengths and areas for improvement from the analysis. Then ask a thoughtful follow-up question or move to the next question.`;
 
       return await this.callOpenAI(prompt);
     } catch (error) {

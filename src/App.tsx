@@ -11,7 +11,8 @@ import { AIAnalysisService } from '@/services/aiAnalysis';
 import { DadJokeService } from '@/services/dadJokeService';
 import { useAppStore } from '@/store/appStore';
 import type { InterviewQuestion, PresentationTopic, CandidateQuestion } from '@/types';
-import { FiSun, FiMoon, FiUpload, FiFileText } from 'react-icons/fi';
+import { ThemeSelector } from '@atoms/ThemeSelector';
+import { FiUpload, FiFileText } from 'react-icons/fi';
 import { LoadingOverlay } from './components/atoms/LoadingOverlay/LoadingOverlay';
 import { SkillBubble } from './components/atoms/SkillBubble';
 import { CookieConsent } from './components/molecules/CookieConsent';
@@ -53,7 +54,7 @@ const AppContent = () => {
     const { 
         currentStep, 
         theme, 
-        toggleTheme, 
+        setTheme, 
         setCurrentStep, 
         setResumeData, 
         setJobDescription, 
@@ -70,6 +71,16 @@ const AppContent = () => {
     } = useAppStore();
 
     useEffect(() => {
+        // Remove any existing theme classes
+        document.body.className = document.body.className
+            .split(' ')
+            .filter(cls => !cls.startsWith('theme-'))
+            .join(' ');
+        
+        // Add new theme class
+        document.body.classList.add(`theme-${theme}`);
+        
+        // Also set data attribute for backward compatibility
         document.body.setAttribute('data-theme', theme);
     }, [theme]);
 
@@ -94,6 +105,13 @@ const AppContent = () => {
             'other': 'Other'
         };
         return roleMap[role] || role;
+    };
+
+    /**
+     * Check if analysis data exists (indicating previous analysis was completed)
+     */
+    const hasExistingAnalysis = (): boolean => {
+        return !!(interviewQuestions.length > 0 || presentationTopics.length > 0 || atsScore);
     };
 
     /**
@@ -278,16 +296,58 @@ const AppContent = () => {
                             <Text as="h1" variant="h1" className="logo gradient-text">
                                 AI Interview Prep
                             </Text>
-                            <button
-                                className="theme-toggle"
-                                onClick={toggleTheme}
-                                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                            >
-                                {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
-                            </button>
+                            <div className="theme-selector-wrapper">
+                                <span className="theme-selector-label">Theme:</span>
+                                <ThemeSelector 
+                                    currentTheme={theme}
+                                    onThemeChange={setTheme}
+                                />
+                            </div>
                         </div>
                     </header>
                     <main className="main-content">
+                        {hasExistingAnalysis() && currentStep === 'upload' && (
+                            <Card className="current-analysis-section">
+                                <div className="current-analysis-header">
+                                    <Text as="h2" variant="h2" className="section-header">
+                                        📊 Current Analysis Available
+                                    </Text>
+                                    <Text variant="body" color="secondary" className="current-analysis-description">
+                                        You have an existing analysis ready. View your dashboard or start a new analysis below.
+                                    </Text>
+                                </div>
+                                <div className="current-analysis-stats">
+                                    {atsScore && (
+                                        <div className="analysis-stat">
+                                            <span className="stat-label">ATS Score:</span>
+                                            <span className="stat-value">{atsScore.score}/100</span>
+                                        </div>
+                                    )}
+                                    {interviewQuestions.length > 0 && (
+                                        <div className="analysis-stat">
+                                            <span className="stat-label">Questions:</span>
+                                            <span className="stat-value">{interviewQuestions.length}</span>
+                                        </div>
+                                    )}
+                                    {presentationTopics.length > 0 && (
+                                        <div className="analysis-stat">
+                                            <span className="stat-label">Topics:</span>
+                                            <span className="stat-value">{presentationTopics.length}</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="current-analysis-actions">
+                                    <Button
+                                        variant="primary"
+                                        size="medium"
+                                        onClick={() => setCurrentStep('dashboard')}
+                                        className="view-dashboard-btn"
+                                    >
+                                        View Dashboard
+                                    </Button>
+                                </div>
+                            </Card>
+                        )}
                         <div className="grid-container">
                             <Card className="upload-section">
                                 <Text as="h2" variant="h2" className="section-header">
@@ -479,13 +539,13 @@ const AppContent = () => {
                         >
                             Start New
                         </Button>
-                        <button
-                            className="theme-toggle"
-                            onClick={toggleTheme}
-                            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-                        >
-                            {theme === 'light' ? <FiMoon size={20} /> : <FiSun size={20} />}
-                        </button>
+                        <div className="theme-selector-wrapper">
+                            <span className="theme-selector-label">Theme:</span>
+                            <ThemeSelector 
+                                currentTheme={theme}
+                                onThemeChange={setTheme}
+                            />
+                        </div>
                     </div>
                 </div>
             </header>
