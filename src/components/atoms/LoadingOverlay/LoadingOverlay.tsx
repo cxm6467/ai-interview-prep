@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Text } from '../Text';
 import { DadJokeService } from '../../../services/dadJokeService';
 import styles from './LoadingOverlay.module.css';
@@ -15,11 +15,11 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   cycleInterval = 5000 // 5 seconds
 }) => {
   const [currentJoke, setCurrentJoke] = useState<string>('Loading a joke...');
-  const [jokeIndex, setJokeIndex] = useState(0);
+  const [_jokeIndex, setJokeIndex] = useState(0);
   const [prefetchedJokes, setPrefetchedJokes] = useState<string[]>([]);
 
   // Fallback jokes for immediate display
-  const fallbackJokes = [
+  const fallbackJokes = useMemo(() => [
     "Why don't scientists trust atoms? Because they make up everything! 🔬",
     "What do you call a fake noodle? An impasta! 🍝",
     "Why did the scarecrow win an award? He was outstanding in his field! 🌾",
@@ -28,7 +28,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
     "What do you call a sleeping bull? A bulldozer! 😴",
     "Why don't programmers like nature? It has too many bugs! 🐛",
     "What's the best thing about Switzerland? I don't know, but the flag is a big plus! 🇨🇭"
-  ];
+  ], []);
 
   // Prefetch jokes when component mounts
   useEffect(() => {
@@ -44,8 +44,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
           
           // Small delay to be respectful to the API
           await new Promise(resolve => setTimeout(resolve, 100));
-        } catch (error) {
-          console.warn('Failed to prefetch joke:', error);
+        } catch {
           break; // Stop trying if we hit an error
         }
       }
@@ -66,7 +65,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
       setCurrentJoke(fallbackJokes[0]);
       prefetchJokes();
     }
-  }, [showJokes]);
+  }, [showJokes, fallbackJokes]);
 
   // Cycle through jokes
   useEffect(() => {
@@ -82,7 +81,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
     }, cycleInterval);
 
     return () => clearInterval(interval);
-  }, [showJokes, cycleInterval, prefetchedJokes]);
+  }, [showJokes, cycleInterval, prefetchedJokes, fallbackJokes]);
 
   return (
     <div className={styles.overlay}>

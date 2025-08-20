@@ -141,7 +141,7 @@ export class AIAnalysisService {
         let errorData;
         try {
           errorData = responseText ? JSON.parse(responseText) : {};
-        } catch (e) {
+        } catch {
           errorData = { error: responseText || 'Invalid JSON response' };
         }
         const errorMessage = errorData.error?.message || errorData.error || 'Unknown error';

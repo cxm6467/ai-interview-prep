@@ -51,8 +51,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({ data, className = '' }) 
       
       // Apply syntax highlighting
       return highlightJson(jsonString);
-    } catch (e) {
-      console.error('Error formatting JSON:', e);
+    } catch {
       return 'Error: Invalid JSON data';
     }
   }, [data]);

@@ -6,7 +6,7 @@ export function lazyLoad<T = any>(
 ): ComponentType<T> {
   const LazyComponent = lazy(importFunc);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   return function WrappedComponent(props: T) {
     return (
       <Suspense fallback={<div>Loading...</div>}>

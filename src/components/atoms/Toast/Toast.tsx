@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styles from './Toast.module.css';
 
 export interface ToastProps {
@@ -46,12 +46,12 @@ export const Toast: React.FC<ToastProps> = ({
 
       return () => clearTimeout(timer);
     }
-  }, [show, duration]);
+  }, [show, duration, handleClose]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setShow(false);
     setTimeout(() => onClose?.(), 300);
-  };
+  }, [onClose]);
 
   if (!show) {
     return null;

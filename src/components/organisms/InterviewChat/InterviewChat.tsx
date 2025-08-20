@@ -131,7 +131,7 @@ ${interviewQuestions[nextIndex].question}`,
           setMessages(prev => [...prev, nextQuestionMessage]);
         }, 1000);
       }
-    } catch (_) {
+    } catch {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
@@ -144,7 +144,7 @@ ${interviewQuestions[nextIndex].question}`,
     }
   };
 
-  const generateMockResponse = (userInput: string, _question: any, questionIndex: number): string => {
+  const generateMockResponse = (userInput: string, _question: InterviewQuestion, questionIndex: number): string => {
     const responses = [
       `That's a solid approach! I particularly like how you mentioned ${userInput.split(' ').slice(-3).join(' ')}. To make your answer even stronger, consider adding specific metrics or outcomes from your experience.`,
       

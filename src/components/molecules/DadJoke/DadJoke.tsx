@@ -36,8 +36,7 @@ export const DadJoke: React.FC<DadJokeProps> = ({ className = '' }) => {
       if (result.message) {
         setMessage(result.message);
       }
-    } catch (error) {
-      console.error('Error fetching joke:', error);
+    } catch {
       
       if (retryCount < maxRetries) {
         // Exponential backoff: 1s, 2s, 4s
