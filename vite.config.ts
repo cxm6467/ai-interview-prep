@@ -47,30 +47,45 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: true,
-    chunkSizeWarningLimit: 1000, // Increase chunk size warning limit (in kB)
+    chunkSizeWarningLimit: 800, // Reasonable chunk size limit considering PDF.js requirements (in kB)
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Handle PDF.js worker separately
-          if (id.includes('pdf.worker.entry')) {
-            return 'pdf.worker';
+          // Handle PDF.js components separately for better chunking
+          if (id.includes('pdf.worker.entry') || id.includes('pdf.worker.js')) {
+            return 'pdf-worker';
+          }
+          if (id.includes('pdfjs-dist/build/pdf.js') || id.includes('pdfjs-dist')) {
+            return 'pdf-lib';
           }
           
-          // Split node_modules into separate chunks
+          // Split large node_modules into smaller chunks
           if (id.includes('node_modules')) {
+            // React ecosystem
             if (id.includes('react') || id.includes('react-dom')) {
               return 'vendor-react';
             }
-            if (id.includes('@radix-ui')) {
-              return 'vendor-radix';
+            // UI libraries
+            if (id.includes('@radix-ui') || id.includes('framer-motion')) {
+              return 'vendor-ui';
             }
-            if (id.includes('pdfjs-dist')) {
-              return 'pdf-worker';
+            // Document processing libraries
+            if (id.includes('mammoth') || id.includes('docx')) {
+              return 'vendor-documents';
             }
+            // Utility libraries
+            if (id.includes('lodash') || id.includes('date-fns') || id.includes('classnames')) {
+              return 'vendor-utils';
+            }
+            // Development/build tools
+            if (id.includes('vite') || id.includes('rollup') || id.includes('esbuild')) {
+              return 'vendor-build';
+            }
+            // Everything else
             return 'vendor-other';
           }
           
-          // Split components into separate chunks
+          // Split application code into logical chunks
           if (id.includes('/components/')) {
             if (id.includes('/organisms/')) {
               return 'chunk-organisms';
@@ -83,9 +98,14 @@ export default defineConfig({
             }
           }
           
-          // Split services into a separate chunk
-          if (id.includes('/services/')) {
+          // Services and business logic
+          if (id.includes('/services/') || id.includes('/store/')) {
             return 'chunk-services';
+          }
+          
+          // Utilities and helpers
+          if (id.includes('/utils/') || id.includes('/hooks/')) {
+            return 'chunk-utils';
           }
         },
         chunkFileNames: 'assets/[name]-[hash].js',
