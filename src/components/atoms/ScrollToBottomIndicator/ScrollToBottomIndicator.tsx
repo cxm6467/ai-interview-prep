@@ -36,7 +36,6 @@ export const ScrollToBottomIndicator: React.FC<ScrollToBottomIndicatorProps> = (
   }
 
   const handleClick = () => {
-    console.log('ScrollToBottomIndicator clicked, unseenCount:', unseenCount);
     onScrollToBottom();
   };
 

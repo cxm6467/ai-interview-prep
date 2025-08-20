@@ -51,7 +51,6 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
   // Scroll to bottom function
   const scrollToBottom = useCallback((behavior: 'smooth' | 'auto' = 'smooth') => {
     if (!containerRef.current) {
-      console.warn('ScrollToBottom: Container ref not found');
       return;
     }
     
@@ -59,11 +58,8 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
     const scrollHeight = container.scrollHeight;
     const clientHeight = container.clientHeight;
     
-    console.log('ScrollToBottom called:', { scrollHeight, clientHeight, behavior });
-    
     // Ensure we have content to scroll to
     if (scrollHeight <= clientHeight) {
-      console.log('ScrollToBottom: No scrollable content');
       return;
     }
     
@@ -78,8 +74,6 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
       setUnseenCount(0);
       messageCountWhenScrolledAwayRef.current = null;
       setIsNearBottom(true);
-      
-      console.log('ScrollToBottom: Scrolled to', scrollHeight);
     });
   }, []);
   
