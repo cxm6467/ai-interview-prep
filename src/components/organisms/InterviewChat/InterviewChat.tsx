@@ -25,8 +25,14 @@ export const InterviewChat: React.FC = () => {
   const { interviewQuestions, resumeData, interviewerRole } = useAppStore();
   
   // Use the enhanced auto-scroll hook with unseen message tracking
+  // Only count AI messages as "unseen" (not user's own messages)
   const { containerRef: messagesContainerRef, unseenCount, isNearBottom, scrollToBottom } = 
-    useAutoScrollToBottom<HTMLDivElement>(messages);
+    useAutoScrollToBottom<HTMLDivElement, ChatMessage>(
+      messages, 
+      true, 
+      100, 
+      (message) => message.type === 'ai'
+    );
   
   useEffect(() => {
     // Initialize with welcome message and first question
@@ -197,25 +203,6 @@ ${interviewQuestions[nextIndex].question}`,
           isVisible={!isNearBottom && unseenCount > 0}
           onScrollToBottom={scrollToBottom}
         />
-        
-        {/* Debug info - remove later */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{ 
-            position: 'absolute', 
-            top: '10px', 
-            right: '10px', 
-            background: 'rgba(0,0,0,0.8)', 
-            color: 'white', 
-            padding: '5px', 
-            fontSize: '12px',
-            borderRadius: '4px',
-            zIndex: 1000 
-          }}>
-            unseenCount: {unseenCount}<br/>
-            isNearBottom: {String(isNearBottom)}<br/>
-            visible: {String(!isNearBottom && unseenCount > 0)}
-          </div>
-        )}
       </div>
       
       <div className={styles.inputContainer}>

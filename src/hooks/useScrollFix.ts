@@ -9,12 +9,14 @@ import { useEffect, useRef, useCallback, useState } from 'react';
  * @param messages - Array of messages to monitor
  * @param enabled - Whether auto-scroll is enabled (default: true)
  * @param threshold - Distance from bottom to consider "near bottom" (default: 100px)
+ * @param shouldCountMessage - Function to determine if a message should be counted as unseen
  * @returns Object with container ref, unseen count, and scroll function
  */
-export const useAutoScrollToBottom = <T extends HTMLElement>(
-  messages: unknown[],
+export const useAutoScrollToBottom = <T extends HTMLElement, M = unknown>(
+  messages: M[],
   enabled: boolean = true,
-  threshold: number = 100
+  threshold: number = 100,
+  shouldCountMessage?: (message: M) => boolean
 ) => {
   const containerRef = useRef<T>(null);
   const [unseenCount, setUnseenCount] = useState(0);
@@ -94,7 +96,10 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
         });
       } else if (messageCountWhenScrolledAwayRef.current !== null) {
         // User is not near bottom and we're tracking unseen messages
-        const unseenMessages = messages.length - messageCountWhenScrolledAwayRef.current;
+        const messagesSinceScrolledAway = messages.slice(messageCountWhenScrolledAwayRef.current);
+        const unseenMessages = shouldCountMessage 
+          ? messagesSinceScrolledAway.filter(shouldCountMessage).length
+          : messagesSinceScrolledAway.length;
         setUnseenCount(Math.max(0, unseenMessages));
       }
     }
