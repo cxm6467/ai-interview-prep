@@ -50,7 +50,7 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: true,
-    chunkSizeWarningLimit: 800, // Reasonable chunk size limit considering PDF.js requirements (in kB)
+    chunkSizeWarningLimit: 1200, // Adjusted for PDF.js worker requirements (in kB)
     rollupOptions: {
       onwarn(warning, warn) {
         // Suppress eval warnings from PDF.js
