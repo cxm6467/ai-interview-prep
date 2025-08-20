@@ -19,7 +19,7 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
   const containerRef = useRef<T>(null);
   const [unseenCount, setUnseenCount] = useState(0);
   const [isNearBottom, setIsNearBottom] = useState(true);
-  const lastSeenCountRef = useRef(0);
+  const messageCountWhenScrolledAwayRef = useRef<number | null>(null);
   
   // Check if user is near bottom of container
   const checkScrollPosition = useCallback(() => {
@@ -32,16 +32,21 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
       container.scrollTop + container.clientHeight >= 
       container.scrollHeight - threshold;
     
+    const wasNearBottom = isNearBottom;
     setIsNearBottom(isNear);
     
-    if (isNear) {
-      // User is at bottom, reset unseen count
+    if (isNear && !wasNearBottom) {
+      // User just scrolled back to bottom, reset everything
       setUnseenCount(0);
-      lastSeenCountRef.current = messages.length;
+      messageCountWhenScrolledAwayRef.current = null;
+    } else if (!isNear && wasNearBottom) {
+      // User just scrolled away from bottom, start tracking from current message count
+      messageCountWhenScrolledAwayRef.current = messages.length;
+      setUnseenCount(0); // Reset count when they first scroll away
     }
     
     return isNear;
-  }, [messages.length, threshold]);
+  }, [isNearBottom, messages.length, threshold]);
   
   // Scroll to bottom function
   const scrollToBottom = useCallback((behavior: 'smooth' | 'auto' = 'smooth') => {
@@ -54,10 +59,10 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
       behavior
     });
     
-    // Reset unseen count when manually scrolling to bottom
+    // Reset unseen count and tracking when manually scrolling to bottom
     setUnseenCount(0);
-    lastSeenCountRef.current = messages.length;
-  }, [messages.length]);
+    messageCountWhenScrolledAwayRef.current = null;
+  }, []);
   
   // Handle new messages
   useEffect(() => {
@@ -67,20 +72,20 @@ export const useAutoScrollToBottom = <T extends HTMLElement>(
     
     const currentNearBottom = checkScrollPosition();
     
-    // If new messages were added
-    if (messages.length > lastSeenCountRef.current) {
+    // If we have new messages
+    if (messages.length > 0) {
       if (currentNearBottom) {
         // User is near bottom, auto-scroll
         requestAnimationFrame(() => {
           scrollToBottom('smooth');
         });
-      } else {
-        // User is not near bottom, increment unseen count
-        const newMessages = messages.length - lastSeenCountRef.current;
-        setUnseenCount(prev => prev + newMessages);
+      } else if (messageCountWhenScrolledAwayRef.current !== null) {
+        // User is not near bottom and we're tracking unseen messages
+        const unseenMessages = messages.length - messageCountWhenScrolledAwayRef.current;
+        setUnseenCount(Math.max(0, unseenMessages));
       }
     }
-  }, [messages, enabled, checkScrollPosition, scrollToBottom]);
+  }, [messages.length, enabled, checkScrollPosition, scrollToBottom]);
   
   // Add scroll event listener to track user scroll position
   useEffect(() => {
