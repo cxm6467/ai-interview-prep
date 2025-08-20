@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Card } from '@atoms/Card';
 import { Button } from '@atoms/Button';
 import { Text } from '@atoms/Text';
+import { SpeechButton } from '@atoms/SpeechButton';
 import { FileUpload } from '@molecules/FileUpload';
 import { DadJoke } from '@molecules/DadJoke';
 import { Footer } from '@organisms/Footer';
@@ -396,7 +397,10 @@ const AppContent = () => {
     // Dashboard View
     return (
         <div className="app">
-            <header className="app-header">
+            <a href="#main-content" className="skip-nav">
+                Skip to main content
+            </a>
+            <header className="app-header" role="banner">
                 <div className="header-content">
                     <div>
                         <Text as="h1" variant="h1" className="logo gradient-text">
@@ -434,7 +438,7 @@ const AppContent = () => {
                     </div>
                 </div>
             </header>
-            <main className="main-content">
+            <div className="main-content">
                 <div className="container">
                     <div className="stats-grid">
                         <Card className="stat-card">
@@ -477,50 +481,73 @@ const AppContent = () => {
                             <div className="label">Questions to Ask</div>
                         </Card>
                     </div>
-                    <div className="nav-tabs">
+                    <nav className="nav-tabs" role="tablist" aria-label="Interview preparation sections">
                         <Button
                             variant={activeTab === 'interview' ? 'primary' : 'ghost'}
                             onClick={() => setActiveTab('interview')}
+                            role="tab"
+                            aria-selected={activeTab === 'interview'}
+                            aria-controls="interview-panel"
                         >
                             💬 Interview Q&A
                         </Button>
                         <Button
                             variant={activeTab === 'chat' ? 'primary' : 'ghost'}
                             onClick={() => setActiveTab('chat')}
+                            role="tab"
+                            aria-selected={activeTab === 'chat'}
+                            aria-controls="chat-panel"
                         >
                             🤖 AI Interview Coach
                         </Button>
                         <Button
                             variant={activeTab === 'presentations' ? 'primary' : 'ghost'}
                             onClick={() => setActiveTab('presentations')}
+                            role="tab"
+                            aria-selected={activeTab === 'presentations'}
+                            aria-controls="presentations-panel"
                         >
                             📈 Presentations
                         </Button>
                         <Button
                             variant={activeTab === 'questions' ? 'primary' : 'ghost'}
                             onClick={() => setActiveTab('questions')}
+                            role="tab"
+                            aria-selected={activeTab === 'questions'}
+                            aria-controls="questions-panel"
                         >
                             💡 Questions to Ask
                         </Button>
                         <Button
                             variant={activeTab === 'skills' ? 'primary' : 'ghost'}
                             onClick={() => setActiveTab('skills')}
+                            role="tab"
+                            aria-selected={activeTab === 'skills'}
+                            aria-controls="skills-panel"
                         >
                             🎯 Skills Analysis
                         </Button>
                         <Button
                             variant={activeTab === 'jokes' ? 'primary' : 'ghost'}
                             onClick={() => setActiveTab('jokes')}
+                            role="tab"
+                            aria-selected={activeTab === 'jokes'}
+                            aria-controls="jokes-panel"
                         >
                             😄 Dad Jokes
                         </Button>
-                    </div>
-                    <div className="content-area">
+                    </nav>
+                    <main id="main-content" className="content-area">
                         {activeTab === 'interview' && (
-                            <div className="content-section">
+                            <section 
+                                id="interview-panel" 
+                                role="tabpanel" 
+                                aria-labelledby="interview-tab"
+                                className="content-section"
+                            >
                                 <div className="content-cards-container">
                                     {interviewQuestions?.map((question) => (
-                                        <div key={question.id} className="content-card question-card">
+                                        <article key={question.id} className="content-card question-card" role="article" aria-labelledby={`question-${question.id}`}>
                                             <div className="question-text">{question.question}</div>
                                             {question.suggestedAnswer && (
                                                 <div className="suggested-answer">
@@ -528,10 +555,19 @@ const AppContent = () => {
                                                     <Text variant="body">{question.suggestedAnswer}</Text>
                                                 </div>
                                             )}
-                                        </div>
+                                            <div className="speech-controls">
+                                                <SpeechButton 
+                                                    text={`${question.question}${question.suggestedAnswer ? `. Suggested Answer: ${question.suggestedAnswer}` : ''}`}
+                                                    size="small"
+                                                    variant="ghost"
+                                                    showLabel={false}
+                                                    className="content-speech-button"
+                                                />
+                                            </div>
+                                        </article>
                                     ))}
                                 </div>
-                            </div>
+                            </section>
                         )}
                         {activeTab === 'skills' && (
                             <div className="content-section">
@@ -650,6 +686,15 @@ const AppContent = () => {
                                                         </li>
                                                     ))}
                                                 </ul>
+                                                <div className="speech-controls">
+                                                    <SpeechButton 
+                                                        text={`${topic.title}. ${topic.bullets.join('. ')}`} 
+                                                        size="small"
+                                                        variant="ghost"
+                                                        showLabel={false}
+                                                        className="content-speech-button"
+                                                    />
+                                                </div>
                                             </div>
                                         ))
                                     ) : (
@@ -681,6 +726,15 @@ const AppContent = () => {
                                                     <div className="rationale-label">Why ask this:</div>
                                                     <Text variant="body" color="secondary">{question.rationale}</Text>
                                                 </div>
+                                                <div className="speech-controls">
+                                                    <SpeechButton 
+                                                        text={`${question.question}. Why ask this: ${question.rationale}`}
+                                                        size="small"
+                                                        variant="ghost"
+                                                        showLabel={false}
+                                                        className="content-speech-button"
+                                                    />
+                                                </div>
                                             </div>
                                         ))
                                     ) : (
@@ -698,9 +752,9 @@ const AppContent = () => {
                                 <DadJoke />
                             </div>
                         )}
-                    </div>
+                    </main>
                 </div>
-            </main>
+            </div>
             <Footer />
             <CookieConsent />
         </div>

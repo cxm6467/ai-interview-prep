@@ -37,7 +37,13 @@
   background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
 }
 
-/* Removed hover effect from stat cards as they are not clickable */
+/* Ensure no hover effects on stat cards */
+.stat-card:hover {
+  transform: none !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+  border-color: var(--border) !important;
+  background: var(--card-bg) !important;
+}
 
 .stat-card .emoji {
   font-size: 1.3rem;
@@ -159,7 +165,7 @@
 
 @media (max-width: 640px) {
   .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     max-width: 500px;
   }
   
@@ -1027,18 +1033,43 @@
   border-left: 3px solid var(--accent-purple);
 }
 
+/* Speech Controls - positioned at end of content */
+.speech-controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.content-speech-button {
+  opacity: 0.6;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  min-width: auto;
+  transition: opacity 0.2s ease;
+}
+
+.content-speech-button:hover {
+  opacity: 1;
+}
+
 .content-card .question-text {
   font-size: 1.05rem;
   font-weight: 500;
-  margin-bottom: 0.75rem;
   color: var(--text-primary);
+  flex: 1;
 }
+
+/* Removed old topic-header styles - now using speech-controls */
 
 .content-card .topic-title {
   font-size: 1.2rem;
   font-weight: 600;
-  margin-bottom: 1rem;
   color: var(--text-primary);
+  flex: 1;
 }
 
 .content-card .topic-bullets {
@@ -1062,11 +1093,12 @@
   flex-shrink: 0;
 }
 
+/* Removed old answer-header styles - now using speech-controls */
+
 .content-card .answer-label {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -1235,13 +1267,15 @@
   border-left: 3px solid var(--accent-green);
 }
 
+/* Removed old rationale-header styles - now using speech-controls */
+
 .candidate-question-card .rationale-label {
   font-size: 0.875rem;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 0.5rem;
   text-transform: uppercase;
   letter-spacing: 0.025em;
+  flex: 1;
 }
 
 /* Category-specific colors */
@@ -1265,6 +1299,128 @@
   color: var(--accent-red);
 }
 
+/* Dad Joke Speech Controls */
+.joke-content {
+  position: relative;
+}
+
+.joke-speech-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.joke-speech-button {
+  opacity: 0.6;
+  font-size: 0.875rem;
+  padding: 0.25rem 0.5rem;
+  min-width: auto;
+  transition: opacity 0.2s ease;
+}
+
+.joke-speech-button:hover {
+  opacity: 1;
+}
+
+/* Accessibility Improvements */
+
+/* Focus management and keyboard navigation */
+.speech-button:focus,
+.content-speech-button:focus,
+.joke-speech-button:focus {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .content-speech-button,
+  .joke-speech-button {
+    opacity: 1;
+    border: 1px solid currentColor;
+  }
+  
+  .speech-controls {
+    border-top-color: currentColor;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .content-speech-button,
+  .joke-speech-button {
+    transition: none;
+  }
+  
+  .speech-controls {
+    animation: none;
+  }
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip navigation link */
+.skip-nav {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: 4px;
+  border: 2px solid var(--accent-blue);
+  font-weight: 600;
+  z-index: 100;
+  transition: top 0.2s ease;
+}
+
+.skip-nav:focus {
+  top: 6px;
+  outline: none;
+}
+
+/* Enhanced focus indicators for all interactive elements */
+button:focus,
+.nav-tabs button:focus,
+[role="button"]:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+/* Tab navigation improvements */
+.nav-tabs button {
+  position: relative;
+}
+
+.nav-tabs button[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-blue);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
   .content-cards-container,
@@ -1275,5 +1431,14 @@
   .content-card,
   .skills-card-modern {
     padding: 1rem;
+  }
+  
+  .speech-controls {
+    gap: 0.25rem;
+  }
+  
+  .content-speech-button {
+    font-size: 0.8rem;
+    padding: 0.2rem 0.4rem;
   }
 }

@@ -191,6 +191,15 @@ export interface ButtonProps {
   icon?: React.ReactNode;
   className?: string;
   type?: 'button' | 'submit' | 'reset';
+  // Accessibility props
+  role?: string;
+  'aria-selected'?: boolean;
+  'aria-controls'?: string;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
+  tabIndex?: number;
+  title?: string;
+  onKeyDown?: (event: React.KeyboardEvent) => void;
 }
 
 export interface CardProps {

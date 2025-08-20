@@ -28,6 +28,15 @@ interface ButtonProps {
   style?: React.CSSProperties;
   /** Button HTML type attribute */
   type?: 'button' | 'submit' | 'reset';
+  // Accessibility props
+  role?: string;
+  'aria-selected'?: boolean;
+  'aria-controls'?: string;
+  'aria-label'?: string;
+  'aria-labelledby'?: string;
+  tabIndex?: number;
+  title?: string;
+  onKeyDown?: (event: React.KeyboardEvent) => void;
 }
 
 /**
@@ -72,6 +81,14 @@ export const Button: React.FC<ButtonProps> = ({
   className,
   style,
   type = 'button',
+  role,
+  'aria-selected': ariaSelected,
+  'aria-controls': ariaControls,
+  'aria-label': ariaLabel,
+  'aria-labelledby': ariaLabelledby,
+  tabIndex,
+  title,
+  onKeyDown,
 }) => {
   return (
     <button
@@ -85,7 +102,15 @@ export const Button: React.FC<ButtonProps> = ({
       )}
       style={style}
       onClick={onClick}
+      onKeyDown={onKeyDown}
       disabled={disabled}
+      role={role}
+      aria-selected={ariaSelected}
+      aria-controls={ariaControls}
+      aria-label={ariaLabel}
+      aria-labelledby={ariaLabelledby}
+      tabIndex={tabIndex}
+      title={title}
     >
       {icon && <span className={styles.icon}>{icon}</span>}
       <span className={styles.text}>{children}</span>
