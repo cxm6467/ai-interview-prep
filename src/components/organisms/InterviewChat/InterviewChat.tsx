@@ -7,6 +7,7 @@ import { ScrollToBottomIndicator } from '@atoms/ScrollToBottomIndicator';
 import { useAppStore } from '@store/appStore';
 import { AIAnalysisService } from '@services/aiAnalysis';
 import { useAutoScrollToBottom } from '../../../hooks/useScrollFix';
+import type { InterviewQuestion } from '../../../types';
 import styles from './InterviewChat.module.css';
 
 interface ChatMessage {

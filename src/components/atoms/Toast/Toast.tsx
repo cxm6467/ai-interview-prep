@@ -38,6 +38,11 @@ export const Toast: React.FC<ToastProps> = ({
     setShow(isVisible);
   }, [isVisible]);
 
+  const handleClose = useCallback(() => {
+    setShow(false);
+    setTimeout(() => onClose?.(), 300);
+  }, [onClose]);
+
   useEffect(() => {
     if (show && duration > 0) {
       const timer = setTimeout(() => {
@@ -47,11 +52,6 @@ export const Toast: React.FC<ToastProps> = ({
       return () => clearTimeout(timer);
     }
   }, [show, duration, handleClose]);
-
-  const handleClose = useCallback(() => {
-    setShow(false);
-    setTimeout(() => onClose?.(), 300);
-  }, [onClose]);
 
   if (!show) {
     return null;
