@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '../../atoms/Button/Button';
 import { Card } from '../../atoms/Card/Card';
 import { Text } from '../../atoms/Text/Text';
+import { SpeechButton } from '../../atoms/SpeechButton/SpeechButton';
 import { DadJokeService } from '../../../services/dadJokeService';
 
 interface DadJokeProps {
@@ -70,9 +71,22 @@ export const DadJoke: React.FC<DadJokeProps> = ({ className = '' }) => {
           {error ? '😕' : isLoading ? '⏳' : '😄'}
         </div>
         
-        <Text variant="body" align="center" className="joke-text">
-          {joke}
-        </Text>
+        <div className="joke-content">
+          <Text variant="body" align="center" className="joke-text">
+            {joke}
+          </Text>
+          {!isLoading && !error && joke !== 'Ready for a laugh? Click the button below!' && (
+            <div className="joke-speech-container">
+              <SpeechButton 
+                text={joke} 
+                size="small"
+                variant="ghost"
+                showLabel={false}
+                className="joke-speech-button"
+              />
+            </div>
+          )}
+        </div>
         
         {error && (
           <div className="error-message">

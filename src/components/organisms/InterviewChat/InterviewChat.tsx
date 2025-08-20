@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@atoms/Card';
 import { Button } from '@atoms/Button';
 import { Text } from '@atoms/Text';
+import { SpeechButton } from '@atoms/SpeechButton';
 import { ScrollToBottomIndicator } from '@atoms/ScrollToBottomIndicator';
 import { useAppStore } from '@store/appStore';
 import { AIAnalysisService } from '@services/aiAnalysis';
@@ -176,9 +177,20 @@ ${interviewQuestions[nextIndex].question}`,
           >
             <div className={styles.messageContent}>
               <Text variant="body">{message.content}</Text>
-              <Text variant="caption" color="tertiary" className={styles.timestamp}>
-                {message.timestamp.toLocaleTimeString()}
-              </Text>
+              <div className={styles.messageFooter}>
+                <Text variant="caption" color="tertiary" className={styles.timestamp}>
+                  {message.timestamp.toLocaleTimeString()}
+                </Text>
+                {message.type === 'ai' && (
+                  <SpeechButton 
+                    text={message.content} 
+                    size="small"
+                    variant="ghost"
+                    showLabel={false}
+                    className={styles.speechButton}
+                  />
+                )}
+              </div>
             </div>
           </div>
         ))}
