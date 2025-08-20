@@ -125,13 +125,13 @@ async function generateComprehensiveAnalysis(resumeText, jobDescription) {
     console.log('🚀 Starting comprehensive analysis...');
     
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-3.5-turbo-0125', // Latest, fastest version
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: analysisPrompt }
       ],
-      temperature: 0.7,
-      max_tokens: 4000,
+      temperature: 0.3, // Lower temperature for faster, more consistent responses
+      max_tokens: 3500, // Optimized token limit
       response_format: { type: 'json_object' }
     }, {
       timeout: 90000 // 90 second timeout for OpenAI API call
