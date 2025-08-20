@@ -76,7 +76,7 @@ function createSuccessResponse(data) {
 /**
  * Call OpenAI API with error handling and retries
  */
-async function callOpenAI(prompt, maxTokens = 1500, temperature = 0.7) {
+async function callOpenAI(prompt, maxTokens = 1200, temperature = 0.3) {
   if (!openai) {
     if (!apiKey) {
       throw new Error('OpenAI API key is not configured. Please set the OPENAI_API_KEY environment variable in your Netlify site settings.');
@@ -89,7 +89,7 @@ async function callOpenAI(prompt, maxTokens = 1500, temperature = 0.7) {
     console.log('🚀 Calling OpenAI API...');
     
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: 'gpt-3.5-turbo-0125', // Latest, fastest version
       messages: [
         {
           role: 'system',
