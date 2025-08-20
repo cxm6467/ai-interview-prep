@@ -1120,6 +1120,7 @@
   background: var(--color-surface-secondary);
   border-radius: 0.75rem;
   border-left: 3px solid var(--color-primary);
+  color: var(--color-text);
 }
 
 /* Speech Controls - positioned at end of content */
@@ -1187,7 +1188,7 @@
 .content-card .answer-label {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--color-text);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
