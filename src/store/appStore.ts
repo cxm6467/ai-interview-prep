@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { ResumeData, JobDescription, InterviewQuestion, CandidateQuestion, PresentationTopic, ATSScore } from '../types';
+import type { ResumeData, JobDescription, InterviewQuestion, CandidateQuestion, PresentationTopic, ATSScore, ThemeType } from '../types';
 
 interface AppState {
   resumeData: ResumeData | null;
@@ -12,7 +12,7 @@ interface AppState {
   
   isLoading: boolean;
   currentStep: 'upload' | 'analysis' | 'dashboard' | 'interview';
-  theme: 'light' | 'dark';
+  theme: ThemeType;
   
   setResumeData: (data: ResumeData) => void;
   setJobDescription: (data: JobDescription) => void;
@@ -23,6 +23,7 @@ interface AppState {
   setInterviewerRole: (role: string) => void;
   setLoading: (loading: boolean) => void;
   setCurrentStep: (step: 'upload' | 'analysis' | 'dashboard' | 'interview') => void;
+  setTheme: (theme: ThemeType) => void;
   toggleTheme: () => void;
   reset: () => void;
 }
@@ -48,6 +49,7 @@ export const useAppStore = create<AppState>((set) => ({
   setInterviewerRole: (role) => set({ interviewerRole: role }),
   setLoading: (loading) => set({ isLoading: loading }),
   setCurrentStep: (step) => set({ currentStep: step }),
+  setTheme: (theme) => set({ theme }),
   toggleTheme: () => set((state) => ({ 
     theme: state.theme === 'dark' ? 'light' : 'dark' 
   })),

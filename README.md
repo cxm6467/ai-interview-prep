@@ -7,11 +7,13 @@ A comprehensive AI-powered interview preparation application that transforms job
 ## ✨ Features
 
 ### 🎯 Intelligent Interview Coaching
-- **AI Interview Coach** - Practice with an AI that adapts to 8+ different interviewer roles (Technical Lead, Hiring Manager, Recruiter, Program Manager, etc.)
+- **Enhanced AI Interview Coach** - Practice with an AI that adapts to 8+ different interviewer roles (Technical Lead, Hiring Manager, Recruiter, Program Manager, etc.)
+- **Context-Aware Responses** - AI leverages your complete analysis data (ATS score, strengths, improvements, job details) for personalized feedback
 - **Personalized Questions** - AI generates interview questions based on your specific resume and target job description
 - **Strategic Questions to Ask** - AI-generated questions candidates should ask interviewers, categorized by timing and purpose
-- **Real-time Feedback** - Get instant, role-specific suggestions to improve your answers
-- **Interactive Chat Interface** - Natural conversation flow with typing indicators and smooth UX
+- **Real-time Feedback** - Get instant, role-specific suggestions that consider your analyzed strengths and improvement areas
+- **Fully Themed Chat Interface** - Modern chat UI that adapts to all 9 themes with smooth animations and responsive design
+- **Current Analysis Integration** - Shows existing analysis overview on upload page when available (not on first load)
 
 ### 📊 Advanced ATS & Skills Analysis
 - **Smart ATS Score Calculation** - Advanced algorithm analyzes how well your resume matches job requirements (0-100 score)
@@ -27,7 +29,7 @@ A comprehensive AI-powered interview preparation application that transforms job
 - **Export-Ready Format** - Topics formatted for easy presentation preparation
 
 ### 🚀 Modern User Experience
-- **Dual Theme Support** - Beautiful light and dark themes with smooth transitions
+- **9 Comprehensive Themes** - Complete theme system with Standard (Light/Dark), Popular (Ocean Blue, Royal Purple, Forest Green, Warm Sunset, Cool Mint), and Accessible (High Contrast/Low Contrast) themes with smooth transitions
 - **Mobile-First Design** - Fully responsive interface optimized for all devices
 - **5-Tab Dashboard** - Comprehensive interview prep with Questions, Coaching, Presentations, Strategic Questions, and Skills Analysis
 - **Progressive Web App** - Fast loading, offline-capable, and app-like experience
@@ -110,6 +112,46 @@ Netlify dev automatically handles both the frontend and serverless functions wit
 
 ## 🎨 Design System
 
+### Theme System
+The application features a comprehensive 9-theme system designed for accessibility and user preference:
+
+**Standard Themes:**
+- **Light** - Clean white background with dark text
+- **Dark** - Dark background with light text (default)
+
+**Popular Themes:**
+- **Ocean Blue** - Professional blue tones for corporate environments
+- **Royal Purple** - Modern purple gradients for creative workflows
+- **Forest Green** - Natural green tones for calm focus
+- **Warm Sunset** - Orange and yellow tones for energetic sessions
+- **Cool Mint** - Blue and cyan tones for refreshing clarity
+
+**Accessible Themes:**
+- **High Contrast** - Maximum contrast for better visibility
+- **Low Contrast** - Reduced contrast for light sensitivity
+
+All themes feature:
+- **Semantic CSS Variables**: Consistent theming across all elements using modern CSS custom properties
+- **Zero Static Colors**: All components use theme variables - no hardcoded colors anywhere in the codebase
+- **Smooth Transitions**: 0.3s cubic-bezier transitions for seamless theme switching
+- **Universal Coverage**: Themes affect ALL application elements including:
+  - Page backgrounds (html, body, root)
+  - Content containers and cards
+  - Form elements (textareas, inputs, buttons)
+  - Navigation and header elements
+  - AI chat interface (messages, input, scrollbars)
+  - Loading overlays and spinners
+  - Interactive elements (buttons, links, dropdowns)
+  - Skill bubbles and status indicators
+  - Toast notifications and alerts
+  - File upload components
+  - All borders, shadows, and accents
+- **WCAG 2.1 Accessibility**: All themes meet accessibility standards with proper contrast ratios and verified legibility across all components
+- **Modern UI**: Dropdown selector with visual theme previews and smooth animations
+- **Persistent Storage**: Theme preference saved and restored across sessions
+- **Current Analysis Integration**: Smart detection and display of existing analysis data
+
+### Color-Coded Content System
 The application features a cohesive color-coded design system:
 
 - **🔵 Blue**: Strengths and positive attributes, role-based questions

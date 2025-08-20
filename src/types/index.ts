@@ -9,6 +9,40 @@ import type { ReactNode, ElementType, JSX } from 'react';
  * @fileoverview Type definitions for AI Interview Prep application
  */
 
+// ==================== THEME INTERFACES ====================
+
+/**
+ * Available theme types for the application
+ */
+export type ThemeType = 
+  | 'light' 
+  | 'dark' 
+  | 'blue' 
+  | 'purple' 
+  | 'green' 
+  | 'high-contrast' 
+  | 'low-contrast' 
+  | 'warm' 
+  | 'cool';
+
+/**
+ * Theme configuration interface
+ */
+export interface Theme {
+  /** Unique identifier for the theme */
+  id: ThemeType;
+  /** Display name for the theme */
+  name: string;
+  /** Description of the theme */
+  description: string;
+  /** Category of the theme */
+  category: 'standard' | 'accessible' | 'popular';
+  /** CSS class name to apply */
+  className: string;
+  /** Whether this is an accessible theme */
+  accessible: boolean;
+}
+
 // ==================== CORE DATA INTERFACES ====================
 
 /**

@@ -23,7 +23,15 @@ export const InterviewChat: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const { interviewQuestions, resumeData, interviewerRole } = useAppStore();
+  const { 
+    interviewQuestions, 
+    resumeData, 
+    interviewerRole, 
+    jobDescription,
+    atsScore,
+    presentationTopics,
+    candidateQuestions 
+  } = useAppStore();
   
   // Use the enhanced auto-scroll hook with unseen message tracking
   // Only count AI messages as "unseen" (not user's own messages)
@@ -82,7 +90,14 @@ Take your time to think about your answer, and I'll provide feedback to help you
           currentQuestion.question, // Pass the question text instead of the object
           resumeData,
           conversationHistory,
-          interviewerRole
+          interviewerRole,
+          {
+            jobDescription,
+            atsScore,
+            allQuestions: interviewQuestions,
+            presentationTopics,
+            candidateQuestions
+          }
         );
       } else {
         // Fallback to contextual mock responses
