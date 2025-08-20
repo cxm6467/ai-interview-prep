@@ -12,6 +12,13 @@ interface ParsedDataCache {
   jobDescription?: CacheItem<JobDescription>;
 }
 
+export interface CacheAvailability {
+  hasResume: boolean;
+  hasJobDescription: boolean;
+  resumeFileName?: string;
+  jobDescriptionPreview?: string;
+}
+
 export class CacheService {
   private static readonly CACHE_KEY = 'interview_prep_cache';
   private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
@@ -151,5 +158,47 @@ export class CacheService {
       jobCached: !!cache.jobDescription,
       cacheSize: `${sizeInKB} KB`
     };
+  }
+
+  /**
+   * Check what cached content is available for the given inputs
+   * @param resumeContent - The resume file content to check
+   * @param jobContent - The job description content to check
+   * @returns Object indicating what cached content is available
+   */
+  static checkCacheAvailability(resumeContent?: string, jobContent?: string): CacheAvailability {
+    if (!this.hasConsent()) {
+      return { hasResume: false, hasJobDescription: false };
+    }
+
+    const cache = this.getCache();
+    const result: CacheAvailability = {
+      hasResume: false,
+      hasJobDescription: false
+    };
+
+    // Check resume cache
+    if (resumeContent && cache.resume) {
+      const resumeHash = this.generateHash(resumeContent);
+      if (cache.resume.hash === resumeHash) {
+        result.hasResume = true;
+        // Extract filename from resume data if available
+        result.resumeFileName = cache.resume.data.name || 'Resume';
+      }
+    }
+
+    // Check job description cache
+    if (jobContent && cache.jobDescription) {
+      const jobHash = this.generateHash(jobContent);
+      if (cache.jobDescription.hash === jobHash) {
+        result.hasJobDescription = true;
+        // Extract preview from job description
+        result.jobDescriptionPreview = cache.jobDescription.data.title || 
+          cache.jobDescription.data.description?.substring(0, 100) || 
+          jobContent.substring(0, 100);
+      }
+    }
+
+    return result;
   }
 }
