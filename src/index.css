@@ -607,3 +607,14 @@ html {
 *, *::before, *::after {
   color: inherit;
 }
+
+/* Explicitly set text colors for light theme to prevent white text issues */
+.theme-light *, .theme-light *::before, .theme-light *::after,
+[data-theme="light"] *, [data-theme="light"] *::before, [data-theme="light"] *::after {
+  color: inherit;
+}
+
+/* Force text elements to use theme colors in light mode */
+.theme-light, [data-theme="light"] {
+  color: var(--color-text) !important;
+}
