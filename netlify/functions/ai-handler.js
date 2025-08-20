@@ -9,12 +9,19 @@ const { OpenAI } = require('openai');
 
 // Initialize OpenAI client
 let openai;
-try {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-} catch (error) {
-  console.error('Failed to initialize OpenAI client:', error);
+const apiKey = process.env.OPENAI_API_KEY;
+
+if (!apiKey) {
+  console.error('❌ OPENAI_API_KEY environment variable is not set');
+} else {
+  try {
+    openai = new OpenAI({
+      apiKey: apiKey,
+    });
+    console.log('✅ OpenAI client initialized successfully');
+  } catch (error) {
+    console.error('❌ Failed to initialize OpenAI client:', error);
+  }
 }
 
 /**
@@ -71,7 +78,11 @@ function createSuccessResponse(data) {
  */
 async function callOpenAI(prompt, maxTokens = 1500, temperature = 0.7) {
   if (!openai) {
-    throw new Error('OpenAI client not initialized. Please check your API key.');
+    if (!apiKey) {
+      throw new Error('OpenAI API key is not configured. Please set the OPENAI_API_KEY environment variable in your Netlify site settings.');
+    } else {
+      throw new Error('OpenAI client not initialized. Please check your API key configuration.');
+    }
   }
 
   try {
