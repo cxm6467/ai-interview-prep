@@ -35,12 +35,17 @@ export const ScrollToBottomIndicator: React.FC<ScrollToBottomIndicatorProps> = (
     return null;
   }
 
+  const handleClick = () => {
+    console.log('ScrollToBottomIndicator clicked, unseenCount:', unseenCount);
+    onScrollToBottom();
+  };
+
   return (
     <div className={`${styles.container} ${className}`}>
       <Button
         variant="primary"
         size="medium"
-        onClick={onScrollToBottom}
+        onClick={handleClick}
         className={styles.button}
         aria-label={`Scroll to bottom - ${unseenCount} new message${unseenCount === 1 ? '' : 's'}`}
       >
