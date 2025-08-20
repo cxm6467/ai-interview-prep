@@ -265,7 +265,7 @@ const AppContent = () => {
     if (currentStep === 'upload') {
         return (
             <>
-                {isAnalyzing && <LoadingOverlay message={`Analyzing your resume and job description${interviewerRole ? ` for interview with ${formatInterviewerRole(interviewerRole)}` : ''}...`} />}
+                {isAnalyzing && <LoadingOverlay message={`Analyzing your resume and job description${interviewerRole ? ` for an interview with ${formatInterviewerRole(interviewerRole)}` : ''}...`} />}
                 <div className="app">
                     <header className="app-header">
                         <div className="header-content">

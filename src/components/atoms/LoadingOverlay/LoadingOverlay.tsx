@@ -14,7 +14,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   showJokes = true,
   cycleInterval = 5000 // 5 seconds
 }) => {
-  const [currentJoke, setCurrentJoke] = useState<string>('Loading jokes...');
+  const [currentJoke, setCurrentJoke] = useState<string>('Loading a joke...');
   const [jokeIndex, setJokeIndex] = useState(0);
   const [prefetchedJokes, setPrefetchedJokes] = useState<string[]>([]);
 

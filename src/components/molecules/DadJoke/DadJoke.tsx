@@ -113,7 +113,7 @@ export const DadJoke: React.FC<DadJokeProps> = ({ className = '' }) => {
             className={`action-button ${isLoading ? 'loading' : ''}`}
             style={{ backgroundColor: '#22c55e', borderColor: '#22c55e' }}
           >
-            {isLoading ? 'Loading...' : 'Get A Joke'}
+            {isLoading ? 'Loading...' : 'Get a Joke'}
           </Button>
           
           {message && !error && (
