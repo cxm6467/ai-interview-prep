@@ -197,6 +197,25 @@ ${interviewQuestions[nextIndex].question}`,
           isVisible={!isNearBottom && unseenCount > 0}
           onScrollToBottom={scrollToBottom}
         />
+        
+        {/* Debug info - remove later */}
+        {process.env.NODE_ENV === 'development' && (
+          <div style={{ 
+            position: 'absolute', 
+            top: '10px', 
+            right: '10px', 
+            background: 'rgba(0,0,0,0.8)', 
+            color: 'white', 
+            padding: '5px', 
+            fontSize: '12px',
+            borderRadius: '4px',
+            zIndex: 1000 
+          }}>
+            unseenCount: {unseenCount}<br/>
+            isNearBottom: {String(isNearBottom)}<br/>
+            visible: {String(!isNearBottom && unseenCount > 0)}
+          </div>
+        )}
       </div>
       
       <div className={styles.inputContainer}>
