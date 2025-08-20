@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card } from '@atoms/Card';
 import { Button } from '@atoms/Button';
 import { Text } from '@atoms/Text';
+import { ScrollToBottomIndicator } from '@atoms/ScrollToBottomIndicator';
 import { useAppStore } from '@store/appStore';
 import { AIAnalysisService } from '@services/aiAnalysis';
 import { useAutoScrollToBottom } from '../../../hooks/useScrollFix';
@@ -23,8 +24,9 @@ export const InterviewChat: React.FC = () => {
   
   const { interviewQuestions, resumeData, interviewerRole } = useAppStore();
   
-  // Use the auto-scroll hook to scroll to bottom when new messages are added
-  const messagesContainerRef = useAutoScrollToBottom<HTMLDivElement>(messages);
+  // Use the enhanced auto-scroll hook with unseen message tracking
+  const { containerRef: messagesContainerRef, unseenCount, isNearBottom, scrollToBottom } = 
+    useAutoScrollToBottom<HTMLDivElement>(messages);
   
   useEffect(() => {
     // Initialize with welcome message and first question
@@ -188,6 +190,13 @@ ${interviewQuestions[nextIndex].question}`,
         )}
         
         <div ref={messagesEndRef} />
+        
+        {/* Scroll to bottom indicator for unseen messages */}
+        <ScrollToBottomIndicator
+          unseenCount={unseenCount}
+          isVisible={!isNearBottom && unseenCount > 0}
+          onScrollToBottom={scrollToBottom}
+        />
       </div>
       
       <div className={styles.inputContainer}>
