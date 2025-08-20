@@ -37,14 +37,14 @@ const DadJoke = lazyLoad<DadJokeProps>(
 // Define route types
 export interface RouteConfig {
   path: string;
-  component: ComponentType<any>;
+  component: ComponentType<Record<string, unknown>>;
   exact?: boolean;
   requiresAuth?: boolean;
 }
 
 // Create a wrapper component for the home page
 const HomePage: FC = () => {
-  const handleFileUpload = (files: File[]) => {
+  const handleFileUpload = (_files: File[]) => {
     // Files uploaded
     // Handle file upload logic here
   };

@@ -277,6 +277,14 @@ We welcome contributions! Please see our [contribution guidelines](https://githu
 
 This project is open source and available under the [MIT License](LICENSE).
 
+### Attribution
+
+This project includes AI-generated code and assistance from Claude (Anthropic). All AI contributions have been reviewed and tested for production use. The codebase is designed to be educational and demonstrates modern React/TypeScript patterns and best practices.
+
+### Third-Party Licenses
+
+This software includes third-party packages with their own licenses. Please refer to the package.json file and node_modules directory for complete license information for all dependencies.
+
 ## 🔗 Connect & Follow
 
 ### Developer Links
@@ -298,6 +306,8 @@ Created with ❤️ by Chris Marasco - Follow for more innovative projects!
 - [x] **Development Experience** - Unified Netlify dev server and improved routing
 - [x] **Persistent localStorage Caching** - Cross-session joke storage with 7-day expiration
 - [x] **Production-Ready Logging** - Clean console output with professional error handling
+- [x] **Open Source License** - MIT License with proper attribution for AI-generated code
+- [x] **Console Log Cleanup** - Removed non-essential warning logs for cleaner production experience
 
 ### Phase 1: Enhanced User Experience
 - [ ] **Interview Recording & Playback** - Record practice sessions for self-review

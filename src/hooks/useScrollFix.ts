@@ -103,7 +103,7 @@ export const useAutoScrollToBottom = <T extends HTMLElement, M = unknown>(
         setUnseenCount(Math.max(0, unseenMessages));
       }
     }
-  }, [messages.length, enabled, checkScrollPosition, scrollToBottom]);
+  }, [messages.length, messages, enabled, checkScrollPosition, scrollToBottom, shouldCountMessage]);
   
   // Add scroll event listener to track user scroll position
   useEffect(() => {

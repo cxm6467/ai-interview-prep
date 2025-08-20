@@ -128,7 +128,6 @@ export const getAvailableVoices = () => {
  */
 export const speakText = (text: string, options: SpeechOptions = {}): void => {
   if (!isTTSSupported()) {
-    console.warn('Text-to-speech not supported in this browser');
     return;
   }
 
