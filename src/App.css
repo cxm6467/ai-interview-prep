@@ -1132,34 +1132,34 @@
 }
 
 .skills-card-icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 0.875rem;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+  font-size: 1.5rem;
+  line-height: 1;
+  background: none !important;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .skills-card-icon.strengths {
-  background: var(--accent-green);
-  color: white;
+  color: var(--accent-green);
 }
 
 .skills-card-icon.improvements {
-  background: var(--accent-orange);
-  color: white;
+  color: var(--accent-orange);
 }
 
 .skills-card-icon.matches {
-  background: var(--accent-blue);
-  color: white;
+  color: var(--accent-blue);
 }
 
 .skills-card-icon.missing {
-  background: #ef4444;
-  color: white;
+  color: #ef4444;
 }
 
 .skills-list-modern {
