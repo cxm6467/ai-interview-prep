@@ -1,8 +1,12 @@
 {
   "name": "netlify-functions",
   "version": "1.0.0",
-  "main": "ai-handler.js",
+  "description": "Netlify Functions for AI Interview Prep",
+  "main": "index.js",
   "dependencies": {
-    "openai": "^4.0.0"
+    "openai": "^5.12.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

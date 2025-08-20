@@ -13,7 +13,7 @@ interface ButtonProps {
   /** Click handler function */
   onClick?: () => void;
   /** Visual style variant */
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'tertiary' | 'ghost';
   /** Size of the button */
   size?: 'small' | 'medium' | 'large';
   /** Whether the button should take full width of its container */
@@ -24,6 +24,8 @@ interface ButtonProps {
   icon?: React.ReactNode;
   /** Additional CSS classes */
   className?: string;
+  /** Inline styles */
+  style?: React.CSSProperties;
   /** Button HTML type attribute */
   type?: 'button' | 'submit' | 'reset';
 }
@@ -68,6 +70,7 @@ export const Button: React.FC<ButtonProps> = ({
   disabled = false,
   icon,
   className,
+  style,
   type = 'button',
 }) => {
   return (
@@ -80,6 +83,7 @@ export const Button: React.FC<ButtonProps> = ({
         fullWidth && styles.fullWidth,
         className
       )}
+      style={style}
       onClick={onClick}
       disabled={disabled}
     >

@@ -1,44 +1,32 @@
 [build]
-  command = "npm install && npm run lint && npm run build"
+  command = "npm run build"
   publish = "dist"
-  functions = "netlify/functions"
-
-[build.environment]
-  # Disable secrets scanning for build output
-  SECRETS_SCAN_ENABLED = "false"
-  # Specify Node.js version
-  NODE_VERSION = "20.0.0"
-
-[context.production.environment]
-  NODE_VERSION = "20.0.0"
-
-[context.deploy-preview.environment]
-  NODE_VERSION = "20.0.0"
 
 [functions]
+  directory = "netlify/functions"
   node_bundler = "esbuild"
-  external_node_modules = ["openai"]
-  included_files = ["netlify/functions/**/*.js"]
 
-# Security headers
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://icanhazdadjoke.com https://api.openai.com; frame-src 'self' https://www.youtube.com;"
-
-# API routes
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
-  force = true
 
-# SPA fallback
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+[dev]
+  framework = "vite"
+  command = "npm run dev"
+  functionsPort = 8888
+  publish = "dist"
+
+[context.production.environment]
+  NODE_ENV = "production"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "development"
+
+[context.branch-deploy.environment]
+  NODE_ENV = "development"

@@ -14,7 +14,10 @@ export default defineConfig({
   },
   esbuild: {
     // Ignore eval warnings from PDF.js
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+    logOverride: { 
+      'this-is-undefined-in-esm': 'silent',
+      'eval': 'silent'
+    }
   },
   resolve: {
     alias: {
@@ -55,13 +58,25 @@ export default defineConfig({
     outDir: 'dist',
     emptyOutDir: true,
     sourcemap: true,
-    chunkSizeWarningLimit: 1000, // Increase chunk size warning limit (in kB)
+    chunkSizeWarningLimit: 1500, // Increase chunk size warning limit for PDF.js (in kB)
     rollupOptions: {
+      onwarn(warning, warn) {
+        // Suppress eval warnings from PDF.js
+        if (warning.code === 'EVAL' && warning.id?.includes('pdfjs-dist')) {
+          return;
+        }
+        warn(warning);
+      },
       output: {
         manualChunks: (id) => {
-          // Handle PDF.js worker separately
-          if (id.includes('pdf.worker.entry')) {
-            return 'pdf.worker';
+          // Handle PDF.js worker separately (largest chunk)
+          if (id.includes('pdf.worker.entry') || id.includes('pdf.worker.js')) {
+            return 'pdf-worker';
+          }
+          
+          // Split PDF.js main library 
+          if (id.includes('pdfjs-dist') && !id.includes('pdf.worker')) {
+            return 'pdf-lib';
           }
           
           // Split node_modules into separate chunks
@@ -72,14 +87,20 @@ export default defineConfig({
             if (id.includes('@radix-ui')) {
               return 'vendor-radix';
             }
-            if (id.includes('pdfjs-dist')) {
-              return 'pdf-worker';
+            if (id.includes('react-icons')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('zustand')) {
+              return 'vendor-store';
             }
             return 'vendor-other';
           }
           
-          // Split components into separate chunks
+          // Split components into separate chunks based on usage patterns
           if (id.includes('/components/')) {
+            if (id.includes('/organisms/InterviewChat')) {
+              return 'chunk-chat'; // Lazy loaded, separate chunk
+            }
             if (id.includes('/organisms/')) {
               return 'chunk-organisms';
             }

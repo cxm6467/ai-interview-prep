@@ -31,6 +31,8 @@ A comprehensive AI-powered interview preparation application that transforms job
 - **Progressive Web App** - Fast loading, offline-capable, and app-like experience
 - **Accessibility First** - WCAG 2.1 compliant with screen reader support and keyboard navigation
 - **Smart Caching** - Intelligent caching system reduces API calls and improves performance
+- **Chat-Style Interface** - Modern card design with asymmetric border radius and intuitive layouts
+- **Optimized Keyword Display** - Smart wrapping skill bubbles with proper container isolation
 
 ### 🎭 Stress Relief & Engagement
 - **Dad Jokes Integration** - Lighten the mood with family-friendly humor during prep sessions
@@ -55,7 +57,8 @@ A comprehensive AI-powered interview preparation application that transforms job
 ### Development & Deployment
 - **Development**: Hot module replacement, TypeScript strict mode, ESLint + Prettier
 - **Deployment**: Netlify with automatic deployments and edge optimization
-- **Performance**: Code splitting, lazy loading, and progressive enhancement
+- **Performance**: Advanced code splitting, lazy loading, and optimized chunk sizes (<1.5MB)
+- **Bundle Optimization**: Manual chunking with PDF.js worker separation and vendor splitting
 - **Security**: Environment variables, CORS protection, and input sanitization
 
 ## 🛠️ Getting Started
@@ -83,12 +86,25 @@ npm install
 VITE_OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-4. Start the development server:
+4. Start the development servers:
+
+**For full AI functionality (with Netlify functions):**
+```bash
+# Terminal 1: Start Netlify functions
+netlify functions:serve --port 8888
+
+# Terminal 2: Start Vite dev server
+npm run dev
+```
+
+**For mock data development:**
 ```bash
 npm run dev
 ```
 
 5. Open [http://localhost:5173](http://localhost:5173) in your browser
+
+The application will automatically proxy API requests to the Netlify functions during development.
 
 ## 🎨 Design System
 
@@ -112,23 +128,27 @@ src/
 │   │   ├── Card/                # Container component
 │   │   ├── Text/                # Typography component
 │   │   ├── LoadingOverlay/      # Loading states
-│   │   └── SkillBubble/         # Skill tags with variants
+│   │   └── SkillBubble/         # Skill tags with optimized wrapping
 │   ├── molecules/                # Composite components
 │   │   ├── FileUpload/          # Drag-and-drop file uploader
 │   │   ├── DadJoke/             # Humor integration
 │   │   └── CookieConsent/       # GDPR compliance
 │   └── organisms/                # Complex, feature-rich components
-│       ├── InterviewChat/       # AI coaching interface
+│       ├── InterviewChat/       # AI coaching interface (lazy loaded)
 │       └── Footer/              # Social links and info
 ├── services/                     # Business logic layer
-│   ├── aiAnalysis.ts           # OpenAI integration
+│   ├── aiAnalysis.ts           # OpenAI integration with timeout handling
 │   ├── cacheService.ts         # Performance optimization
-│   └── documentParser.ts       # File processing
+│   └── documentParser.ts       # PDF/DOCX file processing
 ├── store/                        # State management
 │   └── appStore.ts             # Zustand store configuration
 ├── types/                        # TypeScript definitions
 │   └── index.ts                # Comprehensive type system
-└── hooks/                        # Custom React hooks (future)
+├── utils/                        # Utility functions
+│   └── lazyLoad.tsx            # Component lazy loading utilities
+└── netlify/functions/            # Serverless backend
+    ├── ai-handler.js           # OpenAI API proxy with CORS
+    └── package.json            # Function dependencies
 ```
 
 ### File Naming Conventions
@@ -156,8 +176,15 @@ The app includes GDPR-compliant cookie consent for caching user data locally. Al
 1. Connect your GitHub repository to Netlify
 2. Set build command: `npm run build`
 3. Set publish directory: `dist`
-4. Add environment variables in Netlify dashboard
+4. Add environment variables in Netlify dashboard:
+   - `OPENAI_API_KEY`: Your OpenAI API key
 5. Deploy!
+
+**Optimized Build Features:**
+- Advanced chunk splitting with PDF.js worker separation
+- Lazy loading for InterviewChat component
+- Gzip compression and edge optimization
+- Clean build output with no warnings
 
 ### Other Platforms
 

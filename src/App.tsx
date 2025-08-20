@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Card } from '@atoms/Card';
 import { Button } from '@atoms/Button';
 import { Text } from '@atoms/Text';
 import { FileUpload } from '@molecules/FileUpload';
 import { DadJoke } from '@molecules/DadJoke';
-import { InterviewChat } from '@organisms/InterviewChat';
 import { Footer } from '@organisms/Footer';
 import { DocumentParser } from '@/services/documentParser';
 import { AIAnalysisService } from '@/services/aiAnalysis';
 import { CacheService } from '@/services/cacheService';
 import { useAppStore } from '@/store/appStore';
-import { FiSun, FiMoon, FiUpload, FiFileText, FiChevronRight } from 'react-icons/fi';
+import { FiSun, FiMoon, FiUpload, FiFileText } from 'react-icons/fi';
 import { LoadingOverlay } from './components/atoms/LoadingOverlay/LoadingOverlay';
 import { SkillBubble } from './components/atoms/SkillBubble';
 import { CookieConsent } from './components/molecules/CookieConsent';
 import './App.css';
+
+// Lazy load heavy components
+const InterviewChat = lazy(() => import('@organisms/InterviewChat').then(module => ({
+  default: module.InterviewChat
+})));
 
 /**
  * Main Application Component
@@ -62,6 +66,24 @@ const App = () => {
     useEffect(() => {
         document.body.setAttribute('data-theme', theme);
     }, [theme]);
+
+    /**
+     * Formats interviewer role for display in loading message
+     */
+    const formatInterviewerRole = (role: string): string => {
+        const roleMap: Record<string, string> = {
+            'recruiter': 'Recruiter',
+            'hiring-manager': 'Hiring Manager',
+            'tech-lead': 'Technical Lead',
+            'program-manager': 'Program Manager',
+            'product-manager': 'Product Manager',
+            'team-member': 'Team Member',
+            'director': 'Director',
+            'cto': 'CTO',
+            'other': 'Other'
+        };
+        return roleMap[role] || role;
+    };
 
     /**
      * Handles resume file upload
@@ -184,7 +206,7 @@ const App = () => {
     if (currentStep === 'upload') {
         return (
             <>
-                {isAnalyzing && <LoadingOverlay message="Analyzing your resume and job description..." />}
+                {isAnalyzing && <LoadingOverlay message={`Analyzing your resume and job description${interviewerRole ? ` for interview with ${formatInterviewerRole(interviewerRole)}` : ''}...`} />}
                 <div className="app">
                     <header className="app-header">
                         <div className="header-content">
@@ -230,19 +252,27 @@ const App = () => {
                                     <FiFileText className="icon" /> Job Description
                                 </Text>
                                 <div className="job-input-container">
-                                    <textarea
-                                        className="job-textarea"
-                                        placeholder="📄 Paste job URL or description here..."
-                                        value={jobInput}
-                                        onChange={(e) => {
-                                            setJobInput(e.target.value);
-                                            if (e.target.value && jobFile) {
-                                                setJobFile(null); // Clear file when typing
-                                            }
-                                        }}
-                                        rows={4}
-                                        disabled={!!jobFile}
-                                    />
+                                    <div className="paste-section">
+                                        <Text as="h3" variant="h3" className="subsection-header">
+                                            📝 Paste Job Description
+                                        </Text>
+                                        <Text variant="small" color="secondary" className="subsection-description">
+                                            Copy and paste the job description text or URL below
+                                        </Text>
+                                        <textarea
+                                            className="job-textarea"
+                                            placeholder="Paste job description text or URL here..."
+                                            value={jobInput}
+                                            onChange={(e) => {
+                                                setJobInput(e.target.value);
+                                                if (e.target.value && jobFile) {
+                                                    setJobFile(null); // Clear file when typing
+                                                }
+                                            }}
+                                            rows={4}
+                                            disabled={!!jobFile}
+                                        />
+                                    </div>
                                     {jobFile && (
                                         <div className="file-preview">
                                             <FiFileText className="file-icon" />
@@ -257,36 +287,37 @@ const App = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="relative my-8">
-                                    <div className="absolute inset-0 flex items-center">
-                                        <div className="w-full border-t border-gray-300"></div>
+                                <div className="stylish-hr-or"></div>
+                                <div className="upload-section">
+                                    <div className="upload-subsection">
+                                        <Text as="h3" variant="h3" className="subsection-header">
+                                            📄 Upload Job Description File
+                                        </Text>
+                                        <Text variant="small" color="secondary" className="subsection-description">
+                                            Upload a PDF, DOC, DOCX, or TXT file containing the job description
+                                        </Text>
+                                        {!jobInput.trim() && (
+                                            <FileUpload
+                                                onDrop={handleJobFileUpload}
+                                                accept={{
+                                                    'application/pdf': ['.pdf'],
+                                                    'application/msword': ['.doc'],
+                                                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+                                                    'text/plain': ['.txt']
+                                                }}
+                                                maxFiles={1}
+                                                label="💼 Drop files here or click to browse"
+                                                description="PDF, DOC, DOCX, TXT files up to 5MB"
+                                            />
+                                        )}
+                                        {jobInput.trim() && (
+                                            <div className="upload-disabled-message">
+                                                <Text variant="small" color="secondary" className="text-center">
+                                                    File upload disabled while text is entered. Clear the text above to upload a file instead.
+                                                </Text>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="relative flex justify-center text-sm">
-                                        <span className="bg-white px-4 text-gray-500 font-medium">or</span>
-                                    </div>
-                                </div>
-                                <div>
-                                    {!jobInput.trim() && (
-                                        <FileUpload
-                                            onDrop={handleJobFileUpload}
-                                            accept={{
-                                                'application/pdf': ['.pdf'],
-                                                'application/msword': ['.doc'],
-                                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-                                                'text/plain': ['.txt']
-                                            }}
-                                            maxFiles={1}
-                                            label="💼 Upload job description"
-                                            description="PDF, DOC, DOCX, TXT files up to 5MB"
-                                        />
-                                    )}
-                                    {jobInput.trim() && (
-                                        <div className="p-4 bg-gray-100 rounded-lg border-2 border-dashed border-gray-300">
-                                            <Text variant="small" color="secondary" className="text-center">
-                                                File upload disabled while text is entered. Clear the text above to upload a file instead.
-                                            </Text>
-                                        </div>
-                                    )}
                                 </div>
                             </Card>
 
@@ -299,7 +330,7 @@ const App = () => {
                                         className="job-textarea"
                                         value={interviewerRole}
                                         onChange={(e) => setInterviewerRole(e.target.value)}
-                                        style={{ height: '44px', padding: '8px 12px', resize: 'none' }}
+                                        style={{ height: '44px', padding: '4px 12px', resize: 'none' }}
                                     >
                                         <option value="">Select interviewer role (optional)</option>
                                         <option value="recruiter">Recruiter / HR Representative</option>
@@ -338,7 +369,8 @@ const App = () => {
                             </div>
                         )}
 
-                        <div className="text-center">
+                        <div className="dad-joke-section">
+                            <div className="stylish-hr"></div>
                             <DadJoke />
                         </div>
                     </main>
@@ -461,151 +493,146 @@ const App = () => {
                     <div className="content-area">
                         {activeTab === 'interview' && (
                             <div className="content-section">
-                                <div className="interview-questions">
+                                <div className="content-cards-container">
                                     {interviewQuestions?.map((question) => (
-                                        <Card key={question.id} className="question-card">
-                                            <Text variant="body" className="mb-6">{question.question}</Text>
+                                        <div key={question.id} className="content-card question-card">
+                                            <div className="question-text">{question.question}</div>
                                             {question.suggestedAnswer && (
                                                 <div className="suggested-answer">
-                                                    <Text variant="small" color="secondary" className="py-2">Suggested Answer:</Text>
+                                                    <div className="answer-label">Suggested Answer:</div>
                                                     <Text variant="body">{question.suggestedAnswer}</Text>
                                                 </div>
                                             )}
-                                        </Card>
+                                        </div>
                                     ))}
                                 </div>
                             </div>
                         )}
                         {activeTab === 'skills' && (
                             <div className="content-section">
-                                <div className="skills-analysis grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-                                    <Card className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                                                <span className="text-white text-sm font-bold">✓</span>
+                                <div className="skills-analysis-modern">
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.25rem' }}>
+                                        <div className="skills-card-modern">
+                                            <div className="skills-card-header">
+                                                <div className="skills-card-icon strengths">✓</div>
+                                                <Text variant="h3" className="font-bold">Strengths</Text>
                                             </div>
-                                            <Text variant="h3" className="text-blue-700 font-bold">Strengths</Text>
+                                            <ul className="skills-list-modern">
+                                                {atsScore?.strengths?.map((strength, i) => (
+                                                    <li key={i}>
+                                                        <div className="skills-list-indicator strengths"></div>
+                                                        <Text variant="body">{strength}</Text>
+                                                    </li>
+                                                )) || (
+                                                    <>
+                                                        <li>
+                                                            <div className="skills-list-indicator strengths"></div>
+                                                            <Text variant="body">Strong technical skills match</Text>
+                                                        </li>
+                                                        <li>
+                                                            <div className="skills-list-indicator strengths"></div>
+                                                            <Text variant="body">Relevant experience</Text>
+                                                        </li>
+                                                    </>
+                                                )}
+                                            </ul>
                                         </div>
-                                        <ul className="space-y-3">
-                                            {atsScore?.strengths?.map((strength, i) => (
-                                                <li key={i} className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-blue-200/50">
-                                                    <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <Text variant="body" className="text-blue-800 leading-relaxed">{strength}</Text>
-                                                </li>
-                                            )) || (
-                                                <>
-                                                    <li className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-blue-200/50">
-                                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                        <Text variant="body" className="text-blue-800 leading-relaxed">Strong technical skills match</Text>
-                                                    </li>
-                                                    <li className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-blue-200/50">
-                                                        <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                        <Text variant="body" className="text-blue-800 leading-relaxed">Relevant experience</Text>
-                                                    </li>
-                                                </>
-                                            )}
-                                        </ul>
-                                    </Card>
-                                    <Card className="p-6 bg-gradient-to-br from-orange-50 to-amber-50 border-orange-200">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
-                                                <span className="text-white text-sm font-bold">!</span>
+                                        <div className="skills-card-modern">
+                                            <div className="skills-card-header">
+                                                <div className="skills-card-icon improvements">!</div>
+                                                <Text variant="h3" className="font-bold">Improvements</Text>
                                             </div>
-                                            <Text variant="h3" className="text-orange-700 font-bold">Improvements</Text>
-                                        </div>
-                                        <ul className="space-y-3">
-                                            {atsScore?.improvements?.map((improvement, i) => (
-                                                <li key={i} className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-orange-200/50">
-                                                    <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                    <Text variant="body" className="text-orange-800 leading-relaxed">{improvement}</Text>
-                                                </li>
-                                            )) || (
-                                                <>
-                                                    <li className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-orange-200/50">
-                                                        <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                        <Text variant="body" className="text-orange-800 leading-relaxed">Add quantifiable achievements</Text>
+                                            <ul className="skills-list-modern">
+                                                {atsScore?.improvements?.map((improvement, i) => (
+                                                    <li key={i}>
+                                                        <div className="skills-list-indicator improvements"></div>
+                                                        <Text variant="body">{improvement}</Text>
                                                     </li>
-                                                    <li className="flex items-start gap-3 p-3 bg-white/60 rounded-lg border border-orange-200/50">
-                                                        <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 flex-shrink-0"></div>
-                                                        <Text variant="body" className="text-orange-800 leading-relaxed">Include industry keywords</Text>
-                                                    </li>
-                                                </>
-                                            )}
-                                        </ul>
-                                    </Card>
-                                    <Card className="p-6 bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                                                <span className="text-white text-sm font-bold">✓</span>
+                                                )) || (
+                                                    <>
+                                                        <li>
+                                                            <div className="skills-list-indicator improvements"></div>
+                                                            <Text variant="body">Add quantifiable achievements</Text>
+                                                        </li>
+                                                        <li>
+                                                            <div className="skills-list-indicator improvements"></div>
+                                                            <Text variant="body">Include industry keywords</Text>
+                                                        </li>
+                                                    </>
+                                                )}
+                                            </ul>
+                                        </div>
+                                        <div className="skills-card-modern">
+                                            <div className="skills-card-header">
+                                                <div className="skills-card-icon matches">✓</div>
+                                                <Text variant="h3" className="font-bold">Keyword Matches</Text>
                                             </div>
-                                            <Text variant="h3" className="text-green-700 font-bold">Keyword Matches</Text>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {atsScore?.keywordMatches?.map((keyword, i) => (
-                                                <SkillBubble key={i} variant="success">
-                                                    {keyword}
-                                                </SkillBubble>
-                                            )) || (
-                                                <>
-                                                    <SkillBubble variant="success">React</SkillBubble>
-                                                    <SkillBubble variant="success">Node.js</SkillBubble>
-                                                    <SkillBubble variant="success">JavaScript</SkillBubble>
-                                                </>
-                                            )}
-                                        </div>
-                                    </Card>
-                                    <Card className="p-6 bg-gradient-to-br from-red-50 to-pink-50 border-red-200">
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                                                <span className="text-white text-sm font-bold">!</span>
+                                            <div className="flex flex-wrap gap-2">
+                                                {atsScore?.keywordMatches?.map((keyword, i) => (
+                                                    <SkillBubble key={i} variant="success">
+                                                        {keyword}
+                                                    </SkillBubble>
+                                                )) || (
+                                                    <>
+                                                        <SkillBubble variant="success">React</SkillBubble>
+                                                        <SkillBubble variant="success">Node.js</SkillBubble>
+                                                        <SkillBubble variant="success">JavaScript</SkillBubble>
+                                                    </>
+                                                )}
                                             </div>
-                                            <Text variant="h3" className="text-red-700 font-bold">Missing Keywords</Text>
                                         </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {atsScore?.missingKeywords?.map((keyword, i) => (
-                                                <SkillBubble key={i} variant="warning">
-                                                    {keyword}
-                                                </SkillBubble>
-                                            )) || (
-                                                <>
-                                                    <SkillBubble variant="warning">Docker</SkillBubble>
-                                                    <SkillBubble variant="warning">GraphQL</SkillBubble>
-                                                    <SkillBubble variant="warning">Kubernetes</SkillBubble>
-                                                </>
-                                            )}
+                                        <div className="skills-card-modern">
+                                            <div className="skills-card-header">
+                                                <div className="skills-card-icon missing">!</div>
+                                                <Text variant="h3" className="font-bold">Missing Keywords</Text>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2">
+                                                {atsScore?.missingKeywords?.map((keyword, i) => (
+                                                    <SkillBubble key={i} variant="warning">
+                                                        {keyword}
+                                                    </SkillBubble>
+                                                )) || (
+                                                    <>
+                                                        <SkillBubble variant="warning">Docker</SkillBubble>
+                                                        <SkillBubble variant="warning">GraphQL</SkillBubble>
+                                                        <SkillBubble variant="warning">Kubernetes</SkillBubble>
+                                                    </>
+                                                )}
+                                            </div>
                                         </div>
-                                    </Card>
+                                    </div>
                                 </div>
                             </div>
                         )}
                         {activeTab === 'chat' && (
                             <div className="content-section">
-                                <InterviewChat />
+                                <Suspense fallback={<div className="loading-placeholder">Loading Interview Chat...</div>}>
+                                    <InterviewChat />
+                                </Suspense>
                             </div>
                         )}
                         {activeTab === 'presentations' && (
                             <div className="content-section">
-                                <div className="space-y-6">
+                                <div className="content-cards-container">
                                     {presentationTopics?.length > 0 ? (
                                         presentationTopics.map((topic) => (
-                                            <Card key={topic.id} className="p-6 hover:shadow-md transition-shadow">
-                                                <Text variant="h3" className="text-xl font-semibold mb-4">{topic.title}</Text>
-                                                <ul className="space-y-4">
+                                            <div key={topic.id} className="content-card topic-card">
+                                                <div className="topic-title">{topic.title}</div>
+                                                <ul className="topic-bullets">
                                                     {topic.bullets.map((bullet, i) => (
-                                                        <li key={i} className="flex items-start">
-                                                            <span className="mr-3 text-blue-500">•</span>
+                                                        <li key={i}>
                                                             <Text variant="body">{bullet}</Text>
                                                         </li>
                                                     ))}
                                                 </ul>
-                                            </Card>
+                                            </div>
                                         ))
                                     ) : (
-                                        <Card className="p-6 text-center">
+                                        <div className="content-card topic-card" style={{ textAlign: 'center' }}>
                                             <Text variant="body" color="secondary">
                                                 No presentation topics generated yet. Please analyze a job description first.
                                             </Text>
-                                        </Card>
+                                        </div>
                                     )}
                                 </div>
                             </div>
