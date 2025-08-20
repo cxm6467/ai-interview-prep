@@ -6,6 +6,18 @@
 [functions]
   node_bundler = "esbuild"
   external_node_modules = ["openai"]
+  
+  # Configure the consolidated AI handler
+  [functions.consolidated-ai-handler]
+    node_bundler = "esbuild"
+    external_node_modules = ["openai"]
+    timeout = 30  # seconds
+
+  # Keep the old handler for backward compatibility
+  [functions.ai-handler]
+    node_bundler = "esbuild"
+    external_node_modules = ["openai"]
+    timeout = 30  # seconds
 
 [[redirects]]
   from = "/api/*"

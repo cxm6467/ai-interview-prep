@@ -24,6 +24,21 @@ import type { ResumeData, JobDescription, InterviewQuestion, CandidateQuestion, 
  * 
  * @class AIAnalysisService
  */
+export interface ConsolidatedAnalysisResult {
+  atsScore: {
+    score: number;
+    feedback: string;
+    strengths: string[];
+    improvements: string[];
+  };
+  technicalQuestions: Array<{ question: string; answer: string }>;
+  behavioralQuestions: Array<{ question: string; answer: string }>;
+  presentationTopics: Array<{ topic: string; keyPoints: string[] }>;
+  candidateQuestions: string[];
+  strengths: string[];
+  improvements: string[];
+}
+
 export class AIAnalysisService {
   /**
    * Core OpenAI API Integration Method
@@ -39,6 +54,55 @@ export class AIAnalysisService {
    * @returns {Promise<string>} The AI-generated response text
    * @throws {Error} When API call fails or times out
    */
+  /**
+   * Perform a consolidated analysis of resume and job description in a single API call
+   * @param resumeText The full text of the resume
+   * @param jobDescription The job description text
+   * @returns A promise that resolves to the consolidated analysis result
+   */
+  static async performConsolidatedAnalysis(
+    resumeText: string,
+    jobDescription: string
+  ): Promise<ConsolidatedAnalysisResult> {
+    const isProduction = import.meta.env.PROD;
+    const apiUrl = isProduction 
+      ? '/.netlify/functions/consolidated-ai-handler'
+      : '/api/ai-handler';
+
+    console.log('🚀 Starting consolidated analysis...');
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          resumeText,
+          jobDescription,
+        }),
+        signal: AbortSignal.timeout(60000) // 60 second timeout for consolidated analysis
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Unknown error from AI service');
+      }
+
+      return result.data;
+    } catch (error) {
+      console.error('❌ Consolidated analysis failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error during analysis';
+      throw new Error(`Consolidated analysis failed: ${errorMessage}`);
+    }
+  }
+
   private static async callOpenAI(prompt: string, maxTokens: number = 1000): Promise<string> {
     // Environment-aware API routing for development vs production
     const isProduction = import.meta.env.PROD;
