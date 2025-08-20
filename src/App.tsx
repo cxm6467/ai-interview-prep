@@ -9,6 +9,7 @@ import { Footer } from '@organisms/Footer';
 import { DocumentParser } from '@/services/documentParser';
 import { AIAnalysisService } from '@/services/aiAnalysis';
 import { useAppStore } from '@/store/appStore';
+import type { InterviewQuestion, PresentationTopic, CandidateQuestion } from '@/types';
 import { FiSun, FiMoon, FiUpload, FiFileText } from 'react-icons/fi';
 import { LoadingOverlay } from './components/atoms/LoadingOverlay/LoadingOverlay';
 import { SkillBubble } from './components/atoms/SkillBubble';
@@ -165,7 +166,7 @@ const AppContent = () => {
     };
 
     /**
-     * Performs the actual analysis
+     * Performs the actual analysis using a single consolidated API call
      */
     const performAnalysis = async (resumeText: string, jobText: string) => {
         setIsAnalyzing(true);
@@ -175,34 +176,79 @@ const AppContent = () => {
         setInterviewerRole(interviewerRole);
         
         try {
-            // Phase 1: Resume analysis
-            console.log('📄 Analyzing your resume...');
-            console.log('🤖 AI is analyzing your resume...');
-            const resumeData = await AIAnalysisService.analyzeResume(resumeText);
-            setResumeData(resumeData);
-            console.log('✅ Resume analysis complete!');
+            console.log('🚀 Starting comprehensive analysis...');
             
-            // Phase 2: Job description analysis
-            console.log('💼 Analyzing job description...');
-            console.log('🤖 AI is analyzing job description...');
-            const jobData = await AIAnalysisService.analyzeJobDescription(jobText);
-            setJobDescription(jobData);
-            console.log('✅ Job analysis complete!');
+            // Single consolidated API call for all analysis
+            const analysis = await AIAnalysisService.performConsolidatedAnalysis(resumeText, jobText);
             
-            // Phase 3: Generate personalized content with parallel AI calls
-            console.log('🎯 Generating your personalized interview prep...');
-            const [questions, topics, candidateQuestions, atsScoreData] = await Promise.all([
-                AIAnalysisService.generateInterviewQuestions(resumeData, jobData, interviewerRole),
-                AIAnalysisService.generatePresentationTopics(resumeData, jobData),
-                AIAnalysisService.generateCandidateQuestions(jobData, interviewerRole),
-                AIAnalysisService.calculateATSScore(resumeData, jobData)
-            ]);
+            // Update resume data with a basic structure that matches the type
+            setResumeData({
+                skills: analysis.strengths || [],
+                experience: [], // These would be parsed from resumeText in a real implementation
+                education: [],
+                summary: ''
+            });
             
-            // Update application state with results
-            setInterviewQuestions(questions);
-            setPresentationTopics(topics);
-            setCandidateQuestions(candidateQuestions);
-            setATSScore(atsScoreData);
+            // Update job description with a basic structure that matches the type
+            setJobDescription({
+                title: 'Target Position',
+                company: 'Target Company',
+                requirements: [],
+                responsibilities: [],
+                preferredSkills: [],
+                description: jobText
+            });
+            
+            // Map technical questions to match InterviewQuestion type
+            const technicalQuestions: InterviewQuestion[] = analysis.technicalQuestions.map((q, i) => ({
+                id: `q-${i}`,
+                type: 'technical',
+                question: q.question,
+                suggestedAnswer: q.answer,
+                tips: []
+            }));
+            
+            // Map behavioral questions to match InterviewQuestion type
+            const behavioralQuestions: InterviewQuestion[] = analysis.behavioralQuestions.map((q, i) => ({
+                id: `bq-${i}`,
+                type: 'behavioral',
+                question: q.question,
+                suggestedAnswer: q.answer,
+                tips: []
+            }));
+            
+            // Combine and set all questions
+            setInterviewQuestions([...technicalQuestions, ...behavioralQuestions]);
+            
+            // Map presentation topics to match PresentationTopic type
+            const mappedPresentationTopics: PresentationTopic[] = analysis.presentationTopics.map((topic, i) => ({
+                id: `topic-${i}`,
+                title: topic.topic,
+                bullets: topic.keyPoints
+            }));
+            
+            setPresentationTopics(mappedPresentationTopics);
+            
+            // Map candidate questions to match CandidateQuestion type
+            const mappedCandidateQuestions: CandidateQuestion[] = analysis.candidateQuestions.map((q, i) => ({
+                id: `cq-${i}`,
+                question: q,
+                category: 'role', // Default category
+                rationale: 'This question helps understand the role and company better.',
+                timing: 'end' as const
+            }));
+            
+            setCandidateQuestions(mappedCandidateQuestions);
+            
+            // Set ATS score with proper type
+            setATSScore({
+                score: analysis.atsScore.score,
+                strengths: analysis.atsScore.strengths,
+                improvements: analysis.atsScore.improvements,
+                keywordMatches: [],
+                missingKeywords: []
+            });
+            
             console.log('🎉 All done! Your interview prep is ready!');
             setCurrentStep('dashboard');
         } catch (err) {
