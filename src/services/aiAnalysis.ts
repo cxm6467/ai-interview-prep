@@ -30,6 +30,8 @@ export interface ConsolidatedAnalysisResult {
     feedback: string;
     strengths: string[];
     improvements: string[];
+    keywordMatches: string[];
+    missingKeywords: string[];
   };
   technicalQuestions: Array<{ question: string; answer: string }>;
   behavioralQuestions: Array<{ question: string; answer: string }>;
@@ -67,7 +69,7 @@ export class AIAnalysisService {
     const isProduction = import.meta.env.PROD;
     const apiUrl = isProduction 
       ? '/.netlify/functions/consolidated-ai-handler'
-      : '/api/ai-handler';
+      : '/.netlify/functions/consolidated-ai-handler';
 
     console.log('🚀 Starting consolidated analysis...');
 
@@ -81,7 +83,7 @@ export class AIAnalysisService {
           resumeText,
           jobDescription,
         }),
-        signal: AbortSignal.timeout(60000) // 60 second timeout for consolidated analysis
+        signal: AbortSignal.timeout(120000) // 120 second timeout for consolidated analysis
       });
 
       if (!response.ok) {

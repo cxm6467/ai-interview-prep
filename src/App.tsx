@@ -245,8 +245,8 @@ const AppContent = () => {
                 score: analysis.atsScore.score,
                 strengths: analysis.atsScore.strengths,
                 improvements: analysis.atsScore.improvements,
-                keywordMatches: [],
-                missingKeywords: []
+                keywordMatches: analysis.atsScore.keywordMatches || [],
+                missingKeywords: analysis.atsScore.missingKeywords || []
             });
             
             console.log('🎉 All done! Your interview prep is ready!');
@@ -265,7 +265,7 @@ const AppContent = () => {
     if (currentStep === 'upload') {
         return (
             <>
-                {isAnalyzing && <LoadingOverlay message={`Analyzing your resume and job description${interviewerRole ? ` for an interview with ${formatInterviewerRole(interviewerRole)}` : ''}...`} />}
+                {isAnalyzing && <LoadingOverlay message={`Analyzing your resume and job description${interviewerRole ? ` for an interview with a ${formatInterviewerRole(interviewerRole)}` : ''}...`} />}
                 <div className="app">
                     <header className="app-header">
                         <div className="header-content">
