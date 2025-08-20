@@ -1,4 +1,4 @@
-import type { ResumeData, JobDescription, InterviewQuestion, PresentationTopic, ATSScore } from '../types';
+import type { ResumeData, JobDescription, InterviewQuestion, CandidateQuestion, PresentationTopic, ATSScore } from '../types';
 
 /**
  * AI Analysis Service
@@ -369,6 +369,96 @@ Make questions specific to their background at ${resume.experience[0]?.company} 
     }
   }
 
+  /**
+   * Generate strategic questions that candidates can ask interviewers
+   * 
+   * Creates intelligent questions based on the job description and interviewer role
+   * that help candidates demonstrate engagement and gather important information.
+   * 
+   * @static
+   * @async
+   * @param {JobDescription} job - The analyzed job description
+   * @param {string} [interviewerRole] - The role of the interviewer (recruiter, hiring-manager, tech-lead, peer)
+   * @returns {Promise<CandidateQuestion[]>} Array of strategic questions to ask
+   */
+  static async generateCandidateQuestions(
+    job: JobDescription,
+    interviewerRole?: string
+  ): Promise<CandidateQuestion[]> {
+    try {
+      const roleContext = interviewerRole ? `
+      
+Interviewer Role: ${interviewerRole}
+Consider the specific perspective and priorities of a ${interviewerRole} when generating questions.
+For example:
+- Recruiter: Focus on culture, process, growth opportunities
+- Hiring Manager: Focus on team dynamics, expectations, success metrics  
+- Tech Lead: Focus on technical challenges, architecture, development practices
+- Peer: Focus on day-to-day work, collaboration, team culture` : '';
+
+      const prompt = `Generate 5-7 strategic questions that a job candidate can ask during an interview, based on this job description and interviewer role. 
+
+Job Description:
+${JSON.stringify(job, null, 2)}
+${roleContext}
+
+Create questions that:
+1. Show genuine interest and research
+2. Help evaluate if the role is a good fit
+3. Demonstrate engagement and strategic thinking
+4. Are appropriate for the interviewer's role and perspective
+5. Avoid questions easily answered by basic research
+
+Format as a valid JSON array with objects containing:
+- id: unique identifier
+- category: one of "role", "company", "team", "growth", "culture"
+- question: the actual question text
+- rationale: why this question is strategic (1-2 sentences)
+- timing: when to ask ("early", "middle", "end")
+
+Example:
+[
+  {
+    "id": "q1",
+    "category": "team",
+    "question": "What does success look like in this role during the first 90 days?",
+    "rationale": "Shows planning mindset and helps set clear expectations for performance.",
+    "timing": "middle"
+  }
+]
+
+Return only valid JSON without any additional text.`;
+
+      const response = await this.callOpenAI(prompt, 1200);
+      
+      // Clean the response
+      const cleanResponse = response
+        .replace(/^```(?:json)?\s*|\s*```$/g, '') // Remove code block markers
+        .trim();
+      
+      // Try to parse the response
+      try {
+        const parsed = JSON.parse(cleanResponse);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } catch (e) {
+        // If direct parsing fails, try to extract JSON from the response
+        const jsonMatch = cleanResponse.match(/\[\s*\{.*\}\s*\]/s);
+        if (jsonMatch) {
+          try {
+            return JSON.parse(jsonMatch[0]);
+          } catch (e) {
+            console.error('⚠️ Failed to parse extracted JSON:', e instanceof Error ? e.message : 'Parse error');
+          }
+        }
+        console.error('❓ Candidate questions generation failed - parsing error:', e instanceof Error ? e.message : 'Parse error');
+        return this.getMockCandidateQuestions();
+      }
+    } catch (error) {
+      console.error('❓ Candidate questions generation failed:', error instanceof Error ? error.message : 'Unknown error');
+      return this.getMockCandidateQuestions();
+    }
+  }
+
   private static getInterviewerContext(role: string): string {
     const roleContextMap: Record<string, string> = {
       'recruiter': `
@@ -658,6 +748,46 @@ As a senior stakeholder, when evaluating responses, focus on:
         question: 'Tell me about a time you had to work with a difficult team member.',
         suggestedAnswer: 'In my previous role, I worked with a colleague who...',
         tips: ['Be diplomatic', 'Focus on the resolution']
+      }
+    ];
+  }
+
+  private static getMockCandidateQuestions(): CandidateQuestion[] {
+    return [
+      {
+        id: 'q1',
+        category: 'role',
+        question: 'What does success look like in this role during the first 90 days?',
+        rationale: 'Shows planning mindset and helps set clear expectations for performance.',
+        timing: 'middle'
+      },
+      {
+        id: 'q2',
+        category: 'team',
+        question: 'How does the engineering team collaborate on projects and handle code reviews?',
+        rationale: 'Reveals team dynamics and development culture, important for day-to-day work satisfaction.',
+        timing: 'middle'
+      },
+      {
+        id: 'q3',
+        category: 'growth',
+        question: 'What learning and development opportunities are available for engineers?',
+        rationale: 'Demonstrates interest in continuous improvement and long-term career planning.',
+        timing: 'end'
+      },
+      {
+        id: 'q4',
+        category: 'company',
+        question: 'What are the biggest technical challenges the company is facing right now?',
+        rationale: 'Shows interest in contributing to meaningful work and understanding business priorities.',
+        timing: 'early'
+      },
+      {
+        id: 'q5',
+        category: 'culture',
+        question: 'How does the company support work-life balance and prevent burnout?',
+        rationale: 'Important for evaluating long-term sustainability and company values alignment.',
+        timing: 'end'
       }
     ];
   }

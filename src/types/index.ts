@@ -140,11 +140,29 @@ export interface ATSScore {
   missingKeywords: string[];
 }
 
+/**
+ * Represents a strategic question that candidates can ask interviewers
+ * @interface CandidateQuestion
+ */
+export interface CandidateQuestion {
+  /** Unique identifier for the question */
+  id: string;
+  /** Category of question to help organize them */
+  category: 'role' | 'company' | 'team' | 'growth' | 'culture';
+  /** The question text that candidates can ask */
+  question: string;
+  /** Why this question is strategic and what it reveals */
+  rationale: string;
+  /** The best time during interview to ask this question */
+  timing: 'early' | 'middle' | 'end';
+}
+
 // App state interfaces
 export interface AppState {
   resumeData: ResumeData | null;
   jobDescription: JobDescription | null;
   interviewQuestions: InterviewQuestion[];
+  candidateQuestions: CandidateQuestion[];
   presentationTopics: PresentationTopic[];
   atsScore: ATSScore | null;
   isLoading: boolean;

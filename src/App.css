@@ -1,24 +1,24 @@
 /* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 1rem;
-  margin: 0 auto 2rem;
-  max-width: 900px;
-  padding: 0 1.5rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 auto 1.5rem;
+  max-width: 1100px;
+  padding: 0 1rem;
   width: 100%;
 }
 
 .stat-card {
-  aspect-ratio: 4/3;
+  aspect-ratio: 5/4;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   text-align: center;
-  padding: 1rem 0.75rem;
+  padding: 0.75rem 0.5rem;
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 10px;
   border: 1px solid var(--border);
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -40,10 +40,10 @@
 /* Removed hover effect from stat cards as they are not clickable */
 
 .stat-card .emoji {
-  font-size: 1.5rem;
-  margin: 0 0 0.5rem;
+  font-size: 1.3rem;
+  margin: 0 0 0.4rem;
   line-height: 1;
-  min-height: 1.5rem;
+  min-height: 1.3rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,34 +113,53 @@
   }
 }
 
+/* Tablet breakpoint */
+@media (max-width: 1024px) {
+  .stats-grid {
+    max-width: 950px;
+    gap: 0.6rem;
+  }
+  
+  .nav-tabs {
+    gap: 0.35rem;
+  }
+  
+  .content-cards-container,
+  .skills-analysis-modern {
+    max-width: 950px;
+  }
+}
+
 @media (max-width: 768px) {
   .stats-grid {
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.75rem;
-    padding: 0 1rem;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    padding: 0 0.5rem;
   }
   
   .stat-card {
-    padding: 0.9rem 0.5rem;
+    padding: 0.6rem 0.4rem;
+    aspect-ratio: 1;
   }
   
   .stat-card .emoji {
-    font-size: 1.25rem;
-    margin-bottom: 0.35rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.3rem;
   }
   
   .stat-card .score {
-    font-size: 1.25rem;
+    font-size: 1.2rem;
   }
   
   .stat-card .label {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
+    line-height: 1.2;
   }
 }
 
 @media (max-width: 640px) {
   .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     max-width: 500px;
   }
   
@@ -164,8 +183,23 @@
 
 @media (max-width: 480px) {
   .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: 0.6rem;
     padding: 0 0.75rem;
+    max-width: 350px;
+  }
+  
+  .nav-tabs {
+    gap: 0.2rem;
+    margin-bottom: 1rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .stats-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0 0.5rem;
   }
   
   .stat-card {
@@ -745,6 +779,11 @@
     gap: 1rem;
   }
   
+  .nav-tabs {
+    gap: 0.3rem;
+    padding: 0 0.5rem;
+  }
+  
   .header-actions {
     width: 100%;
     justify-content: space-between;
@@ -814,9 +853,13 @@
 .nav-tabs {
   display: flex;
   justify-content: center;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
   flex-wrap: wrap;
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
 }
 
 .content-area {
@@ -937,7 +980,7 @@
 
 /* Chat-style cards for tab content */
 .content-cards-container {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -956,10 +999,7 @@
   line-height: 1.6;
 }
 
-.content-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+/* Removed hover effect from content cards */
 
 .content-card.question-card {
   border-bottom-left-radius: 0.25rem;
@@ -1033,7 +1073,7 @@
 
 /* Skills analysis cards - preserve but modernize */
 .skills-analysis-modern {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 1.5rem;
 }
@@ -1050,10 +1090,7 @@
   min-width: 0;
 }
 
-.skills-card-modern:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
+/* Removed hover effect from skills cards */
 
 .skills-card-header {
   display: flex;
@@ -1113,10 +1150,7 @@
   transition: all 0.2s ease;
 }
 
-.skills-list-modern li:hover {
-  background: var(--bg-tertiary);
-  transform: translateX(2px);
-}
+/* Removed hover effect from skills list items */
 
 .skills-list-indicator {
   width: 0.5rem;
@@ -1160,6 +1194,75 @@
   padding: 2rem;
   color: var(--text-secondary);
   font-size: 0.9rem;
+}
+
+/* Candidate Question Cards */
+.candidate-question-card {
+  border-left: 4px solid var(--accent-green);
+}
+
+.candidate-question-card .question-category {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.candidate-question-card .category-badge {
+  background: var(--bg-tertiary);
+  color: var(--accent-green);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.candidate-question-card .timing-badge {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.candidate-question-card .question-rationale {
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+  border-left: 3px solid var(--accent-green);
+}
+
+.candidate-question-card .rationale-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Category-specific colors */
+.candidate-question-card .category-badge.role {
+  color: var(--accent-blue);
+}
+
+.candidate-question-card .category-badge.company {
+  color: var(--accent-purple);
+}
+
+.candidate-question-card .category-badge.team {
+  color: var(--accent-green);
+}
+
+.candidate-question-card .category-badge.growth {
+  color: var(--accent-orange);
+}
+
+.candidate-question-card .category-badge.culture {
+  color: var(--accent-red);
 }
 
 /* Responsive design */
