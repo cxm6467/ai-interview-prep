@@ -18,7 +18,7 @@ export type ThemeType =
   | 'light' 
   | 'dark' 
   | 'blue' 
-  | 'purple' 
+  | 'indigo' 
   | 'green' 
   | 'high-contrast' 
   | 'low-contrast' 

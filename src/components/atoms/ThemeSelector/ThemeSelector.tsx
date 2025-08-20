@@ -40,11 +40,11 @@ const availableThemes: Theme[] = [
     accessible: true
   },
   {
-    id: 'purple',
-    name: 'Royal Purple',
-    description: 'Modern purple gradients',
+    id: 'indigo',
+    name: 'Deep Indigo',
+    description: 'Rich indigo blue tones',
     category: 'popular',
-    className: 'theme-purple',
+    className: 'theme-indigo',
     accessible: true
   },
   {

@@ -29,7 +29,7 @@ A comprehensive AI-powered interview preparation application that transforms job
 - **Export-Ready Format** - Topics formatted for easy presentation preparation
 
 ### 🚀 Modern User Experience
-- **9 Comprehensive Themes** - Complete theme system with Standard (Light/Dark), Popular (Ocean Blue, Royal Purple, Forest Green, Warm Sunset, Cool Mint), and Accessible (High Contrast/Low Contrast) themes with smooth transitions
+- **9 Comprehensive Themes** - Complete theme system with Standard (Light/Dark), Popular (Ocean Blue, Deep Indigo, Forest Green, Warm Sunset, Cool Mint), and Accessible (High Contrast/Low Contrast) themes with smooth transitions
 - **Mobile-First Design** - Fully responsive interface optimized for all devices
 - **5-Tab Dashboard** - Comprehensive interview prep with Questions, Coaching, Presentations, Strategic Questions, and Skills Analysis
 - **Progressive Web App** - Fast loading, offline-capable, and app-like experience
@@ -121,7 +121,7 @@ The application features a comprehensive 9-theme system designed for accessibili
 
 **Popular Themes:**
 - **Ocean Blue** - Professional blue tones for corporate environments
-- **Royal Purple** - Modern purple gradients for creative workflows
+- **Deep Indigo** - Rich indigo blue tones for professional elegance
 - **Forest Green** - Natural green tones for calm focus
 - **Warm Sunset** - Orange and yellow tones for energetic sessions
 - **Cool Mint** - Blue and cyan tones for refreshing clarity
@@ -158,7 +158,7 @@ The application features a cohesive color-coded design system:
 - **🟠 Orange**: Areas for improvement, growth-focused questions  
 - **🟢 Green**: Keyword matches and success indicators, team and company questions
 - **🔴 Red**: Missing keywords and alerts, culture-focused questions
-- **🟣 Purple**: Interview questions and practice, presentations
+- **🔵 Indigo**: Interview questions and practice, presentations
 - **🔷 Teal**: Presentation topics and speaking points
 
 ## 📁 Project Architecture
@@ -310,6 +310,9 @@ Created with ❤️ by Chris Marasco - Follow for more innovative projects!
 - [x] **Console Log Cleanup** - Removed non-essential warning logs for cleaner production experience
 - [x] **Light Theme Text Fix** - Improved readability of suggested answers in light theme with enhanced contrast
 - [x] **Enhanced Text Contrast** - Improved contrast ratios for secondary/tertiary text and borders in light theme for WCAG AA compliance
+- [x] **Single File Upload** - Restricted file upload components to single file selection with clear user messaging
+- [x] **Purple to Blue Color Scheme** - Updated primary colors from purple to modern blue for better professional appearance
+- [x] **Loading Screen Text Fix** - Improved loading screen text contrast in light theme for better readability
 
 ### Phase 1: Enhanced User Experience
 - [ ] **Interview Recording & Playback** - Record practice sessions for self-review
