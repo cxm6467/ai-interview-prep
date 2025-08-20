@@ -26,7 +26,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   },
   maxFiles = 1,
   label = 'Upload File',
-  description = 'Drag & drop or click to browse',
+  description = 'Drag & drop a single file or click to browse',
   className,
   children,
 }) => {
@@ -34,6 +34,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     onDrop: (acceptedFiles) => onDrop(acceptedFiles),
     accept,
     maxFiles,
+    multiple: false, // Explicitly disable multiple file selection
   });
 
   return (

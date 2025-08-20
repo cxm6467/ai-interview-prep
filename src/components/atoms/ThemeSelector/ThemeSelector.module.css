@@ -191,8 +191,8 @@
   background: linear-gradient(135deg, #0066cc 50%, #4da6ff 50%);
 }
 
-.theme-selector__preview--purple {
-  background: linear-gradient(135deg, #6b46c1 50%, #a78bfa 50%);
+.theme-selector__preview--indigo {
+  background: linear-gradient(135deg, #4F46E5 50%, #818CF8 50%);
 }
 
 .theme-selector__preview--green {

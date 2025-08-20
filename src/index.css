@@ -97,9 +97,9 @@
 
 .theme-light,
 [data-theme="light"] {
-  --color-primary: #8E44AD;
-  --color-primary-hover: #7D3C98;
-  --color-primary-subtle: rgba(142, 68, 173, 0.1);
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-subtle: rgba(37, 99, 235, 0.1);
   
   --color-secondary: #3498DB;
   --color-secondary-hover: #2E86C1;
@@ -195,14 +195,14 @@
   --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-.theme-purple {
-  --color-primary: #6B46C1;
-  --color-primary-hover: #553C9A;
-  --color-primary-subtle: rgba(107, 70, 193, 0.1);
+.theme-indigo {
+  --color-primary: #4F46E5;
+  --color-primary-hover: #4338CA;
+  --color-primary-subtle: rgba(79, 70, 229, 0.1);
   
-  --color-secondary: #A78BFA;
-  --color-secondary-hover: #9F7AEA;
-  --color-secondary-subtle: rgba(167, 139, 250, 0.1);
+  --color-secondary: #818CF8;
+  --color-secondary-hover: #6366F1;
+  --color-secondary-subtle: rgba(129, 140, 248, 0.1);
   
   --color-success: #10B981;
   --color-success-hover: #059669;

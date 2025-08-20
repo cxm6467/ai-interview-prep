@@ -89,7 +89,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
       <Text variant="h3" color="primary" className="mb-4">{message}</Text>
       {showJokes && (
         <div className="max-w-md mx-auto">
-          <Text variant="body" color="secondary" align="center" className="mb-2">
+          <Text variant="body" color="primary" align="center" className="mb-2">
             While you wait, enjoy a dad joke! 😄
           </Text>
           <Text variant="body" color="primary" align="center" className="italic">
