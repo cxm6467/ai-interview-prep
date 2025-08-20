@@ -16,18 +16,28 @@ interface JokeSearchResponse {
   total_pages: number;
 }
 
+/**
+ * Dad Joke Service with persistent localStorage caching
+ * 
+ * Features:
+ * - Persistent caching across browser sessions (localStorage)
+ * - Smart uniqueness tracking to prevent repeat jokes
+ * - Batch API fetching (up to 60 jokes in 2 calls)
+ * - 7-day cache expiration with automatic cleanup
+ * - Proactive prefetching when cache runs low
+ */
 export class DadJokeService {
   private static readonly STORAGE_KEY = 'dadJoke_usedIds';
   private static readonly CACHE_KEY = 'dadJoke_cache';
   private static readonly CACHE_EXPIRY = 'dadJoke_cacheExpiry';
   private static readonly API_URL = 'https://icanhazdadjoke.com';
   private static readonly SEARCH_URL = 'https://icanhazdadjoke.com/search';
-  private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+  private static readonly CACHE_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days for localStorage
   private static readonly JOKES_PER_BATCH = 30; // Max allowed by API
 
   private static getUsedIds(): Set<string> {
     try {
-      const stored = sessionStorage.getItem(this.STORAGE_KEY);
+      const stored = localStorage.getItem(this.STORAGE_KEY);
       return new Set(stored ? JSON.parse(stored) : []);
     } catch {
       return new Set();
@@ -36,7 +46,7 @@ export class DadJokeService {
 
   private static saveUsedIds(usedIds: Set<string>): void {
     try {
-      sessionStorage.setItem(this.STORAGE_KEY, JSON.stringify([...usedIds]));
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify([...usedIds]));
     } catch (error) {
       console.warn('Failed to save used joke IDs:', error);
     }
@@ -44,8 +54,8 @@ export class DadJokeService {
 
   private static getCachedJokes(): DadJoke[] {
     try {
-      const cached = sessionStorage.getItem(this.CACHE_KEY);
-      const expiry = sessionStorage.getItem(this.CACHE_EXPIRY);
+      const cached = localStorage.getItem(this.CACHE_KEY);
+      const expiry = localStorage.getItem(this.CACHE_EXPIRY);
       
       if (!cached || !expiry) {return [];}
       
@@ -64,8 +74,8 @@ export class DadJokeService {
   private static setCachedJokes(jokes: DadJoke[]): void {
     try {
       const expiry = Date.now() + this.CACHE_DURATION;
-      sessionStorage.setItem(this.CACHE_KEY, JSON.stringify(jokes));
-      sessionStorage.setItem(this.CACHE_EXPIRY, expiry.toString());
+      localStorage.setItem(this.CACHE_KEY, JSON.stringify(jokes));
+      localStorage.setItem(this.CACHE_EXPIRY, expiry.toString());
     } catch (error) {
       console.warn('Failed to cache jokes:', error);
     }
@@ -73,8 +83,8 @@ export class DadJokeService {
 
   private static clearCache(): void {
     try {
-      sessionStorage.removeItem(this.CACHE_KEY);
-      sessionStorage.removeItem(this.CACHE_EXPIRY);
+      localStorage.removeItem(this.CACHE_KEY);
+      localStorage.removeItem(this.CACHE_EXPIRY);
     } catch (error) {
       console.warn('Failed to clear joke cache:', error);
     }
@@ -236,7 +246,7 @@ export class DadJokeService {
 
   static resetJokeCache(): void {
     try {
-      sessionStorage.removeItem(this.STORAGE_KEY);
+      localStorage.removeItem(this.STORAGE_KEY);
       this.clearCache();
       console.log('Dad joke cache has been reset');
     } catch (error) {
@@ -247,7 +257,7 @@ export class DadJokeService {
   static getJokeStats(): { used: number; cached: number; cacheExpiry: string | null } {
     const usedIds = this.getUsedIds();
     const cachedJokes = this.getCachedJokes();
-    const expiry = sessionStorage.getItem(this.CACHE_EXPIRY);
+    const expiry = localStorage.getItem(this.CACHE_EXPIRY);
     
     return {
       used: usedIds.size,
