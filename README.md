@@ -218,8 +218,9 @@ src/
 
 ### Frontend Performance
 - **Code Splitting**: Lazy-loaded InterviewChat component and optimized chunks
-- **Bundle Optimization**: PDF.js worker separation and vendor chunk splitting
-- **Gzip Compression**: Automatic compression and edge optimization via Netlify
+- **Advanced Bundle Optimization**: Intelligent chunk splitting with PDF.js worker (1,068 kB) and library (311 kB) separation
+- **Vendor Chunking**: React (160 kB), documents (56 kB), and utilities properly separated for optimal caching
+- **Gzip Compression**: Automatic compression and edge optimization via Netlify (300 kB gzipped for PDF worker)
 - **Responsive Images**: Optimized assets with proper sizing
 
 ### Development Experience
@@ -315,6 +316,7 @@ Created with ❤️ by Chris Marasco - Follow for more innovative projects!
 - [x] **Loading Screen Text Fix** - Improved loading screen text contrast in light theme for better readability
 - [x] **Global Text Inheritance Fix** - Fixed white text on white background issue by ensuring proper color inheritance
 - [x] **PDF.js Build Warning Suppression** - Suppressed eval warnings from PDF.js library for cleaner build output
+- [x] **Chunk Size Optimization** - Adjusted chunk size warning limit to accommodate PDF.js worker requirements (1200 kB)
 
 ### Phase 1: Enhanced User Experience
 - [ ] **Interview Recording & Playback** - Record practice sessions for self-review
