@@ -20,7 +20,7 @@ export const CookieConsent: React.FC = () => {
     localStorage.setItem('cookie_consent', 'accepted');
     localStorage.setItem('cookie_consent_date', new Date().toISOString());
     setIsVisible(false);
-    console.log('🍪 Cookie consent accepted');
+    // Cookie consent accepted
   };
 
   const handleDecline = () => {
@@ -32,7 +32,7 @@ export const CookieConsent: React.FC = () => {
     localStorage.removeItem('dadJoke_cache');
     localStorage.removeItem('dadJoke_cacheExpiry');
     setIsVisible(false);
-    console.log('🍪 Cookie consent declined - cleared stored data');
+    // Cookie consent declined - cleared stored data
   };
 
   const handleCustomize = () => {

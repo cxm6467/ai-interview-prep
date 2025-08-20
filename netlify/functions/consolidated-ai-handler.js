@@ -18,7 +18,7 @@ if (!apiKey) {
     openai = new OpenAI({
       apiKey: apiKey,
     });
-    console.log('✅ OpenAI client initialized successfully');
+    // OpenAI client initialized successfully
   } catch (error) {
     console.error('❌ Failed to initialize OpenAI client:', error);
   }
@@ -122,7 +122,7 @@ async function generateComprehensiveAnalysis(resumeText, jobDescription) {
   }`;
 
   try {
-    console.log('🚀 Starting comprehensive analysis...');
+    // Starting comprehensive analysis
     
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo-0125', // Latest, fastest version

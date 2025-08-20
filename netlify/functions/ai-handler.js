@@ -18,7 +18,7 @@ if (!apiKey) {
     openai = new OpenAI({
       apiKey: apiKey,
     });
-    console.log('✅ OpenAI client initialized successfully');
+    // OpenAI client initialized successfully
   } catch (error) {
     console.error('❌ Failed to initialize OpenAI client:', error);
   }
@@ -86,7 +86,7 @@ async function callOpenAI(prompt, maxTokens = 1200, temperature = 0.3) {
   }
 
   try {
-    console.log('🚀 Calling OpenAI API...');
+    // Calling OpenAI API
     
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo-0125', // Latest, fastest version
@@ -110,7 +110,7 @@ async function callOpenAI(prompt, maxTokens = 1200, temperature = 0.3) {
       throw new Error('No response received from OpenAI');
     }
 
-    console.log('✅ OpenAI API call successful');
+    // OpenAI API call successful
     return response;
   } catch (error) {
     console.error('❌ OpenAI API error:', error);
@@ -161,7 +161,7 @@ exports.handler = async (event, context) => {
       return createErrorResponse(400, 'Missing or invalid type field');
     }
 
-    console.log(`📝 Processing ${type} request`);
+    // Processing request
 
     // Call OpenAI API
     const aiResponse = await callOpenAI(

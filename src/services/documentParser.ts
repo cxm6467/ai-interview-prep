@@ -116,7 +116,7 @@ Google Cloud Professional Developer (2021)
     }
     
     try {
-      console.log('Would fetch job description from:', input);
+      // Would fetch job description from URL (not implemented)
       
       // Return mock job description for demo
       return `

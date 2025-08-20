@@ -33,7 +33,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   // Prefetch jokes when component mounts
   useEffect(() => {
     const prefetchJokes = async () => {
-      console.log('🎭 Prefetching jokes for loading screen...');
+      // Prefetching jokes for loading screen
       const jokes: string[] = [];
       
       // Try to get 5 fresh jokes
@@ -51,11 +51,11 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
       }
       
       if (jokes.length > 0) {
-        console.log(`🎯 Prefetched ${jokes.length} jokes for loading screen`);
+        // Prefetched jokes successfully
         setPrefetchedJokes(jokes);
         setCurrentJoke(jokes[0]);
       } else {
-        console.log('📦 Using fallback jokes for loading screen');
+        // Using fallback jokes for loading screen
         setPrefetchedJokes(fallbackJokes);
         setCurrentJoke(fallbackJokes[0]);
       }

@@ -157,7 +157,7 @@ export class DadJokeService {
       const availableJokes = cachedJokes.filter(joke => !usedIds.has(joke.id));
       
       if (availableJokes.length <= 5) { // Prefetch when only 5 or fewer jokes remain
-        console.log('Prefetching new jokes...');
+        // Prefetching new jokes
         
         // Add a small delay before starting prefetch to improve UX
         await new Promise(resolve => setTimeout(resolve, 200));
@@ -166,7 +166,7 @@ export class DadJokeService {
         
         if (newJokes.length === 0) {
           // If we can't get any new jokes, reset the cache and use fallback
-          console.log('No new jokes available, using fallback...');
+          // No new jokes available, using fallback
           this.resetJokeCache();
           
           const fallbackJokes = [
@@ -248,7 +248,7 @@ export class DadJokeService {
     try {
       localStorage.removeItem(this.STORAGE_KEY);
       this.clearCache();
-      console.log('Dad joke cache has been reset');
+      // Dad joke cache has been reset
     } catch (error) {
       console.warn('Failed to reset joke cache:', error);
     }
@@ -276,7 +276,7 @@ export class DadJokeService {
       
       // Only preload if cache is empty or has fewer than 10 jokes
       if (cachedJokes.length < 10) {
-        console.log('Preloading dad jokes in background...');
+        // Preloading dad jokes in background
         
         // Run prefetch in background without blocking
         setTimeout(async () => {
@@ -284,7 +284,7 @@ export class DadJokeService {
             const newJokes = await this.prefetchJokes();
             if (newJokes.length > 0) {
               this.setCachedJokes(newJokes);
-              console.log(`Preloaded ${newJokes.length} dad jokes`);
+              // Preloaded jokes successfully
             }
           } catch (error) {
             console.warn('Background joke preloading failed:', error);
