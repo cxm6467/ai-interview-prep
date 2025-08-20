@@ -7,15 +7,12 @@ import { DadJoke } from '@molecules/DadJoke';
 import { Footer } from '@organisms/Footer';
 import { DocumentParser } from '@/services/documentParser';
 import { AIAnalysisService } from '@/services/aiAnalysis';
-import { CacheService } from '@/services/cacheService';
 import { useAppStore } from '@/store/appStore';
 import { FiSun, FiMoon, FiUpload, FiFileText } from 'react-icons/fi';
 import { LoadingOverlay } from './components/atoms/LoadingOverlay/LoadingOverlay';
 import { SkillBubble } from './components/atoms/SkillBubble';
 import { CookieConsent } from './components/molecules/CookieConsent';
-import { CachePrompt } from './components/molecules/CachePrompt';
-import { ToastProvider, useToast } from './components/organisms/ToastManager';
-import type { CacheAvailability } from '@/services/cacheService';
+import { ToastProvider } from './components/organisms/ToastManager';
 import './App.css';
 
 // Lazy load heavy components
@@ -48,11 +45,7 @@ const AppContent = () => {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [error, setError] = useState('');
     const [activeTab, setActiveTab] = useState('interview');
-    const [showCachePrompt, setShowCachePrompt] = useState(false);
-    const [cacheAvailability, setCacheAvailability] = useState<CacheAvailability | null>(null);
-    const [pendingAnalysisData, setPendingAnalysisData] = useState<{ resumeText: string; jobText: string } | null>(null);
     
-    const { showSuccess } = useToast();
     
     const { 
         currentStep, 
@@ -131,19 +124,14 @@ const AppContent = () => {
      * Orchestrates the complete analysis workflow including:
      * 1. Input validation
      * 2. Document parsing (resume and job description)
-     * 3. Cache checking for performance optimization
-     * 4. AI analysis calls with parallel processing
-     * 5. State updates and navigation to dashboard
+     * 3. AI analysis calls with parallel processing
+     * 4. State updates and navigation to dashboard
      * 
-     * Uses intelligent caching to avoid redundant API calls for identical content.
      * All AI operations run in parallel for optimal performance.
      * 
      * @async
      * @function
      * @throws {Error} When document parsing or AI analysis fails
-     */
-    /**
-     * Checks for cached content availability and shows prompt if found
      */
     const handleAnalyze = async () => {
         // Input validation
@@ -159,23 +147,12 @@ const AppContent = () => {
         setError('');
         
         try {
-            // Parse documents first to check cache availability
+            // Parse documents
             console.log('📄 Parsing documents...');
             const resumeText = await DocumentParser.parseResume(resumeFile);
             const jobText = jobFile ? await DocumentParser.parseResume(jobFile) : jobInput;
             
-            // Check if we have cached content
-            const availability = CacheService.checkCacheAvailability(resumeText, jobText);
-            
-            if (availability.hasResume || availability.hasJobDescription) {
-                // Show cache prompt to user
-                setCacheAvailability(availability);
-                setPendingAnalysisData({ resumeText, jobText });
-                setShowCachePrompt(true);
-                return;
-            }
-            
-            // No cache available, proceed with full analysis
+            // Proceed with analysis
             await performAnalysis(resumeText, jobText);
         } catch (err) {
             console.error('💥 Analysis error:', err);
@@ -185,9 +162,9 @@ const AppContent = () => {
     };
 
     /**
-     * Performs the actual analysis with caching
+     * Performs the actual analysis
      */
-    const performAnalysis = async (resumeText: string, jobText: string, useCache: boolean = true) => {
+    const performAnalysis = async (resumeText: string, jobText: string) => {
         setIsAnalyzing(true);
         setError('');
         
@@ -195,27 +172,17 @@ const AppContent = () => {
         setInterviewerRole(interviewerRole);
         
         try {
-            // Phase 1: Resume analysis with caching optimization
+            // Phase 1: Resume analysis
             console.log('📄 Analyzing your resume...');
-            let resumeData = useCache ? CacheService.getCachedResume(resumeText) : null;
-            if (!resumeData) {
-                console.log('🤖 AI is analyzing your resume...');
-                resumeData = await AIAnalysisService.analyzeResume(resumeText);
-                CacheService.cacheResume(resumeText, resumeData);
-                showSuccess('Resume analysis cached successfully!');
-            }
+            console.log('🤖 AI is analyzing your resume...');
+            const resumeData = await AIAnalysisService.analyzeResume(resumeText);
             setResumeData(resumeData);
             console.log('✅ Resume analysis complete!');
             
-            // Phase 2: Job description analysis with caching optimization
+            // Phase 2: Job description analysis
             console.log('💼 Analyzing job description...');
-            let jobData = useCache ? CacheService.getCachedJobDescription(jobText) : null;
-            if (!jobData) {
-                console.log('🤖 AI is analyzing job description...');
-                jobData = await AIAnalysisService.analyzeJobDescription(jobText);
-                CacheService.cacheJobDescription(jobText, jobData);
-                showSuccess('Job description analysis cached successfully!');
-            }
+            console.log('🤖 AI is analyzing job description...');
+            const jobData = await AIAnalysisService.analyzeJobDescription(jobText);
             setJobDescription(jobData);
             console.log('✅ Job analysis complete!');
             
@@ -242,19 +209,6 @@ const AppContent = () => {
         }
     };
 
-    /**
-     * Handle cache prompt responses
-     */
-    const handleCacheResponse = async (useCache: boolean) => {
-        setShowCachePrompt(false);
-        
-        if (pendingAnalysisData) {
-            const { resumeText, jobText } = pendingAnalysisData;
-            await performAnalysis(resumeText, jobText, useCache);
-            setPendingAnalysisData(null);
-            setCacheAvailability(null);
-        }
-    };
 
     // Render Upload View
     if (currentStep === 'upload') {
@@ -431,18 +385,6 @@ const AppContent = () => {
                     <Footer />
                 </div>
                 <CookieConsent />
-                {showCachePrompt && cacheAvailability && (
-                    <CachePrompt
-                        isVisible={showCachePrompt}
-                        cacheType={cacheAvailability.hasResume && cacheAvailability.hasJobDescription ? 'both' : 
-                                  cacheAvailability.hasResume ? 'resume' : 'jobDescription'}
-                        resumeFileName={cacheAvailability.resumeFileName}
-                        jobDescriptionPreview={cacheAvailability.jobDescriptionPreview}
-                        onUseCache={() => handleCacheResponse(true)}
-                        onSkipCache={() => handleCacheResponse(false)}
-                        onClose={() => setShowCachePrompt(false)}
-                    />
-                )}
             </>
         );
     }

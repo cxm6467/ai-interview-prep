@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '../../atoms/Button/Button';
 import { Card } from '../../atoms/Card/Card';
 import { Text } from '../../atoms/Text/Text';
 import { DadJokeService } from '../../../services/dadJokeService';
-import styles from './DadJoke.module.css';
 
 interface DadJokeProps {
   className?: string;
@@ -58,13 +57,6 @@ export const DadJoke: React.FC<DadJokeProps> = ({ className = '' }) => {
     }
   };
 
-  const resetCache = () => {
-    DadJokeService.resetJokeCache();
-    setError(null);
-    setMessage('Joke cache reset! You\'ll see fresh jokes now.');
-    setJoke('Cache cleared! Click "Get A Joke" for fresh content.');
-    setRetryCount(0);
-  };
   
   const handleRetry = () => {
     setRetryCount(0);
