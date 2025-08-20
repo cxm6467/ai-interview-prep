@@ -8,6 +8,7 @@ import { DadJoke } from '@molecules/DadJoke';
 import { Footer } from '@organisms/Footer';
 import { DocumentParser } from '@/services/documentParser';
 import { AIAnalysisService } from '@/services/aiAnalysis';
+import { DadJokeService } from '@/services/dadJokeService';
 import { useAppStore } from '@/store/appStore';
 import type { InterviewQuestion, PresentationTopic, CandidateQuestion } from '@/types';
 import { FiSun, FiMoon, FiUpload, FiFileText } from 'react-icons/fi';
@@ -71,6 +72,11 @@ const AppContent = () => {
     useEffect(() => {
         document.body.setAttribute('data-theme', theme);
     }, [theme]);
+
+    // Preload dad jokes on app initialization
+    useEffect(() => {
+        DadJokeService.preloadJokes();
+    }, []);
 
     /**
      * Formats interviewer role for display in loading message

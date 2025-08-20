@@ -10,7 +10,7 @@ export class DadJokeService {
   private static readonly CACHE_EXPIRY = 'dadJoke_cacheExpiry';
   private static readonly API_URL = 'https://icanhazdadjoke.com';
   private static readonly CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-  private static readonly PREFETCH_COUNT = 5;
+  private static readonly PREFETCH_COUNT = 50;
 
   private static getUsedIds(): Set<string> {
     try {
@@ -85,21 +85,37 @@ export class DadJokeService {
   private static async prefetchJokes(): Promise<DadJoke[]> {
     const jokes: DadJoke[] = [];
     const usedIds = this.getUsedIds();
+    const batchSize = 10; // Process in batches to avoid overwhelming the API
     
-    for (let i = 0; i < this.PREFETCH_COUNT; i++) {
-      try {
-        const joke = await this.fetchJoke();
-        
-        // Only add if we haven't used this joke before
-        if (!usedIds.has(joke.id)) {
-          jokes.push(joke);
-        }
-      } catch (error) {
-        console.warn(`Failed to fetch joke ${i + 1}:`, error);
+    for (let batch = 0; batch < Math.ceil(this.PREFETCH_COUNT / batchSize); batch++) {
+      const batchPromises: Promise<DadJoke | null>[] = [];
+      
+      // Create batch of requests
+      for (let i = 0; i < batchSize && (batch * batchSize + i) < this.PREFETCH_COUNT; i++) {
+        batchPromises.push(
+          this.fetchJoke()
+            .then(joke => !usedIds.has(joke.id) ? joke : null)
+            .catch(error => {
+              console.warn(`Failed to fetch joke ${batch * batchSize + i + 1}:`, error);
+              return null;
+            })
+        );
       }
       
-      // Small delay to be respectful to the API
-      await new Promise(resolve => setTimeout(resolve, 50));
+      // Wait for current batch to complete
+      const batchResults = await Promise.all(batchPromises);
+      
+      // Add successful, unique jokes
+      batchResults.forEach(joke => {
+        if (joke) {
+          jokes.push(joke);
+        }
+      });
+      
+      // Small delay between batches to be respectful to the API
+      if (batch < Math.ceil(this.PREFETCH_COUNT / batchSize) - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
     }
     
     return jokes;
@@ -110,10 +126,10 @@ export class DadJokeService {
       let cachedJokes = this.getCachedJokes();
       const usedIds = this.getUsedIds();
 
-      // If cache is empty or all cached jokes are used, prefetch new ones
+      // If cache is empty or running low on unused jokes, prefetch new ones
       const availableJokes = cachedJokes.filter(joke => !usedIds.has(joke.id));
       
-      if (availableJokes.length === 0) {
+      if (availableJokes.length <= 5) { // Prefetch when only 5 or fewer jokes remain
         console.log('Prefetching new jokes...');
         
         // Add a small delay before starting prefetch to improve UX
@@ -141,8 +157,16 @@ export class DadJokeService {
           };
         }
         
-        this.setCachedJokes(newJokes);
-        cachedJokes = newJokes;
+        // Merge new jokes with existing cache (remove duplicates)
+        const mergedJokes = [...cachedJokes];
+        newJokes.forEach(newJoke => {
+          if (!mergedJokes.some(existing => existing.id === newJoke.id)) {
+            mergedJokes.push(newJoke);
+          }
+        });
+        
+        this.setCachedJokes(mergedJokes);
+        cachedJokes = mergedJokes;
       }
 
       // Get a random unused joke
@@ -213,5 +237,35 @@ export class DadJokeService {
       cached: cachedJokes.length,
       cacheExpiry: expiry ? new Date(parseInt(expiry, 10)).toLocaleString() : null
     };
+  }
+
+  /**
+   * Preload jokes in the background on app initialization
+   * This runs without blocking the UI and populates the cache for better UX
+   */
+  static async preloadJokes(): Promise<void> {
+    try {
+      const cachedJokes = this.getCachedJokes();
+      
+      // Only preload if cache is empty or has fewer than 10 jokes
+      if (cachedJokes.length < 10) {
+        console.log('Preloading dad jokes in background...');
+        
+        // Run prefetch in background without blocking
+        setTimeout(async () => {
+          try {
+            const newJokes = await this.prefetchJokes();
+            if (newJokes.length > 0) {
+              this.setCachedJokes(newJokes);
+              console.log(`Preloaded ${newJokes.length} dad jokes`);
+            }
+          } catch (error) {
+            console.warn('Background joke preloading failed:', error);
+          }
+        }, 1000); // Delay 1 second to not interfere with app initialization
+      }
+    } catch (error) {
+      console.warn('Failed to start joke preloading:', error);
+    }
   }
 }
