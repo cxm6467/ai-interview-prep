@@ -161,6 +161,135 @@ The application features a cohesive color-coded design system:
 - **🔵 Indigo**: Interview questions and practice, presentations
 - **🔷 Teal**: Presentation topics and speaking points
 
+## 🔄 Application Flow
+
+The following diagram illustrates the complete user journey and data flow through the AI Interview Prep application:
+
+```mermaid
+graph TD
+    A[👤 User Visits App] --> B{First Time User?}
+    
+    B -->|Yes| C[🎨 Theme Selection]
+    B -->|No| D[📄 Upload Resume/Job Description]
+    
+    C --> D
+    
+    D --> E[📊 Document Processing]
+    E --> F[🧠 AI Analysis Engine]
+    
+    F --> G[📈 ATS Score Calculation]
+    F --> H[🎯 Skills Gap Analysis]
+    F --> I[🔍 Keyword Optimization]
+    F --> J[💼 Presentation Topics]
+    
+    G --> K[📋 Dashboard Display]
+    H --> K
+    I --> K
+    J --> K
+    
+    K --> L{User Navigation}
+    
+    L -->|Questions Tab| M[❓ AI-Generated Interview Questions]
+    L -->|Coaching Tab| N[🤖 Interactive AI Coach]
+    L -->|Presentations Tab| O[🎤 Topic Suggestions]
+    L -->|Strategic Tab| P[💡 Questions to Ask Interviewer]
+    L -->|Skills Tab| Q[📊 Detailed Analysis View]
+    
+    M --> R[🎯 Role-Based Questions]
+    N --> S[👨‍💼 8+ Interviewer Personas]
+    O --> T[📝 Structured Talking Points]
+    P --> U[⏰ Timing-Based Questions]
+    Q --> V[🏷️ Interactive Skill Bubbles]
+    
+    S --> W[💬 Real-time Chat Interface]
+    W --> X[🔄 Context-Aware Responses]
+    X --> Y[📋 Personalized Feedback]
+    
+    R --> Z[😄 Dad Jokes for Stress Relief]
+    T --> Z
+    U --> Z
+    V --> Z
+    Y --> Z
+    
+    Z --> AA{Want to Continue?}
+    AA -->|Yes| L
+    AA -->|No| BB[💾 Auto-save Progress]
+    
+    BB --> CC[🎯 Session Complete]
+    
+    subgraph "🔧 Backend Services"
+        DD[🌐 Netlify Functions]
+        EE[🤖 OpenAI GPT-3.5-turbo]
+        FF[📚 Document Parser]
+        GG[💾 Cache Service]
+    end
+    
+    E --> DD
+    DD --> EE
+    DD --> FF
+    F --> GG
+    
+    subgraph "🎨 UI Components"
+        HH[⚛️ React Components]
+        II[🎭 Theme System]
+        JJ[📱 Responsive Design]
+    end
+    
+    C --> II
+    K --> HH
+    HH --> JJ
+    
+    subgraph "📊 Data Flow"
+        KK[📄 File Upload]
+        LL[🔍 Text Extraction]
+        MM[🧮 Analysis Processing]
+        NN[💾 Local Storage]
+    end
+    
+    D --> KK
+    KK --> LL
+    LL --> MM
+    MM --> NN
+    
+    classDef userAction fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef aiProcess fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef dataFlow fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef uiComponent fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    
+    class A,B,C,D,L,AA userAction
+    class F,G,H,I,J,M,N,S,W,X,Y aiProcess
+    class E,KK,LL,MM,NN,GG dataFlow
+    class K,HH,II,JJ,R,O,P,Q,T,U,V uiComponent
+```
+
+### 🔍 Flow Breakdown
+
+**1. Initial Setup & Document Processing**
+- User selects theme and uploads resume/job description
+- Advanced PDF/DOCX parsing extracts text content
+- Files processed through secure Netlify Functions
+
+**2. AI Analysis Engine**
+- OpenAI GPT-3.5-turbo analyzes document content
+- Calculates ATS compatibility score (0-100)
+- Identifies skills gaps and keyword opportunities
+- Generates personalized presentation topics
+
+**3. Interactive Dashboard**
+- 5-tab interface with comprehensive interview prep tools
+- Real-time data visualization with skill bubbles
+- Responsive design adapts to all device sizes
+
+**4. AI Coaching Experience**
+- 8+ distinct interviewer personas (Technical Lead, Hiring Manager, etc.)
+- Context-aware responses using complete analysis data
+- Real-time chat interface with smooth animations
+
+**5. Stress Relief & Engagement**
+- Dad jokes integration with smart caching (60 jokes, 7-day expiration)
+- Persistent progress tracking across sessions
+- GDPR-compliant local storage
+
 ## 📁 Project Architecture
 
 ### Component Structure (Atomic Design)
