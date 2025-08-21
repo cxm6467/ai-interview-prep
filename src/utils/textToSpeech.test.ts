@@ -199,5 +199,4 @@ describe('textToSpeech utilities', () => {
     expect(isPaused()).toBe(true);
   });
 
-
 });

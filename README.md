@@ -51,8 +51,6 @@ A comprehensive AI-powered interview preparation application that transforms job
   - [Phase 3: Mobile & Advanced AI](#phase-3-mobile--advanced-ai)
 - [📚 Documentation](#-documentation)
 
----
-
 ## ✨ Features
 
 ### 🎯 Intelligent Interview Coaching
@@ -95,6 +93,8 @@ A comprehensive AI-powered interview preparation application that transforms job
 - **GDPR-Compliant Caching** - Optional local data caching with cookie consent management
 - **Session Persistence** - Resume your prep sessions exactly where you left off
 
+**[⬆️ Back to Top](#-ai-interview-prep)**
+
 ## 🚀 Tech Stack
 
 ### Frontend Architecture
@@ -117,6 +117,8 @@ A comprehensive AI-powered interview preparation application that transforms job
 - **Performance**: Advanced code splitting, lazy loading, and optimized chunk sizes (<1.5MB)
 - **Bundle Optimization**: Manual chunking with PDF.js worker separation and vendor splitting
 - **Security**: Environment variables, CORS protection, and input sanitization
+
+**[⬆️ Back to Top](#-ai-interview-prep)**
 
 ## 🛠️ Getting Started
 
@@ -159,6 +161,8 @@ npm run dev
 
 Netlify dev automatically handles both the frontend and serverless functions with proper routing.
 
+**[⬆️ Back to Top](#-ai-interview-prep)**
+
 ## 🎨 Design System
 
 ### Theme System
@@ -199,6 +203,8 @@ All themes feature:
 - **Modern UI**: Dropdown selector with visual theme previews and smooth animations
 - **Persistent Storage**: Theme preference saved and restored across sessions
 - **Current Analysis Integration**: Smart detection and display of existing analysis data
+
+**[⬆️ Back to Top](#-ai-interview-prep)**
 
 ### Color-Coded Content System
 The application features a cohesive color-coded design system:
@@ -339,6 +345,8 @@ graph TD
 - Persistent progress tracking across sessions
 - GDPR-compliant local storage
 
+**[⬆️ Back to Top](#-ai-interview-prep)**
+
 ## 📁 Project Architecture
 
 ### Component Structure (Atomic Design)
@@ -378,6 +386,8 @@ src/
 - **CSS Modules**: `ComponentName.module.css`
 - **Services**: camelCase with descriptive names
 - **Types**: Exported from centralized `types/index.ts`
+
+**[⬆️ Back to Top](#-ai-interview-prep)**
 
 ## ⚡ Performance Optimizations
 
@@ -422,6 +432,8 @@ npm run test:coverage   # Generate coverage reports
 npm run test:ci         # CI mode with coverage
 ```
 
+**[⬆️ Back to Top](#-ai-interview-prep)**
+
 ## 🔧 Configuration
 
 ### OpenAI Integration
@@ -433,6 +445,8 @@ The app works without an API key using mock data, but for full AI functionality:
 
 ### Cookie Consent
 The app includes GDPR-compliant cookie consent for caching user data locally. All data stays on the user's device.
+
+**[⬆️ Back to Top](#-ai-interview-prep)**
 
 ## 🚀 Deployment
 
@@ -455,6 +469,8 @@ The app includes GDPR-compliant cookie consent for caching user data locally. Al
 
 The app can be deployed to any static hosting service (Vercel, AWS S3, etc.) with serverless function support for the AI backend.
 
+**[⬆️ Back to Top](#-ai-interview-prep)**
+
 ## 🤝 Contributing
 
 We welcome contributions! Please see our [contribution guidelines](https://github.com/cxm6467/ai-interview-prep) for details.
@@ -465,6 +481,8 @@ We welcome contributions! Please see our [contribution guidelines](https://githu
 - 🔧 Submit pull requests
 - 📖 Improve documentation
 - 🎨 Enhance UI/UX design
+
+**[⬆️ Back to Top](#-ai-interview-prep)**
 
 ## 📄 License
 
