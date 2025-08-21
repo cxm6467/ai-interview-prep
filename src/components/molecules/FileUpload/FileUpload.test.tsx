@@ -1,26 +1,27 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+// Jest globals available
 import { render, screen, fireEvent, waitFor } from '../../../test/utils';
 import { FileUpload } from './FileUpload';
 import { createMockFile, createMockDragEvent } from '../../../test/utils';
 
 // Mock react-dropzone
-vi.mock('react-dropzone', () => ({
-  useDropzone: vi.fn()
+jest.mock('react-dropzone', () => ({
+  useDropzone: jest.fn()
 }));
 
-const mockUseDropzone = vi.mocked(await import('react-dropzone')).useDropzone;
+import { useDropzone } from 'react-dropzone';
+const mockUseDropzone = useDropzone as jest.MockedFunction<typeof useDropzone>;
 
 describe('FileUpload', () => {
-  const mockOnDrop = vi.fn();
-  const mockGetRootProps = vi.fn(() => ({
+  const mockOnDrop = jest.fn();
+  const mockGetRootProps = jest.fn(() => ({
     'data-testid': 'dropzone-root'
   }));
-  const mockGetInputProps = vi.fn(() => ({
+  const mockGetInputProps = jest.fn(() => ({
     'data-testid': 'dropzone-input'
   }));
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    jest.clearAllMocks();
     mockUseDropzone.mockReturnValue({
       getRootProps: mockGetRootProps,
       getInputProps: mockGetInputProps,
@@ -29,7 +30,7 @@ describe('FileUpload', () => {
       isDragAccept: false,
       fileRejections: [],
       acceptedFiles: [],
-      open: vi.fn()
+      open: jest.fn()
     } as any);
   });
 
@@ -73,7 +74,7 @@ describe('FileUpload', () => {
       isDragAccept: true,
       fileRejections: [],
       acceptedFiles: [],
-      open: vi.fn()
+      open: jest.fn()
     } as any);
 
     const { container } = render(<FileUpload onDrop={mockOnDrop} />);
@@ -92,7 +93,7 @@ describe('FileUpload', () => {
       isDragAccept: false,
       fileRejections: [],
       acceptedFiles: [],
-      open: vi.fn()
+      open: jest.fn()
     } as any);
 
     const { container } = render(<FileUpload onDrop={mockOnDrop} />);
@@ -102,12 +103,12 @@ describe('FileUpload', () => {
   });
 
   it('calls onDrop with files when dropzone is used', async () => {
-    const mockOpen = vi.fn();
+    const mockOpen = jest.fn();
     mockUseDropzone.mockImplementation((config) => {
       // Simulate file drop
       if (config?.onDrop) {
         const mockFile = createMockFile('test.pdf', 1024, 'application/pdf');
-        setTimeout(() => config.onDrop([mockFile], [], expect.any(Object)), 0);
+        setTimeout(() => config.onDrop?.([mockFile], [], expect.any(Object)), 0);
       }
       
       return {

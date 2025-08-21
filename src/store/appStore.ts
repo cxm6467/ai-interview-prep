@@ -38,7 +38,7 @@ export const useAppStore = create<AppState>((set) => ({
   interviewerRole: '',
   isLoading: false,
   currentStep: 'upload',
-  theme: 'dark',
+  theme: 'light',
   
   setResumeData: (data) => set({ resumeData: data }),
   setJobDescription: (data) => set({ jobDescription: data }),
@@ -61,6 +61,8 @@ export const useAppStore = create<AppState>((set) => ({
     presentationTopics: [],
     atsScore: null,
     interviewerRole: '',
-    currentStep: 'upload'
+    isLoading: false,
+    currentStep: 'upload',
+    theme: 'light'
   })
 }));

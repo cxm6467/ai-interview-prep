@@ -10,10 +10,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:ui": "vitest --ui",
-    "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "test:ci": "jest --ci --coverage --watchAll=false"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
@@ -49,15 +49,16 @@
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
     "@eslint/js": "^9.33.0",
+    "@jest/globals": "^30.0.5",
     "@testing-library/jest-dom": "^6.7.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jest": "^30.0.0",
     "@types/pdf-parse": "^1.1.5",
     "@types/pdfjs-dist": "^2.10.377",
     "@types/react-icons": "^2.2.7",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
-    "@vitest/ui": "^3.2.4",
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.0.1",
     "eslint": "^9.33.0",
@@ -66,12 +67,14 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.3.0",
     "husky": "^9.1.2",
-    "jsdom": "^26.1.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^30.0.5",
+    "jest-environment-jsdom": "^30.0.5",
     "lint-staged": "^16.1.5",
     "msw": "^2.10.5",
     "netlify-cli": "^23.1.4",
     "prettier": "^3.6.2",
-    "typescript-eslint": "^8.39.1",
-    "vitest": "^3.2.4"
+    "ts-jest": "^29.4.1",
+    "typescript-eslint": "^8.39.1"
   }
 }

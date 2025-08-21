@@ -608,13 +608,71 @@ html {
   color: inherit;
 }
 
+/* Force light theme application with higher specificity */
+body.theme-light,
+body[data-theme="light"],
+html.theme-light,
+html[data-theme="light"] {
+  --color-primary: #2563EB !important;
+  --color-primary-hover: #1D4ED8 !important;
+  --color-primary-subtle: rgba(37, 99, 235, 0.1) !important;
+  
+  --color-secondary: #3498DB !important;
+  --color-secondary-hover: #2E86C1 !important;
+  --color-secondary-subtle: rgba(52, 152, 219, 0.1) !important;
+  
+  --color-success: #27AE60 !important;
+  --color-success-hover: #229954 !important;
+  --color-success-subtle: rgba(39, 174, 96, 0.1) !important;
+  
+  --color-warning: #F39C12 !important;
+  --color-warning-hover: #E67E22 !important;
+  --color-warning-subtle: rgba(243, 156, 18, 0.1) !important;
+  
+  --color-error: #E91E63 !important;
+  --color-error-hover: #C2185B !important;
+  --color-error-subtle: rgba(233, 30, 99, 0.1) !important;
+  
+  --color-info: #17A2B8 !important;
+  --color-info-hover: #138496 !important;
+  --color-info-subtle: rgba(23, 162, 184, 0.1) !important;
+  
+  --color-background: #FAFAFA !important;
+  --color-background-secondary: #FFFFFF !important;
+  --color-background-tertiary: #F5F5F5 !important;
+  
+  --color-surface: #FFFFFF !important;
+  --color-surface-hover: #F8F8F8 !important;
+  --color-surface-secondary: #F5F5F5 !important;
+  
+  --color-text: #2D2A2E !important;
+  --color-text-secondary: #4A474B !important;
+  --color-text-tertiary: #6B6669 !important;
+  --color-text-inverse: #FFFFFF !important;
+  
+  --color-border: #D1D5DB !important;
+  --color-border-hover: #9CA3AF !important;
+  --color-border-secondary: #6B7280 !important;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.05) !important;
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+  
+  background: var(--color-background) !important;
+  color: var(--color-text) !important;
+}
+
 /* Explicitly set text colors for light theme to prevent white text issues */
 .theme-light *, .theme-light *::before, .theme-light *::after,
-[data-theme="light"] *, [data-theme="light"] *::before, [data-theme="light"] *::after {
+[data-theme="light"] *, [data-theme="light"] *::before, [data-theme="light"] *::after,
+body.theme-light *, body.theme-light *::before, body.theme-light *::after,
+body[data-theme="light"] *, body[data-theme="light"] *::before, body[data-theme="light"] *::after {
   color: inherit;
 }
 
-/* Force text elements to use theme colors in light mode */
-.theme-light, [data-theme="light"] {
+/* Additional light theme overrides for specific elements */
+body.theme-light .app,
+body[data-theme="light"] .app {
+  background: var(--color-background) !important;
   color: var(--color-text) !important;
 }
