@@ -10,6 +10,7 @@ export default {
     '<rootDir>/src/main.test.tsx',
     '<rootDir>/src/hooks/useScrollFix.simple.test.{ts,tsx}',
     '<rootDir>/src/hooks/useScrollFix.comprehensive.test.{ts,tsx}',
+    '<rootDir>/src/hooks/useToast.test.{ts,tsx}',
   ],
   collectCoverageFrom: [
     'src/utils/*.{ts,tsx}',
