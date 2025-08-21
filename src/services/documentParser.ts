@@ -56,7 +56,8 @@ export class DocumentParser {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
         const pageText = textContent.items
-          .map((item: any) => (item as { str: string }).str)
+          .map((item: any) => (item && typeof item.str === 'string') ? item.str : '')
+          .filter(str => str.length > 0)
           .join(' ');
         fullText += pageText + '\n';
       }
