@@ -9,6 +9,7 @@ export default {
     '<rootDir>/src/components/atoms/SkillBubble/*.{test,spec}.{ts,tsx}',
     '<rootDir>/src/main.test.tsx',
     '<rootDir>/src/hooks/useScrollFix.simple.test.{ts,tsx}',
+    '<rootDir>/src/hooks/useScrollFix.comprehensive.test.{ts,tsx}',
   ],
   collectCoverageFrom: [
     'src/utils/*.{ts,tsx}',
@@ -45,4 +46,18 @@ export default {
     '^@types/(.*)$': '<rootDir>/src/types/$1',
     '^@test/(.*)$': '<rootDir>/src/test/$1',
   },
+  
+  // Coverage and reporting configuration
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'lcov', 'html', 'cobertura'],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+  
+  collectCoverage: false, // Only collect when explicitly requested
 };
