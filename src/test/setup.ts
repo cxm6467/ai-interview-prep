@@ -1,22 +1,21 @@
 import '@testing-library/jest-dom';
-import { beforeAll, afterEach, afterAll, vi } from 'vitest';
 
 // Mock TextToSpeech API
 Object.defineProperty(window, 'speechSynthesis', {
   writable: true,
   value: {
-    speak: vi.fn(),
-    cancel: vi.fn(),
-    pause: vi.fn(),
-    resume: vi.fn(),
-    getVoices: vi.fn(() => []),
+    speak: jest.fn(),
+    cancel: jest.fn(),
+    pause: jest.fn(),
+    resume: jest.fn(),
+    getVoices: jest.fn(() => []),
     onvoiceschanged: null,
   }
 });
 
 Object.defineProperty(window, 'SpeechSynthesisUtterance', {
   writable: true,
-  value: vi.fn().mockImplementation((text) => ({
+  value: jest.fn().mockImplementation((text) => ({
     text,
     voice: null,
     pitch: 1,
@@ -31,31 +30,31 @@ Object.defineProperty(window, 'SpeechSynthesisUtterance', {
 // Mock localStorage
 Object.defineProperty(window, 'localStorage', {
   value: {
-    getItem: vi.fn(() => null),
-    setItem: vi.fn(),
-    removeItem: vi.fn(),
-    clear: vi.fn(),
+    getItem: jest.fn(() => null),
+    setItem: jest.fn(),
+    removeItem: jest.fn(),
+    clear: jest.fn(),
   }
 });
 
 // Mock fetch
-global.fetch = vi.fn();
+global.fetch = jest.fn();
 
 // Mock IntersectionObserver
-global.IntersectionObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
+global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
 }));
 
 // Mock ResizeObserver  
-global.ResizeObserver = vi.fn().mockImplementation(() => ({
-  observe: vi.fn(),
-  unobserve: vi.fn(),
-  disconnect: vi.fn(),
+global.ResizeObserver = jest.fn().mockImplementation(() => ({
+  observe: jest.fn(),
+  unobserve: jest.fn(),
+  disconnect: jest.fn(),
 }));
 
 // Clean up after each test
 afterEach(() => {
-  vi.clearAllMocks();
+  jest.clearAllMocks();
 });

@@ -1,12 +1,12 @@
 import { render, RenderOptions } from '@testing-library/react';
 import { ReactElement } from 'react';
-import { vi } from 'vitest';
+// Jest globals are available
 
 // Mock theme store
 export const mockThemeStore = {
   theme: 'light',
-  setTheme: vi.fn(),
-  toggleTheme: vi.fn(),
+  setTheme: jest.fn(),
+  toggleTheme: jest.fn(),
 };
 
 // Mock app store
@@ -21,18 +21,18 @@ export const mockAppStore = {
   isLoading: false,
   currentStep: 'upload' as const,
   theme: 'light' as const,
-  setResumeData: vi.fn(),
-  setJobDescription: vi.fn(),
-  setInterviewQuestions: vi.fn(),
-  setCandidateQuestions: vi.fn(),
-  setPresentationTopics: vi.fn(),
-  setATSScore: vi.fn(),
-  setInterviewerRole: vi.fn(),
-  setLoading: vi.fn(),
-  setCurrentStep: vi.fn(),
-  setTheme: vi.fn(),
-  toggleTheme: vi.fn(),
-  reset: vi.fn(),
+  setResumeData: jest.fn(),
+  setJobDescription: jest.fn(),
+  setInterviewQuestions: jest.fn(),
+  setCandidateQuestions: jest.fn(),
+  setPresentationTopics: jest.fn(),
+  setATSScore: jest.fn(),
+  setInterviewerRole: jest.fn(),
+  setLoading: jest.fn(),
+  setCurrentStep: jest.fn(),
+  setTheme: jest.fn(),
+  toggleTheme: jest.fn(),
+  reset: jest.fn(),
 };
 
 // Custom render function that includes providers
@@ -64,8 +64,8 @@ export const createMockDragEvent = (files: File[]) => {
       items: files.map(file => ({ kind: 'file', type: file.type, getAsFile: () => file })),
       types: ['Files']
     },
-    preventDefault: vi.fn(),
-    stopPropagation: vi.fn(),
+    preventDefault: jest.fn(),
+    stopPropagation: jest.fn(),
   };
 };
 
@@ -73,13 +73,13 @@ export const createMockDragEvent = (files: File[]) => {
 export const mockTTSResponse = {
   isSupported: true,
   isSpeaking: false,
-  speak: vi.fn(),
-  cancel: vi.fn(),
-  pause: vi.fn(),
-  resume: vi.fn(),
+  speak: jest.fn(),
+  cancel: jest.fn(),
+  pause: jest.fn(),
+  resume: jest.fn(),
   voices: []
 };
 
 export * from '@testing-library/react';
 export { customRender as render };
-export { vi };
+// Jest utilities exported above
