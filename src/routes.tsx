@@ -1,5 +1,6 @@
 import { lazyLoad } from './utils/lazyLoad';
-import type { ComponentType, FC } from 'react';
+import type { FC } from 'react';
+import type { RouteConfig } from './constants/routes';
 
 // Define prop types for components
 export interface FileUploadProps {
@@ -34,13 +35,6 @@ const DadJoke = lazyLoad<DadJokeProps>(
   () => import('@/components/molecules/DadJoke/DadJoke').then(m => ({ default: m.DadJoke }))
 );
 
-// Define route types
-export interface RouteConfig {
-  path: string;
-  component: ComponentType<Record<string, unknown>>;
-  exact?: boolean;
-  requiresAuth?: boolean;
-}
 
 // Create a wrapper component for the home page
 const HomePage: FC = () => {
@@ -75,6 +69,7 @@ const HomePage: FC = () => {
 };
 
 // Main application routes
+// eslint-disable-next-line react-refresh/only-export-components
 export const ROUTES: RouteConfig[] = [
   {
     path: '/',

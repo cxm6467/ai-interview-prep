@@ -1,31 +1,7 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { useState, useCallback, ReactNode } from 'react';
 import { Toast } from '../../atoms/Toast/Toast';
+import { ToastContext, ToastData, ToastContextType } from './ToastContext';
 import styles from './ToastManager.module.css';
-
-export interface ToastData {
-  id: string;
-  message: string;
-  type?: 'success' | 'info' | 'warning' | 'error';
-  duration?: number;
-}
-
-interface ToastContextType {
-  showToast: (toast: Omit<ToastData, 'id'>) => void;
-  showSuccess: (message: string, duration?: number) => void;
-  showError: (message: string, duration?: number) => void;
-  showWarning: (message: string, duration?: number) => void;
-  showInfo: (message: string, duration?: number) => void;
-}
-
-const ToastContext = createContext<ToastContextType | null>(null);
-
-export const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToast must be used within a ToastProvider');
-  }
-  return context;
-};
 
 interface ToastProviderProps {
   children: ReactNode;

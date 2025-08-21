@@ -4,6 +4,55 @@
 
 A comprehensive AI-powered interview preparation application that transforms job interview prep with intelligent analysis, personalized coaching, and interactive practice sessions. Built with React, TypeScript, and OpenAI GPT for modern job seekers.
 
+## 📚 Table of Contents
+
+- [✨ Features](#-features)
+  - [🎯 Intelligent Interview Coaching](#-intelligent-interview-coaching)
+  - [📊 Advanced ATS & Skills Analysis](#-advanced-ats--skills-analysis)
+  - [📈 Dynamic Presentation Topics](#-dynamic-presentation-topics)
+  - [🚀 Modern User Experience](#-modern-user-experience)
+  - [🎭 Stress Relief & Engagement](#-stress-relief--engagement)
+- [🚀 Tech Stack](#-tech-stack)
+  - [Frontend Architecture](#frontend-architecture)
+  - [AI & Backend](#ai--backend)
+  - [Development & Deployment](#development--deployment)
+- [🛠️ Getting Started](#️-getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [🎨 Design System](#-design-system)
+  - [Theme System](#theme-system)
+  - [Color-Coded Content System](#color-coded-content-system)
+- [🔄 Application Flow](#-application-flow)
+  - [🔍 Flow Breakdown](#-flow-breakdown)
+- [📁 Project Architecture](#-project-architecture)
+  - [Component Structure (Atomic Design)](#component-structure-atomic-design)
+  - [File Naming Conventions](#file-naming-conventions)
+- [⚡ Performance Optimizations](#-performance-optimizations)
+  - [AI Response Optimization](#ai-response-optimization)
+  - [Caching & Data Management](#caching--data-management)
+  - [Frontend Performance](#frontend-performance)
+  - [Development Experience](#development-experience)
+  - [Testing](#testing)
+- [🔧 Configuration](#-configuration)
+  - [OpenAI Integration](#openai-integration)
+  - [Cookie Consent](#cookie-consent)
+- [🚀 Deployment](#-deployment)
+  - [Netlify (Recommended)](#netlify-recommended)
+  - [Other Platforms](#other-platforms)
+- [🤝 Contributing](#-contributing)
+- [📄 License](#-license)
+  - [Attribution](#attribution)
+  - [Third-Party Licenses](#third-party-licenses)
+- [🔗 Connect & Follow](#-connect--follow)
+- [🎯 Future Roadmap](#-future-roadmap)
+  - [Recently Completed ✅](#recently-completed-)
+  - [Phase 1: Enhanced User Experience](#phase-1-enhanced-user-experience)
+  - [Phase 2: Collaboration & Integration](#phase-2-collaboration--integration)
+  - [Phase 3: Mobile & Advanced AI](#phase-3-mobile--advanced-ai)
+- [📚 Documentation](#-documentation)
+
+---
+
 ## ✨ Features
 
 ### 🎯 Intelligent Interview Coaching
@@ -297,31 +346,31 @@ graph TD
 src/
 ├── components/
 │   ├── atoms/                    # Basic UI building blocks
-│   │   ├── Button/              # Reusable button with variants
-│   │   ├── Card/                # Container component
-│   │   ├── Text/                # Typography component
-│   │   ├── LoadingOverlay/      # Loading states
-│   │   └── SkillBubble/         # Skill tags with optimized wrapping
+│   │   ├── Button/               # Reusable button with variants
+│   │   ├── Card/                 # Container component
+│   │   ├── Text/                 # Typography component
+│   │   ├── LoadingOverlay/       # Loading states
+│   │   └── SkillBubble/          # Skill tags with optimized wrapping
 │   ├── molecules/                # Composite components
-│   │   ├── FileUpload/          # Drag-and-drop file uploader
-│   │   ├── DadJoke/             # Humor integration
-│   │   └── CookieConsent/       # GDPR compliance
+│   │   ├── FileUpload/           # Drag-and-drop file uploader
+│   │   ├── DadJoke/              # Humor integration
+│   │   └── CookieConsent/        # GDPR compliance
 │   └── organisms/                # Complex, feature-rich components
-│       ├── InterviewChat/       # AI coaching interface (lazy loaded)
-│       └── Footer/              # Social links and info
+│       ├── InterviewChat/        # AI coaching interface (lazy loaded)
+│       └── Footer/               # Social links and info
 ├── services/                     # Business logic layer
-│   ├── aiAnalysis.ts           # OpenAI integration with timeout handling
-│   ├── cacheService.ts         # Performance optimization
-│   └── documentParser.ts       # PDF/DOCX file processing
+│   ├── aiAnalysis.ts             # OpenAI integration with timeout handling
+│   ├── cacheService.ts           # Performance optimization
+│   └── documentParser.ts         # PDF/DOCX file processing
 ├── store/                        # State management
-│   └── appStore.ts             # Zustand store configuration
+│   └── appStore.ts               # Zustand store configuration
 ├── types/                        # TypeScript definitions
-│   └── index.ts                # Comprehensive type system
+│   └── index.ts                  # Comprehensive type system
 ├── utils/                        # Utility functions
-│   └── lazyLoad.tsx            # Component lazy loading utilities
+│   └── lazyLoad.tsx              # Component lazy loading utilities
 └── netlify/functions/            # Serverless backend
-    ├── ai-handler.js           # OpenAI API proxy with CORS
-    └── package.json            # Function dependencies
+    ├── ai-handler.js             # OpenAI API proxy with CORS
+    └── package.json              # Function dependencies
 ```
 
 ### File Naming Conventions
@@ -490,4 +539,18 @@ Created with ❤️ by Chris Marasco - Follow for more innovative projects!
 
 ---
 
+## 🔝 Quick Navigation
+
+**Get Started**: [Installation](#installation) | [Prerequisites](#prerequisites) | [Configuration](#-configuration)
+
+**Key Features**: [AI Coaching](#-intelligent-interview-coaching) | [ATS Analysis](#-advanced-ats--skills-analysis) | [Theme System](#theme-system)
+
+**For Developers**: [Tech Stack](#-tech-stack) | [Architecture](#-project-architecture) | [Performance](#-performance-optimizations) | [Contributing](#-contributing)
+
+**Deployment**: [Netlify](#netlify-recommended) | [Other Platforms](#other-platforms) | [CI/CD](#development--deployment)
+
+---
+
 *Built with React, TypeScript, and AI to revolutionize interview preparation!* 🚀✨
+
+**[⬆️ Back to Top](#-ai-interview-prep)**

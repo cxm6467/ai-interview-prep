@@ -35,7 +35,7 @@ const highlightJson = (json: string): string => {
 };
 
 interface JsonViewerProps {
-  data: any;
+  data: unknown;
   className?: string;
 }
 
