@@ -24,9 +24,10 @@ export const formatDuration = (duration: string): string => {
   return duration.trim().replace(/\s+/g, ' ');
 };
 
-export const validateResumeData = (data: any): boolean => {
+export const validateResumeData = (data: unknown): boolean => {
   if (!data || typeof data !== 'object') {return false;}
-  return Array.isArray(data.experience) && 
-         Array.isArray(data.skills) && 
-         Array.isArray(data.education);
+  const obj = data as Record<string, unknown>;
+  return Array.isArray(obj.experience) && 
+         Array.isArray(obj.skills) && 
+         Array.isArray(obj.education);
 };

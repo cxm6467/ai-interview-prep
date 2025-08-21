@@ -23,7 +23,7 @@ export const uniqueArray = <T>(array: T[]): T[] => {
   return Array.from(new Set(array));
 };
 
-export const groupBy = <T, K extends keyof any>(
+export const groupBy = <T, K extends string | number | symbol>(
   array: T[],
   key: (item: T) => K
 ): Record<K, T[]> => {
@@ -52,7 +52,7 @@ export const findDuplicates = <T>(array: T[]): T[] => {
   return Array.from(duplicates);
 };
 
-export const isEmpty = (array: any): boolean => {
+export const isEmpty = (array: unknown): boolean => {
   return !Array.isArray(array) || array.length === 0;
 };
 

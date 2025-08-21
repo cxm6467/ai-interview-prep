@@ -5,10 +5,28 @@ import { Text } from '@atoms/Text';
 import { DadJokeService } from '@services/dadJokeService';
 import styles from './SessionInspector.module.css';
 
+interface JokeStats {
+  used: number;
+  cached: number;
+  cacheExpiry: string | null;
+}
+
+interface StorageData {
+  usedIds: string[];
+  cache: Array<{ id: string; joke: string }>;
+  expiry: string | null;
+  totalStorage: string;
+}
+
 export const SessionInspector: React.FC = () => {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<JokeStats | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [storageData, setStorageData] = useState<any>({});
+  const [storageData, setStorageData] = useState<StorageData>({
+    usedIds: [],
+    cache: [],
+    expiry: null,
+    totalStorage: '{}'
+  });
 
   const refreshData = () => {
     const jokeStats = DadJokeService.getJokeStats();
@@ -98,7 +116,7 @@ export const SessionInspector: React.FC = () => {
             <Text variant="h3" color="accent">Cached Jokes</Text>
             <div className={styles.dataContainer}>
               {storageData.cache.length > 0 ? (
-                storageData.cache.map((joke: any, index: number) => (
+                storageData.cache.map((joke: { id: string; joke: string }, index: number) => (
                   <div key={joke.id} className={styles.jokeItem}>
                     <Text variant="small" weight="bold">#{index + 1} (ID: {joke.id})</Text>
                     <Text variant="small" color="secondary">{joke.joke}</Text>
