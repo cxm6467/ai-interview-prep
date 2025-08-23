@@ -1,0 +1,25 @@
+# Example Terraform variables file for development environment
+# Copy this file to terraform.tfvars and update with your actual values
+
+# Required variables
+openai_api_key = "your-openai-api-key-here"
+
+# Lambda configuration
+lambda_timeout  = 60
+lambda_memory   = 512
+lambda_reserved_concurrency = 5
+
+# Logging configuration
+log_retention_days = 7
+
+# API Gateway throttling (development limits)
+api_throttling_rate_limit  = 100
+api_throttling_burst_limit = 200
+
+# Docker image
+docker_image_tag = "sha256:053372a5fda47ee16953259513079b519e19a91a18c7dc9b09ad6dab9af574ed"
+
+# Security settings (recommended for production)
+enable_ssm_parameter_access = false  # Enable if storing config in Parameter Store
+enable_secrets_manager     = false  # Enable if storing API keys in Secrets Manager
+enable_cross_account_access = false # Enable for CI/CD from other accounts
