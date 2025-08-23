@@ -91,13 +91,16 @@ jobs:
             PLAN_OPTS="-detailed-exitcode"
           fi
           
-          # Run the plan
+          # Run the plan and capture exit code
+          set +e
           terraform plan $PLAN_OPTS \
             -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" \
             -out=tfplan
+          PLAN_EXIT_CODE=$?
+          set -e
           
           # Capture exit code for detailed analysis
-          echo "plan-exitcode=$?" >> $GITHUB_OUTPUT
+          echo plan-exitcode=$PLAN_EXIT_CODE >> $GITHUB_OUTPUT
           
       - name: Terraform Plan (Destroy)
         if: github.event.inputs.plan_type == 'destroy'
@@ -156,9 +159,9 @@ jobs:
           fi
           
           # Store outputs
-          echo "additions=${ADDITIONS}" >> $GITHUB_OUTPUT
-          echo "changes=${CHANGES}" >> $GITHUB_OUTPUT
-          echo "destroys=${DESTROYS}" >> $GITHUB_OUTPUT
+          echo additions=$ADDITIONS >> $GITHUB_OUTPUT
+          echo changes=$CHANGES >> $GITHUB_OUTPUT
+          echo destroys=$DESTROYS >> $GITHUB_OUTPUT
           
       - name: Generate Security Analysis
         working-directory: iac
@@ -190,7 +193,7 @@ jobs:
             echo "✅ No hardcoded secrets detected" >> security-analysis.md
           fi
           
-          echo "hardcoded-issues=${HARDCODED_ISSUES}" >> $GITHUB_OUTPUT
+          echo hardcoded-issues=$HARDCODED_ISSUES >> $GITHUB_OUTPUT
           
       - name: Cost Estimation
         working-directory: iac
