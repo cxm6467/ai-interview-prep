@@ -152,6 +152,22 @@ async function generateComprehensiveAnalysis(resumeText, jobDescription) {
 }
 
 /**
+ * Handle GET requests for health check
+ */
+function handleHealthCheck() {
+  return {
+    statusCode: 200,
+    headers: corsHeaders,
+    body: JSON.stringify({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      environment: process.env.ENVIRONMENT || 'production',
+      openai_configured: !!process.env.OPENAI_API_KEY
+    })
+  };
+}
+
+/**
  * Main handler function
  */
 exports.handler = async function(event, context) {
@@ -160,7 +176,12 @@ exports.handler = async function(event, context) {
     return handleOptions();
   }
 
-  // Only allow POST requests
+  // Handle GET requests for health check
+  if (event.httpMethod === 'GET') {
+    return handleHealthCheck();
+  }
+
+  // Only allow POST requests for main functionality
   if (event.httpMethod !== 'POST') {
     return createErrorResponse(405, 'Method Not Allowed');
   }

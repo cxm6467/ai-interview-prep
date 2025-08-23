@@ -66,7 +66,7 @@ export class AIAnalysisService {
     resumeText: string,
     jobDescription: string
   ): Promise<ConsolidatedAnalysisResult> {
-    const awsApiEndpoint = 'YOUR_API_GATEWAY_URL';
+    const awsApiEndpoint = 'api.dev.ai-ip.chrismarasco.io';
     const isProduction = import.meta.env.PROD;
     const apiUrl = isProduction 
       ? `https://${awsApiEndpoint}/`
@@ -110,7 +110,7 @@ export class AIAnalysisService {
     // Environment-aware API routing for development vs production
     const isProduction = import.meta.env.PROD;
     const apiUrl = isProduction 
-      ? 'YOUR_API_GATEWAY_URL'  // Production: Use AWS API Gateway
+      ? 'https://api.dev.ai-ip.chrismarasco.io/'  // Production: Use AWS API Gateway
       : 'http://localhost:8080/';                // Development: Local backend
     const requestBody = {
       prompt: prompt,

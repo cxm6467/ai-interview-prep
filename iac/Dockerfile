@@ -1,16 +1,15 @@
-# Use the official AWS Node.js Lambda base image.
+# Use the official AWS Lambda Node.js runtime as the base image
 FROM public.ecr.aws/lambda/nodejs:18
 
-# Set the working directory to the Lambda task root.
-WORKDIR /var/task/
+# Copy package.json and package-lock.json (if available)
+COPY apps/backend/package*.json ${LAMBDA_TASK_ROOT}/
 
-# Copy the function code and package files from their new location.
-COPY consolidated-ai-handler.js ./
-COPY package.json ./
+# Install dependencies
+RUN npm install --only=production
 
-# Install the function's dependencies.
-RUN npm install
+# Copy the Lambda function code
+COPY apps/backend/consolidated-ai-handler.js ${LAMBDA_TASK_ROOT}/
+COPY apps/backend/local-server.js ${LAMBDA_TASK_ROOT}/
 
-# Define the command that Lambda will execute to run your function.
-# The format is "[file_name].[handler_name]".
+# Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD ["consolidated-ai-handler.handler"]
