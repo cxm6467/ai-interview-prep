@@ -1,0 +1,176 @@
+name: Setup AWS OIDC (One-time)
+
+on:
+  workflow_dispatch:
+    inputs:
+      aws_account_id:
+        description: 'AWS Account ID'
+        required: true
+        type: string
+      aws_region:
+        description: 'AWS Region'
+        required: true
+        default: 'us-east-1'
+        type: string
+
+# This workflow sets up AWS OIDC for secure authentication without long-term credentials
+# Run this once to create the necessary IAM resources
+
+env:
+  AWS_REGION: ${{ github.event.inputs.aws_region || 'us-east-1' }}
+  
+jobs:
+  setup-oidc:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials (temporary)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          # Use temporary credentials for initial setup
+          aws-access-key-id: ${{ secrets.AWS_SETUP_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SETUP_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+          
+      - name: Create OIDC Provider
+        run: |
+          echo "🔐 Setting up GitHub OIDC provider..."
+          
+          # Check if OIDC provider already exists
+          if aws iam get-open-id-connect-provider --open-id-connect-provider-arn "arn:aws:iam::${{ github.event.inputs.aws_account_id }}:oidc-provider/token.actions.githubusercontent.com" 2>/dev/null; then
+            echo "✅ OIDC provider already exists"
+          else
+            echo "📝 Creating OIDC provider..."
+            aws iam create-open-id-connect-provider \
+              --url https://token.actions.githubusercontent.com \
+              --thumbprint-list 6938fd4d98bab03faadb97b34396831e3780aea1 \
+              --client-id-list sts.amazonaws.com
+          fi
+          
+      - name: Create IAM Role for GitHub Actions
+        run: |
+          echo "👤 Creating IAM role for GitHub Actions..."
+          
+          # Create trust policy
+          cat > trust-policy.json << EOF
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Principal": {
+                  "Federated": "arn:aws:iam::${{ github.event.inputs.aws_account_id }}:oidc-provider/token.actions.githubusercontent.com"
+                },
+                "Action": "sts:AssumeRoleWithWebIdentity",
+                "Condition": {
+                  "StringEquals": {
+                    "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+                  },
+                  "StringLike": {
+                    "token.actions.githubusercontent.com:sub": "repo:${{ github.repository }}:*"
+                  }
+                }
+              }
+            ]
+          }
+          EOF
+          
+          # Create deployment policy
+          cat > deployment-policy.json << EOF
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Effect": "Allow",
+                "Action": [
+                  "ecr:*",
+                  "lambda:*",
+                  "apigateway:*",
+                  "iam:GetRole",
+                  "iam:CreateRole",
+                  "iam:UpdateRole",
+                  "iam:DeleteRole",
+                  "iam:AttachRolePolicy",
+                  "iam:DetachRolePolicy",
+                  "iam:CreatePolicy",
+                  "iam:DeletePolicy",
+                  "iam:GetPolicy",
+                  "iam:PassRole",
+                  "logs:*",
+                  "sts:GetCallerIdentity",
+                  "s3:GetObject",
+                  "s3:PutObject",
+                  "s3:DeleteObject",
+                  "s3:ListBucket",
+                  "cloudfront:CreateInvalidation"
+                ],
+                "Resource": "*"
+              }
+            ]
+          }
+          EOF
+          
+          # Create or update the role
+          ROLE_NAME="GitHubActions-${GITHUB_REPOSITORY##*/}"
+          
+          if aws iam get-role --role-name "$ROLE_NAME" 2>/dev/null; then
+            echo "📝 Updating existing role..."
+            aws iam update-assume-role-policy --role-name "$ROLE_NAME" --policy-document file://trust-policy.json
+          else
+            echo "📝 Creating new role..."
+            aws iam create-role --role-name "$ROLE_NAME" --assume-role-policy-document file://trust-policy.json
+          fi
+          
+          # Create and attach policy
+          POLICY_NAME="${ROLE_NAME}-DeploymentPolicy"
+          POLICY_ARN="arn:aws:iam::${{ github.event.inputs.aws_account_id }}:policy/$POLICY_NAME"
+          
+          # Delete existing policy if it exists
+          if aws iam get-policy --policy-arn "$POLICY_ARN" 2>/dev/null; then
+            # Detach from role first
+            aws iam detach-role-policy --role-name "$ROLE_NAME" --policy-arn "$POLICY_ARN" || true
+            aws iam delete-policy --policy-arn "$POLICY_ARN" || true
+          fi
+          
+          # Create new policy
+          aws iam create-policy --policy-name "$POLICY_NAME" --policy-document file://deployment-policy.json
+          
+          # Attach policy to role
+          aws iam attach-role-policy --role-name "$ROLE_NAME" --policy-arn "$POLICY_ARN"
+          
+          echo "✅ IAM role created: $ROLE_NAME"
+          echo "🔑 Role ARN: arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/$ROLE_NAME"
+          
+      - name: Setup Instructions
+        run: |
+          echo "## 🎉 AWS OIDC Setup Complete!"
+          echo ""
+          echo "### Next Steps:"
+          echo ""
+          echo "1. **Add Repository Variable:**"
+          echo "   - Go to repository Settings → Secrets and variables → Actions → Variables"
+          echo "   - Add: \`AWS_ROLE_ARN\` = \`arn:aws:iam::${{ github.event.inputs.aws_account_id }}:role/GitHubActions-${GITHUB_REPOSITORY##*/}\`"
+          echo ""
+          echo "2. **Add Repository Secrets:**"
+          echo "   - \`OPENAI_API_KEY\` = your OpenAI API key"
+          echo ""
+          echo "3. **Optional Variables:**"
+          echo "   - \`AWS_REGION\` = ${{ env.AWS_REGION }}"
+          echo "   - \`S3_STAGING_BUCKET\` = your staging S3 bucket name"
+          echo "   - \`S3_PRODUCTION_BUCKET\` = your production S3 bucket name"
+          echo "   - \`CLOUDFRONT_STAGING_ID\` = staging CloudFront distribution ID"
+          echo "   - \`CLOUDFRONT_PRODUCTION_ID\` = production CloudFront distribution ID"
+          echo ""
+          echo "### Benefits of OIDC:"
+          echo "- ✅ No long-term AWS credentials in GitHub"
+          echo "- ✅ Automatic credential rotation"
+          echo "- ✅ Fine-grained permissions"
+          echo "- ✅ Enhanced security"
+          echo ""
+          echo "### 🔐 Security Features:"
+          echo "- Role can only be assumed by this repository: ${{ github.repository }}"
+          echo "- Temporary credentials (1 hour expiration)"
+          echo "- CloudTrail logging of all actions"

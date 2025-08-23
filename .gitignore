@@ -50,9 +50,14 @@ lerna-debug.log*
 Thumbs.db
 
 # Deployment
-.netlify/
 .vercel/
 .aws/
+
+# AWS/Terraform
+*.zip
+terraform.tfstate*
+.terraform/
+terraform.tfvars
 
 # Cache directories
 .cache/
