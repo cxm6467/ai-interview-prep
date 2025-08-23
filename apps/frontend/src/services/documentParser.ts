@@ -6,15 +6,15 @@ async function getMammoth() {
 
 // This function will be used to dynamically import PDF.js
 async function getPdfJs() {
-  // Import PDF.js with proper typing
-  const pdfjsLib = await import('pdfjs-dist/build/pdf');
+  // Import PDF.js with proper typing - use the main entry point for v5.x
+  const pdfjsLib = await import('pdfjs-dist');
   
-  // Import worker with proper typing
-  const pdfjsWorker = await import('pdfjs-dist/build/pdf.worker.entry');
-  
-  // Set worker source
+  // Set worker source for pdfjs-dist v5.x
   if (typeof window !== 'undefined' && 'GlobalWorkerOptions' in pdfjsLib) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfjsWorker.default;
+    pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
+      'pdfjs-dist/build/pdf.worker.min.mjs',
+      import.meta.url
+    ).toString();
   }
   
   return pdfjsLib;
@@ -57,7 +57,7 @@ export class DocumentParser {
         const textContent = await page.getTextContent();
         const pageText = textContent.items
           .map((item: any) => (item && typeof item.str === 'string') ? item.str : '')
-          .filter(str => str.length > 0)
+          .filter((str: string) => str.length > 0)
           .join(' ');
         fullText += pageText + '\n';
       }
