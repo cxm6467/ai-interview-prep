@@ -23,7 +23,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
     "mammoth": "^1.10.0",
-    "pdfjs-dist": "^3.11.174",
+    "pdfjs-dist": "^5.4.54",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-dropzone": "^14.3.8",
