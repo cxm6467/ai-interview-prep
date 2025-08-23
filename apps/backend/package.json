@@ -1,0 +1,21 @@
+{
+  "name": "ai-interview-prep-backend",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AWS Lambda backend for AI-powered interview preparation",
+  "scripts": {
+    "build": "echo 'Backend build - Docker image will be built during deployment'",
+    "dev": "node local-server.js",
+    "start": "node local-server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "openai": "^5.12.2",
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {
+    "@types/pdf-parse": "^1.1.5"
+  }
+}

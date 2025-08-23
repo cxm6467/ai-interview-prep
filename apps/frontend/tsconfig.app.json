@@ -1,0 +1,27 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "composite": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "jsx": "react-jsx",
+    "moduleResolution": "bundler",
+    "types": ["vite/client", "node"],
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@atoms/*": ["./src/components/atoms/*"],
+      "@molecules/*": ["./src/components/molecules/*"],
+      "@organisms/*": ["./src/components/organisms/*"],
+      "@templates/*": ["./src/components/templates/*"],
+      "@pages/*": ["./src/components/pages/*"],
+      "@services/*": ["./src/services/*"],
+      "@store/*": ["./src/store/*"],
+      "@types/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@hooks/*": ["./src/hooks/*"],
+      "@styles/*": ["./src/styles/*"]
+    }
+  },
+  "include": ["src"]
+}
