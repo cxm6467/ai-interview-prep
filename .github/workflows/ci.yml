@@ -27,8 +27,8 @@ jobs:
       - name: Install dependencies
         run: |
           npm ci
-          npm ci --workspace=ai-interview-prep-frontend
-          npm ci --workspace=ai-interview-prep-backend
+          npm install --workspace=ai-interview-prep-frontend
+          npm install --workspace=ai-interview-prep-backend
           
       - name: Lint frontend
         run: npm run lint --workspace=ai-interview-prep-frontend
