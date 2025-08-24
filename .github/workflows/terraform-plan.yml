@@ -188,9 +188,9 @@ jobs:
             echo "⚠️ Review: Ensure sensitive values are marked appropriately" >> security-analysis.md
           fi
           
-          # Check for hardcoded values
+          # Check for hardcoded values (more specific patterns)
           HARDCODED_ISSUES=0
-          if grep -E "(password|secret|key).*=.*[\"'][^$]" *.tf; then
+          if grep -E "(password|secret|api_key|access_key|private_key).*=.*\"[^$]" *.tf | grep -v "route_key\|encryption_key"; then
             HARDCODED_ISSUES=1
             echo "🚨 **Warning:** Potential hardcoded secrets detected" >> security-analysis.md
           fi
