@@ -10,6 +10,10 @@ env:
   ECR_REPOSITORY: ai-interview-prep-prod
   ENVIRONMENT: prod
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
@@ -22,8 +26,8 @@ jobs:
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
       with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        role-session-name: GitHubActions-Deploy-${{ github.run_id }}
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Login to Amazon ECR
