@@ -76,7 +76,14 @@ resource "aws_iam_policy" "github_actions_policy" {
           "ecr:InitiateLayerUpload",
           "ecr:PutImage",
           "ecr:DescribeImages",
-          "ecr:DescribeRepositories"
+          "ecr:DescribeRepositories",
+          "ecr:CreateRepository",
+          "ecr:DeleteRepository",
+          "ecr:SetRepositoryPolicy",
+          "ecr:GetRepositoryPolicy",
+          "ecr:ListTagsForResource",
+          "ecr:TagResource",
+          "ecr:UntagResource"
         ]
         Resource = "*"
       },
@@ -88,9 +95,16 @@ resource "aws_iam_policy" "github_actions_policy" {
           "lambda:UpdateFunctionConfiguration",
           "lambda:GetFunction",
           "lambda:GetFunctionConfiguration",
-          "lambda:PublishVersion"
+          "lambda:PublishVersion",
+          "lambda:CreateFunction",
+          "lambda:DeleteFunction",
+          "lambda:AddPermission",
+          "lambda:RemovePermission",
+          "lambda:ListTags",
+          "lambda:TagResource",
+          "lambda:UntagResource"
         ]
-        Resource = "arn:aws:lambda:${var.aws_region}:${data.aws_caller_identity.current.account_id}:function:${var.app_name}-${var.environment}"
+        Resource = "*"
       },
       # CloudWatch Logs
       {
@@ -100,9 +114,15 @@ resource "aws_iam_policy" "github_actions_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents",
           "logs:DescribeLogGroups",
-          "logs:DescribeLogStreams"
+          "logs:DescribeLogStreams",
+          "logs:DeleteLogGroup",
+          "logs:DeleteLogStream",
+          "logs:PutRetentionPolicy",
+          "logs:ListTagsLogGroup",
+          "logs:TagLogGroup",
+          "logs:UntagLogGroup"
         ]
-        Resource = "arn:aws:logs:${var.aws_region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.app_name}-${var.environment}*"
+        Resource = "*"
       },
       # S3 for frontend deployment
       {
@@ -111,20 +131,44 @@ resource "aws_iam_policy" "github_actions_policy" {
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject",
-          "s3:ListBucket"
+          "s3:ListBucket",
+          "s3:CreateBucket",
+          "s3:DeleteBucket",
+          "s3:GetBucketLocation",
+          "s3:GetBucketVersioning",
+          "s3:PutBucketVersioning",
+          "s3:GetBucketWebsite",
+          "s3:PutBucketWebsite",
+          "s3:DeleteBucketWebsite",
+          "s3:GetBucketPolicy",
+          "s3:PutBucketPolicy",
+          "s3:DeleteBucketPolicy",
+          "s3:GetBucketTagging",
+          "s3:PutBucketTagging",
+          "s3:GetBucketPublicAccessBlock",
+          "s3:PutBucketPublicAccessBlock"
         ]
         Resource = [
           "arn:aws:s3:::${var.app_name}-${var.environment}-frontend",
           "arn:aws:s3:::${var.app_name}-${var.environment}-frontend/*"
         ]
       },
-      # CloudFront invalidation
+      # CloudFront permissions
       {
         Effect = "Allow"
         Action = [
           "cloudfront:CreateInvalidation",
           "cloudfront:GetInvalidation",
-          "cloudfront:ListInvalidations"
+          "cloudfront:ListInvalidations",
+          "cloudfront:CreateDistribution",
+          "cloudfront:GetDistribution",
+          "cloudfront:GetDistributionConfig",
+          "cloudfront:UpdateDistribution",
+          "cloudfront:DeleteDistribution",
+          "cloudfront:ListDistributions",
+          "cloudfront:TagResource",
+          "cloudfront:UntagResource",
+          "cloudfront:ListTagsForResource"
         ]
         Resource = "*"
       },
@@ -148,7 +192,49 @@ resource "aws_iam_policy" "github_actions_policy" {
           "acm:ListCertificates",
           "acm:DescribeCertificate",
           "acm:RequestCertificate",
-          "acm:AddTagsToCertificate"
+          "acm:AddTagsToCertificate",
+          "acm:ListTagsForCertificate",
+          "acm:RemoveTagsFromCertificate",
+          "acm:DeleteCertificate",
+          "acm:GetCertificate"
+        ]
+        Resource = "*"
+      },
+      # IAM permissions for Terraform infrastructure
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:CreateRole",
+          "iam:DeleteRole",
+          "iam:GetRole",
+          "iam:UpdateRole",
+          "iam:PassRole",
+          "iam:CreatePolicy",
+          "iam:DeletePolicy",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:ListPolicyVersions",
+          "iam:AttachRolePolicy",
+          "iam:DetachRolePolicy",
+          "iam:ListAttachedRolePolicies",
+          "iam:PutRolePolicy",
+          "iam:DeleteRolePolicy",
+          "iam:GetRolePolicy",
+          "iam:ListRolePolicies",
+          "iam:TagRole",
+          "iam:UntagRole",
+          "iam:ListRoleTags",
+          "iam:TagPolicy",
+          "iam:UntagPolicy",
+          "iam:ListPolicyTags"
+        ]
+        Resource = "*"
+      },
+      # API Gateway permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "apigateway:*"
         ]
         Resource = "*"
       },
@@ -156,9 +242,7 @@ resource "aws_iam_policy" "github_actions_policy" {
       {
         Effect = "Allow"
         Action = [
-          "sts:GetCallerIdentity",
-          "iam:GetRole",
-          "iam:PassRole"
+          "sts:GetCallerIdentity"
         ]
         Resource = "*"
       }
