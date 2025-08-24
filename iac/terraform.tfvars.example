@@ -1,0 +1,13 @@
+# Terraform Variables for AI Interview Prep
+# Copy this file to terraform.tfvars and fill in the values
+
+# Required: OpenAI API Key
+openai_api_key = "your-openai-api-key-here"
+
+# Optional: Override defaults if needed
+# aws_region = "us-east-1"
+# environment = "development" 
+# app_name = "ai-interview-prep"
+# domain_name = "chrismarasco.io"
+# subdomain = "ai-ip"
+# github_repository = "cxm6467/ai-interview-prep"
