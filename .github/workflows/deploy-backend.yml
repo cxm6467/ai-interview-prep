@@ -76,14 +76,12 @@ jobs:
       - name: Build and push Docker image
         if: github.event_name != 'pull_request'
         run: |
-          cd iac
-          
           # Get AWS account ID for ECR
           AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION || 'us-east-1' }}.amazonaws.com
           
-          # Build and tag the image
-          docker build -f Dockerfile ../apps/backend -t consolidated-ai-handler:latest
+          # Build and tag the image (from project root with correct Dockerfile path)
+          docker build -f iac/Dockerfile -t consolidated-ai-handler:latest .
           docker tag consolidated-ai-handler:latest ${ECR_REGISTRY}/consolidated-ai-handler:latest
           
           # Push to ECR
@@ -166,14 +164,12 @@ jobs:
         
       - name: Build and push Docker image
         run: |
-          cd iac
-          
           # Get AWS account ID for ECR
           AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION || 'us-east-1' }}.amazonaws.com
           
-          # Build and tag the image
-          docker build -f Dockerfile ../apps/backend -t consolidated-ai-handler:latest
+          # Build and tag the image (from project root with correct Dockerfile path)
+          docker build -f iac/Dockerfile -t consolidated-ai-handler:latest .
           docker tag consolidated-ai-handler:latest ${ECR_REGISTRY}/consolidated-ai-handler:latest
           
           # Push to ECR
