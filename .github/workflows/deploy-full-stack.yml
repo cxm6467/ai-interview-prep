@@ -114,6 +114,27 @@ jobs:
         working-directory: iac
         run: |
           terraform init
+          
+          # Function to safely import resources (ignores errors)
+          import_resource() {
+            local resource=$1
+            local id=$2
+            echo "Attempting to import $resource..."
+            if terraform import "$resource" "$id" 2>/dev/null; then
+              echo "✅ Successfully imported $resource"
+            else
+              echo "ℹ️  Resource $resource already imported or doesn't exist, continuing..."
+            fi
+          }
+          
+          # Import key resources that commonly cause EntityAlreadyExists errors
+          import_resource "aws_ecr_repository.consolidated_ai_handler" "consolidated-ai-handler"
+          import_resource "aws_iam_role.lambda_execution_role" "lambda-execution-role"
+          import_resource "aws_iam_policy.lambda_policy" "arn:aws:iam::276362266002:policy/lambda-policy"
+          import_resource "aws_cloudwatch_log_group.lambda_logs" "/aws/lambda/consolidated-ai-handler"
+          
+          echo "🔄 Import step completed - proceeding with apply"
+          
           terraform validate
           terraform apply -auto-approve -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}"
         env:
