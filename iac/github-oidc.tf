@@ -134,7 +134,8 @@ resource "aws_iam_policy" "github_actions_policy" {
           "route53:GetHostedZone",
           "route53:ChangeResourceRecordSets",
           "route53:GetChange",
-          "route53:ListResourceRecordSets"
+          "route53:ListResourceRecordSets",
+          "route53:ListTagsForResource"
         ]
         Resource = "*"
       },
