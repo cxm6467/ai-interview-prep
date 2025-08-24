@@ -1,5 +1,27 @@
-# GitHub OIDC Provider and IAM Role for GitHub Actions
-# This allows GitHub Actions to authenticate to AWS without storing long-lived credentials
+# Bootstrap Terraform configuration for GitHub OIDC setup
+# This needs to be applied first before the main infrastructure
+
+terraform {
+  required_version = ">= 1.5.0"
+  
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = var.aws_region
+
+  default_tags {
+    tags = {
+      Project   = var.app_name
+      ManagedBy = "terraform-bootstrap"
+    }
+  }
+}
 
 # Data source to get current AWS account ID
 data "aws_caller_identity" "current" {}
@@ -54,7 +76,7 @@ resource "aws_iam_role" "github_actions" {
   }
 }
 
-# Policy for GitHub Actions - ECR and Lambda deployment permissions
+# Policy for GitHub Actions - comprehensive permissions for Terraform deployment
 resource "aws_iam_policy" "github_actions_policy" {
   name        = "${var.app_name}-${var.environment}-github-actions-policy"
   description = "Policy for GitHub Actions to deploy infrastructure and applications"
@@ -260,15 +282,4 @@ resource "aws_iam_policy" "github_actions_policy" {
 resource "aws_iam_role_policy_attachment" "github_actions_policy_attachment" {
   role       = aws_iam_role.github_actions.name
   policy_arn = aws_iam_policy.github_actions_policy.arn
-}
-
-# Output the role ARN for use in GitHub Actions
-output "github_actions_role_arn" {
-  description = "ARN of the GitHub Actions OIDC role"
-  value       = aws_iam_role.github_actions.arn
-}
-
-output "github_oidc_provider_arn" {
-  description = "ARN of the GitHub OIDC provider"
-  value       = aws_iam_openid_connect_provider.github.arn
 }
