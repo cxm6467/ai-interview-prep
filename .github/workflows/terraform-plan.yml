@@ -136,9 +136,9 @@ jobs:
           terraform show -no-color $PLAN_FILE > plan-output.txt
           
           # Extract summary statistics
-          ADDITIONS=$(grep -c "will be created" plan-output.txt || echo "0")
-          CHANGES=$(grep -c "will be updated" plan-output.txt || echo "0")
-          DESTROYS=$(grep -c "will be destroyed" plan-output.txt || echo "0")
+          ADDITIONS=$(grep -c "will be created" plan-output.txt 2>/dev/null || echo "0")
+          CHANGES=$(grep -c "will be updated" plan-output.txt 2>/dev/null || echo "0") 
+          DESTROYS=$(grep -c "will be destroyed" plan-output.txt 2>/dev/null || echo "0")
           
           # Generate summary
           cat << EOF > plan-summary.md
@@ -150,7 +150,7 @@ jobs:
           
           ### Changes Overview
           - 🟢 **Resources to add:** ${ADDITIONS}
-          - 🟡 **Resources to change:** ${CHANGES}  
+          - 🟡 **Resources to change:** ${CHANGES}
           - 🔴 **Resources to destroy:** ${DESTROYS}
           
           ### Plan Status
@@ -165,9 +165,12 @@ jobs:
             echo "❌ **Plan failed** - Check errors below" >> plan-summary.md
           fi
           
-          # Store outputs
+          # Debug: Show variables being stored
+          echo "Debug: ADDITIONS=$ADDITIONS, CHANGES=$CHANGES, DESTROYS=$DESTROYS"
+          
+          # Store outputs (redirect to prevent display in logs)
           echo additions=$ADDITIONS >> $GITHUB_OUTPUT
-          echo changes=$CHANGES >> $GITHUB_OUTPUT
+          echo changes=$CHANGES >> $GITHUB_OUTPUT  
           echo destroys=$DESTROYS >> $GITHUB_OUTPUT
           
       - name: Generate Security Analysis
