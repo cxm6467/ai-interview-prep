@@ -46,10 +46,16 @@ jobs:
           --file iac/Dockerfile \
           --tag $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA \
           --tag $ECR_REGISTRY/$ECR_REPOSITORY:latest \
-          --push .
+          --push \
+          --output type=image,push=true .
         
-        # Get the image digest
-        IMAGE_DIGEST=$(docker buildx imagetools inspect $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA --format '{{.Manifest.Digest}}')
+        # Get the single platform image digest using AWS CLI
+        IMAGE_DIGEST=$(aws ecr describe-images \
+          --repository-name $ECR_REPOSITORY \
+          --image-ids imageTag=$GITHUB_SHA \
+          --query 'imageDetails[0].imageDigest' \
+          --output text)
+        
         echo "image-digest=$IMAGE_DIGEST" >> $GITHUB_OUTPUT
         echo "image-uri=$ECR_REGISTRY/$ECR_REPOSITORY@$IMAGE_DIGEST" >> $GITHUB_OUTPUT
       env:
