@@ -126,6 +126,29 @@ resource "aws_iam_policy" "github_actions_policy" {
         ]
         Resource = "*"
       },
+      # Route 53 permissions for DNS and SSL certificates
+      {
+        Effect = "Allow"
+        Action = [
+          "route53:ListHostedZones",
+          "route53:GetHostedZone",
+          "route53:ChangeResourceRecordSets",
+          "route53:GetChange",
+          "route53:ListResourceRecordSets"
+        ]
+        Resource = "*"
+      },
+      # ACM (SSL Certificate) permissions
+      {
+        Effect = "Allow"
+        Action = [
+          "acm:ListCertificates",
+          "acm:DescribeCertificate",
+          "acm:RequestCertificate",
+          "acm:AddTagsToCertificate"
+        ]
+        Resource = "*"
+      },
       # Terraform state and general AWS access
       {
         Effect = "Allow"
