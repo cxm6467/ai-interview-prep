@@ -57,3 +57,9 @@ variable "create_route53_records" {
   type        = bool
   default     = true
 }
+
+variable "github_repository" {
+  description = "GitHub repository in the format owner/repo-name (e.g., cxm6467/ai-interview-prep)"
+  type        = string
+  default     = "cxm6467/ai-interview-prep"
+}
