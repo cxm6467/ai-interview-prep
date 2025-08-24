@@ -12,7 +12,7 @@ locals {
 # ECR Repository to store the Docker Image
 resource "aws_ecr_repository" "lambda_repo" {
   name = "${var.app_name}-${var.environment}"
-  
+
   tags = {
     Environment = var.environment
     Application = var.app_name
@@ -45,7 +45,7 @@ resource "aws_iam_policy" "lambda_policy" {
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Effect = "Allow",
+        Effect   = "Allow",
         Resource = "arn:aws:logs:*:*:*"
       }
     ]
@@ -61,7 +61,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
 resource "aws_cloudwatch_log_group" "lambda_logs" {
   name              = "/aws/lambda/${var.app_name}-${var.environment}"
   retention_in_days = var.log_retention_days
-  
+
   tags = {
     Environment = var.environment
     Application = var.app_name
@@ -76,7 +76,7 @@ resource "aws_lambda_function" "ai_handler" {
   role          = aws_iam_role.lambda_exec_role.arn
   timeout       = var.lambda_timeout
   memory_size   = var.lambda_memory
-  
+
   environment {
     variables = {
       OPENAI_API_KEY = var.openai_api_key
@@ -84,9 +84,9 @@ resource "aws_lambda_function" "ai_handler" {
       DEBUG          = var.environment == "development" ? "true" : "false"
     }
   }
-  
+
   depends_on = [aws_cloudwatch_log_group.lambda_logs]
-  
+
   tags = {
     Environment = var.environment
     Application = var.app_name
@@ -97,16 +97,16 @@ resource "aws_lambda_function" "ai_handler" {
 resource "aws_apigatewayv2_api" "api_gw" {
   name          = "${var.app_name}-${var.environment}-api"
   protocol_type = "HTTP"
-  
+
   cors_configuration {
     allow_credentials = false
     allow_headers     = ["content-type", "x-amz-date", "authorization", "x-api-key"]
     allow_methods     = ["*"]
     allow_origins     = ["*"]
     expose_headers    = []
-    max_age          = 300
+    max_age           = 300
   }
-  
+
   tags = {
     Environment = var.environment
     Application = var.app_name
@@ -152,16 +152,16 @@ data "aws_route53_zone" "main" {
 
 # SSL Certificate for the custom domain
 resource "aws_acm_certificate" "api_cert" {
-  count           = var.create_route53_records ? 1 : 0
-  domain_name     = local.full_domain
+  count             = var.create_route53_records ? 1 : 0
+  domain_name       = local.full_domain
   validation_method = "DNS"
-  
+
   subject_alternative_names = var.environment == "development" ? [] : ["www.${local.full_domain}"]
-  
+
   lifecycle {
     create_before_destroy = true
   }
-  
+
   tags = {
     Environment = var.environment
     Application = var.app_name
@@ -177,7 +177,7 @@ resource "aws_route53_record" "cert_validation" {
       type   = dvo.resource_record_type
     }
   } : {}
-  
+
   allow_overwrite = true
   name            = each.value.name
   records         = [each.value.record]
@@ -188,8 +188,8 @@ resource "aws_route53_record" "cert_validation" {
 
 # Certificate validation
 resource "aws_acm_certificate_validation" "api_cert" {
-  count           = var.create_route53_records ? 1 : 0
-  certificate_arn = aws_acm_certificate.api_cert[0].arn
+  count                   = var.create_route53_records ? 1 : 0
+  certificate_arn         = aws_acm_certificate.api_cert[0].arn
   validation_record_fqdns = [for record in aws_route53_record.cert_validation : record.fqdn]
 }
 
@@ -197,13 +197,13 @@ resource "aws_acm_certificate_validation" "api_cert" {
 resource "aws_apigatewayv2_domain_name" "api_domain" {
   count       = var.create_route53_records ? 1 : 0
   domain_name = local.full_domain
-  
+
   domain_name_configuration {
     certificate_arn = aws_acm_certificate_validation.api_cert[0].certificate_arn
     endpoint_type   = "REGIONAL"
     security_policy = "TLS_1_2"
   }
-  
+
   tags = {
     Environment = var.environment
     Application = var.app_name
@@ -224,7 +224,7 @@ resource "aws_route53_record" "api_record" {
   zone_id = data.aws_route53_zone.main[0].zone_id
   name    = local.full_domain
   type    = "A"
-  
+
   alias {
     name                   = aws_apigatewayv2_domain_name.api_domain[0].domain_name_configuration[0].target_domain_name
     zone_id                = aws_apigatewayv2_domain_name.api_domain[0].domain_name_configuration[0].hosted_zone_id

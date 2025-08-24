@@ -92,3 +92,4 @@ tmp/
 # Miscellaneous
 .eslintcache
 .stylelintcache
+.env.development

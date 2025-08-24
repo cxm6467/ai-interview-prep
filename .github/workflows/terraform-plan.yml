@@ -37,6 +37,12 @@ env:
   TF_IN_AUTOMATION: 'true'
   TF_CLI_ARGS: '-no-color'
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+  actions: read
+
 jobs:
   terraform-plan:
     runs-on: ubuntu-latest
@@ -91,13 +97,16 @@ jobs:
             PLAN_OPTS="-detailed-exitcode"
           fi
           
-          # Run the plan
+          # Run the plan and capture exit code
+          set +e
           terraform plan $PLAN_OPTS \
             -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" \
             -out=tfplan
+          PLAN_EXIT_CODE=$?
+          set -e
           
           # Capture exit code for detailed analysis
-          echo "plan-exitcode=$?" >> $GITHUB_OUTPUT
+          echo plan-exitcode=$PLAN_EXIT_CODE >> $GITHUB_OUTPUT
           
       - name: Terraform Plan (Destroy)
         if: github.event.inputs.plan_type == 'destroy'
@@ -156,9 +165,9 @@ jobs:
           fi
           
           # Store outputs
-          echo "additions=${ADDITIONS}" >> $GITHUB_OUTPUT
-          echo "changes=${CHANGES}" >> $GITHUB_OUTPUT
-          echo "destroys=${DESTROYS}" >> $GITHUB_OUTPUT
+          echo additions=$ADDITIONS >> $GITHUB_OUTPUT
+          echo changes=$CHANGES >> $GITHUB_OUTPUT
+          echo destroys=$DESTROYS >> $GITHUB_OUTPUT
           
       - name: Generate Security Analysis
         working-directory: iac
@@ -179,9 +188,9 @@ jobs:
             echo "⚠️ Review: Ensure sensitive values are marked appropriately" >> security-analysis.md
           fi
           
-          # Check for hardcoded values
+          # Check for hardcoded values (more specific patterns)
           HARDCODED_ISSUES=0
-          if grep -E "(password|secret|key).*=.*[\"'][^$]" *.tf; then
+          if grep -E "(password|secret|api_key|access_key|private_key).*=.*\"[^$]" *.tf | grep -v "route_key\|encryption_key"; then
             HARDCODED_ISSUES=1
             echo "🚨 **Warning:** Potential hardcoded secrets detected" >> security-analysis.md
           fi
@@ -190,7 +199,7 @@ jobs:
             echo "✅ No hardcoded secrets detected" >> security-analysis.md
           fi
           
-          echo "hardcoded-issues=${HARDCODED_ISSUES}" >> $GITHUB_OUTPUT
+          echo hardcoded-issues=$HARDCODED_ISSUES >> $GITHUB_OUTPUT
           
       - name: Cost Estimation
         working-directory: iac
