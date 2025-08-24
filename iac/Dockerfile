@@ -9,7 +9,6 @@ RUN npm install --only=production
 
 # Copy the Lambda function code
 COPY apps/backend/consolidated-ai-handler.js ${LAMBDA_TASK_ROOT}/
-COPY apps/backend/local-server.js ${LAMBDA_TASK_ROOT}/
 
 # Set the CMD to your handler (could also be done as a parameter override outside of the Dockerfile)
 CMD ["consolidated-ai-handler.handler"]
