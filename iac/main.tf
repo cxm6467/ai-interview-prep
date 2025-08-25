@@ -9,6 +9,27 @@ locals {
   full_domain = var.environment == "development" ? "dev.${var.subdomain}.${var.domain_name}" : "${var.subdomain}.${var.domain_name}"
 }
 
+# Import existing resources to avoid EntityAlreadyExists errors
+import {
+  to = aws_ecr_repository.lambda_repo
+  id = "ai-interview-prep-development"
+}
+
+import {
+  to = aws_iam_role.lambda_exec_role
+  id = "ai-interview-prep-development-lambda-role"
+}
+
+import {
+  to = aws_iam_policy.lambda_policy
+  id = "arn:aws:iam::276362266002:policy/ai-interview-prep-development-lambda-policy"
+}
+
+import {
+  to = aws_cloudwatch_log_group.lambda_logs
+  id = "/aws/lambda/ai-interview-prep-development"
+}
+
 # ECR Repository to store the Docker Image
 resource "aws_ecr_repository" "lambda_repo" {
   name = "${var.app_name}-${var.environment}"

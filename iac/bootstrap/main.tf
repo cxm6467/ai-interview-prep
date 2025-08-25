@@ -158,7 +158,11 @@ resource "aws_iam_policy" "github_actions_policy" {
           "logs:UntagLogGroup",
           "logs:ListTagsForResource",
           "logs:TagResource",
-          "logs:UntagResource"
+          "logs:UntagResource",
+          "logs:CreateLogDelivery",
+          "logs:DeleteLogDelivery",
+          "logs:DescribeLogDeliveries",
+          "logs:GetLogDelivery"
         ]
         Resource = "*"
       },
@@ -298,6 +302,16 @@ resource "aws_iam_policy" "github_actions_policy" {
         Effect = "Allow"
         Action = [
           "apigateway:*"
+        ]
+        Resource = "*"
+      },
+      # Additional IAM permissions for resource management
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:CreateServiceLinkedRole",
+          "iam:GetServiceLinkedRoleDeletionStatus",
+          "iam:DeleteServiceLinkedRole"
         ]
         Resource = "*"
       },
