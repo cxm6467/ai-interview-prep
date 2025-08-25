@@ -37,12 +37,6 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Verify backend files exist
-      run: |
-        echo "Checking if backend files exist..."
-        ls -la apps/backend/
-        echo "Dockerfile contents:"
-        cat iac/Dockerfile
 
     - name: Build and push Docker image
       id: build-image
@@ -99,25 +93,28 @@ jobs:
         import_resource() {
           local resource=$1
           local id=$2
-          echo "Attempting to import $resource..."
+          local count=$3
+          local total=$4
+          echo "[$count/$total] Attempting to import $resource..."
           if terraform import "$resource" "$id" 2>/dev/null; then
-            echo "✅ Successfully imported $resource"
+            echo "✅ [$count/$total] Successfully imported $resource"
           else
-            echo "ℹ️  Resource $resource already imported or doesn't exist, continuing..."
+            echo "ℹ️  [$count/$total] Resource $resource already imported or doesn't exist, continuing..."
           fi
         }
         
         # Import key resources that commonly cause EntityAlreadyExists errors (dev environment)
-        import_resource "module.lambda.aws_ecr_repository.lambda_repo" "ai-interview-prep-dev"
-        import_resource "module.lambda.aws_iam_role.lambda_exec_role" "ai-interview-prep-dev-role" 
-        import_resource "module.lambda.aws_iam_role.lambda_execution_role_enhanced[0]" "ai-interview-prep-dev-execution-role"
-        import_resource "module.lambda.aws_iam_policy.lambda_policy" "arn:aws:iam::276362266002:policy/ai-interview-prep-dev-policy"
-        import_resource "module.lambda.aws_iam_policy.lambda_metrics_policy[0]" "arn:aws:iam::276362266002:policy/ai-interview-prep-dev-metrics-policy"
-        import_resource "module.lambda.aws_cloudwatch_log_group.lambda_logs" "/aws/lambda/ai-interview-prep-dev"
-        import_resource "module.security.aws_iam_role.api_gateway_cloudwatch_role" "api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io"
-        import_resource "module.security.aws_iam_policy.api_gateway_cloudwatch_policy" "arn:aws:iam::276362266002:policy/api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io"
-        import_resource "module.security.aws_iam_role.route53_cert_validation_role" "route53-cert-validation-dev-ai-ip-chrismarasco-io"
-        import_resource "module.security.aws_iam_policy.route53_cert_validation_policy" "arn:aws:iam::276362266002:policy/route53-cert-validation-dev-ai-ip-chrismarasco-io"
+        echo "🔄 Starting import of 10 resources..."
+        import_resource "module.lambda.aws_ecr_repository.lambda_repo" "ai-interview-prep-dev" 1 10
+        import_resource "module.lambda.aws_iam_role.lambda_exec_role" "ai-interview-prep-dev-role" 2 10
+        import_resource "module.lambda.aws_iam_role.lambda_execution_role_enhanced[0]" "ai-interview-prep-dev-execution-role" 3 10
+        import_resource "module.lambda.aws_iam_policy.lambda_policy" "arn:aws:iam::276362266002:policy/ai-interview-prep-dev-policy" 4 10
+        import_resource "module.lambda.aws_iam_policy.lambda_metrics_policy[0]" "arn:aws:iam::276362266002:policy/ai-interview-prep-dev-metrics-policy" 5 10
+        import_resource "module.lambda.aws_cloudwatch_log_group.lambda_logs" "/aws/lambda/ai-interview-prep-dev" 6 10
+        import_resource "module.security.aws_iam_role.api_gateway_cloudwatch_role" "api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io" 7 10
+        import_resource "module.security.aws_iam_policy.api_gateway_cloudwatch_policy" "arn:aws:iam::276362266002:policy/api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io" 8 10
+        import_resource "module.security.aws_iam_role.route53_cert_validation_role" "route53-cert-validation-dev-ai-ip-chrismarasco-io" 9 10
+        import_resource "module.security.aws_iam_policy.route53_cert_validation_policy" "arn:aws:iam::276362266002:policy/route53-cert-validation-dev-ai-ip-chrismarasco-io" 10 10
         
         echo "🔄 Import step completed - proceeding with plan"
 

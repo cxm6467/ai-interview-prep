@@ -259,4 +259,3 @@ jobs:
         run: |
           # This could trigger a frontend deployment with the new API URL
           echo "API Gateway URL: ${{ steps.api-url.outputs.api-url }}"
-          # TODO: Implement automatic frontend update with new API URL
