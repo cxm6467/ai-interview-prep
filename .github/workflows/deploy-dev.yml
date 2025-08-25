@@ -97,7 +97,7 @@ jobs:
           local count=$3
           local total=$4
           echo "[$count/$total] Attempting to import $resource..."
-          if terraform import -lock=false "$resource" "$id" 2>/dev/null; then
+          if terraform import -lock=false -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" "$resource" "$id" 2>/dev/null; then
             echo "✅ [$count/$total] Successfully imported $resource"
           else
             echo "ℹ️  [$count/$total] Resource $resource already imported or doesn't exist, continuing..."
