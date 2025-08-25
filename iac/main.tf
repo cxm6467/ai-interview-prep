@@ -40,6 +40,13 @@ import {
   id = "dev.ai-ip.chrismarasco.io"
 }
 
+# Check if API Gateway API exists and import if needed
+# Based on existing APIs, likely using one of the development APIs
+import {
+  to = aws_apigatewayv2_api.api_gw
+  id = "26d8r5k3sg"  # Most recent ai-interview-prep-development-api
+}
+
 # ECR Repository to store the Docker Image
 resource "aws_ecr_repository" "lambda_repo" {
   name = "${var.app_name}-${var.environment}"
