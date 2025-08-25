@@ -171,28 +171,31 @@ resource "aws_iam_role" "lambda_execution_role_enhanced" {
     ]
   })
 
-  # Inline policy for basic execution
-  inline_policy {
-    name = "basic-execution"
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Sid    = "BasicExecution"
-          Effect = "Allow"
-          Action = [
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream", 
-            "logs:PutLogEvents"
-          ]
-          Resource = [
-            "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.function_name}",
-            "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.function_name}:*"
-          ]
-        }
-      ]
-    })
-  }
-
   tags = var.tags
+}
+
+# Separate policy for basic execution (replaces deprecated inline_policy)
+resource "aws_iam_role_policy" "lambda_execution_basic" {
+  count = var.use_enhanced_execution_role ? 1 : 0
+  name  = "basic-execution"
+  role  = aws_iam_role.lambda_execution_role_enhanced[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "BasicExecution"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream", 
+          "logs:PutLogEvents"
+        ]
+        Resource = [
+          "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.function_name}",
+          "arn:aws:logs:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:log-group:/aws/lambda/${var.function_name}:*"
+        ]
+      }
+    ]
+  })
 }

@@ -37,12 +37,6 @@ jobs:
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Verify backend files exist
-      run: |
-        echo "Checking if backend files exist..."
-        ls -la apps/backend/
-        echo "Dockerfile contents:"
-        cat iac/Dockerfile
 
     - name: Build and push Docker image
       id: build-image

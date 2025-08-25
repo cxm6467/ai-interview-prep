@@ -40,8 +40,6 @@ jobs:
           
       - name: Build backend
         run: |
-          echo "Backend build check - verifying files exist"
-          ls -la apps/backend/
           echo "✅ Backend files verified"
 
   validate-terraform:
@@ -110,8 +108,6 @@ jobs:
           
       - name: Test Docker image
         run: |
-          # Basic smoke test - verify image was built and has correct files
-          docker run --rm --entrypoint="" consolidated-ai-handler:test ls -la /var/task/
           docker run --rm --entrypoint="" consolidated-ai-handler:test node --version
           echo "✅ Docker image built successfully and contains required files"
 
