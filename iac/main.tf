@@ -30,6 +30,16 @@ import {
   id = "/aws/lambda/ai-interview-prep-development"
 }
 
+import {
+  to = aws_lambda_function.ai_handler
+  id = "ai-interview-prep-development"
+}
+
+import {
+  to = aws_apigatewayv2_domain_name.api_domain[0]
+  id = "dev.ai-ip.chrismarasco.io"
+}
+
 # ECR Repository to store the Docker Image
 resource "aws_ecr_repository" "lambda_repo" {
   name = "${var.app_name}-${var.environment}"
