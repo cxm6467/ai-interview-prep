@@ -106,7 +106,10 @@ resource "aws_iam_policy" "github_actions_policy" {
           "ecr:GetRepositoryPolicy",
           "ecr:ListTagsForResource",
           "ecr:TagResource",
-          "ecr:UntagResource"
+          "ecr:UntagResource",
+          "ecr:PutLifecyclePolicy",
+          "ecr:GetLifecyclePolicy",
+          "ecr:DeleteLifecyclePolicy"
         ]
         Resource = "*"
       },
