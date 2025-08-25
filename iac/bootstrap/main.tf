@@ -160,6 +160,7 @@ resource "aws_iam_policy" "github_actions_policy" {
           "logs:TagResource",
           "logs:UntagResource",
           "logs:CreateLogDelivery",
+          "logs:UpdateLogDelivery",
           "logs:DeleteLogDelivery",
           "logs:DescribeLogDeliveries",
           "logs:GetLogDelivery",
