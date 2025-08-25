@@ -44,7 +44,7 @@ import {
 # Based on existing APIs, likely using one of the development APIs
 import {
   to = aws_apigatewayv2_api.api_gw
-  id = "26d8r5k3sg"  # Most recent ai-interview-prep-development-api
+  id = "26d8r5k3sg" # Most recent ai-interview-prep-development-api
 }
 
 # ECR Repository to store the Docker Image
