@@ -191,7 +191,9 @@ resource "aws_iam_policy" "github_actions_policy" {
           "s3:GetLifecycleConfiguration",
           "s3:PutLifecycleConfiguration",
           "s3:GetReplicationConfiguration",
-          "s3:PutReplicationConfiguration"
+          "s3:PutReplicationConfiguration",
+          "s3:GetEncryptionConfiguration",
+          "s3:PutEncryptionConfiguration"
         ]
         Resource = [
           "arn:aws:s3:::${var.app_name}-*-frontend",
