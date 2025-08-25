@@ -104,27 +104,24 @@ jobs:
         cd iac/environments/dev
         echo "🔍 Checking for existing AWS resources that might conflict..."
         
-        # Check Lambda functions
+        # Dynamic resource checking - better than hard-coded imports
+        # This approach detects existing resources without hard-coding IDs
         echo "Lambda Functions:"
         aws lambda list-functions --query 'Functions[?contains(FunctionName, `ai-interview-prep`)].FunctionName' --output table || echo "No Lambda functions found"
         
-        # Check API Gateway APIs
         echo "API Gateway APIs:"
         aws apigatewayv2 get-apis --query 'Items[?contains(Name, `ai-interview-prep`)].{Name:Name,ApiId:ApiId}' --output table || echo "No API Gateway APIs found"
         
-        # Check API Gateway Domain Names  
         echo "API Gateway Domain Names:"
         aws apigatewayv2 get-domain-names --query 'Items[?contains(DomainName, `ai-ip.chrismarasco.io`)].DomainName' --output table || echo "No API Gateway domains found"
         
-        # Check S3 buckets
         echo "S3 Buckets:"
         aws s3 ls | grep ai-interview-prep || echo "No matching S3 buckets found"
         
-        # Check ECR repositories
         echo "ECR Repositories:"
         aws ecr describe-repositories --query 'repositories[?contains(repositoryName, `ai-interview-prep`)].repositoryName' --output table || echo "No ECR repositories found"
         
-        echo "✅ Resource check complete - import blocks should handle any conflicts"
+        echo "✅ Resource check complete - Terraform import blocks will handle conflicts dynamically"
 
     - name: Terraform Plan
       run: |
