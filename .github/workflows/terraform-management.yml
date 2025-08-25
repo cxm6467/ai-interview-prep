@@ -106,8 +106,15 @@ jobs:
           -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" \
           -var="import_existing_resources=true" \
           -out=tfplan \
-          -no-color
+          -no-color | tee plan.out
+        echo "exitcode=$?" >> $GITHUB_OUTPUT
       continue-on-error: true
+
+    - name: Generate Plan Summary
+      if: steps.plan.outcome != 'skipped'
+      run: |
+        # Generate plan summary files
+        ./generate-plan-summary.sh tfplan ${{ github.event.inputs.environment || 'development' }} plan.out
 
     - name: Post Plan Comment
       if: github.event_name == 'pull_request'
@@ -182,33 +189,55 @@ jobs:
         terraform apply destroy_plan
 
     - name: Upload Terraform Plan
-      if: steps.plan.outputs.exitcode == 0
+      if: steps.plan.outputs.exitcode == '0'
       uses: actions/upload-artifact@v4
       with:
         name: terraform-plan-${{ github.event.inputs.environment || 'development' }}-${{ github.run_id }}
-        path: iac/tfplan
+        path: |
+          tfplan
+          plan.out
+          plan-summary.md
+          security-analysis.md
+          cost-estimation.md
         retention-days: 30
 
     - name: Terraform Outputs
       if: github.event.inputs.action == 'apply' && steps.apply.outcome == 'success'
       run: terraform output -json
 
-    - name: Summary
+    - name: Workflow Summary
       if: always()
       run: |
-        echo "## Terraform ${{ github.event.inputs.action || 'validate' }} Summary" >> $GITHUB_STEP_SUMMARY
-        echo "- **Environment**: ${{ github.event.inputs.environment || 'development' }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Action**: ${{ github.event.inputs.action || 'validate' }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Status**: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+        echo "## 🎯 Terraform ${{ github.event.inputs.action || 'validate' }} Complete" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Environment:** ${{ github.event.inputs.environment || 'development' }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Action:** ${{ github.event.inputs.action || 'validate' }}" >> $GITHUB_STEP_SUMMARY
+        echo "**Overall Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
         
-        if [[ "${{ steps.plan.outcome }}" == "success" ]]; then
-          echo "- **Plan**: ✅ Successful" >> $GITHUB_STEP_SUMMARY
-        elif [[ "${{ steps.plan.outcome }}" == "failure" ]]; then
-          echo "- **Plan**: ❌ Failed" >> $GITHUB_STEP_SUMMARY
+        # Add plan summary if available
+        if [ -f "plan-summary.md" ]; then
+          cat plan-summary.md >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
         fi
         
-        if [[ "${{ steps.apply.outcome }}" == "success" ]]; then
-          echo "- **Apply**: ✅ Successful" >> $GITHUB_STEP_SUMMARY
-        elif [[ "${{ steps.apply.outcome }}" == "failure" ]]; then
-          echo "- **Apply**: ❌ Failed" >> $GITHUB_STEP_SUMMARY
+        # Add security analysis if available
+        if [ -f "security-analysis.md" ]; then
+          cat security-analysis.md >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Add cost estimation if available  
+        if [ -f "cost-estimation.md" ]; then
+          cat cost-estimation.md >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # Final status
+        if [[ "${{ steps.plan.outputs.exitcode }}" == "0" ]]; then
+          echo "✅ **Operation completed successfully**" >> $GITHUB_STEP_SUMMARY
+        elif [[ "${{ steps.plan.outcome }}" == "failure" ]]; then
+          echo "❌ **Operation failed** - Check logs above" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "⏳ **Operation status unknown** - Check workflow details" >> $GITHUB_STEP_SUMMARY
         fi
