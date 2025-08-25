@@ -22,6 +22,12 @@ variable "openai_api_key" {
   sensitive   = true
 }
 
+variable "lambda_image_uri" {
+  description = "The Lambda function container image URI (optional, defaults to latest)"
+  type        = string
+  default     = ""
+}
+
 variable "lambda_timeout" {
   description = "Lambda function timeout in seconds"
   type        = number
@@ -62,4 +68,28 @@ variable "github_repository" {
   description = "GitHub repository in the format owner/repo-name (e.g., cxm6467/ai-interview-prep)"
   type        = string
   default     = "cxm6467/ai-interview-prep"
+}
+
+variable "import_existing_resources" {
+  description = "Whether to import existing resources instead of creating new ones"
+  type        = bool
+  default     = false
+}
+
+variable "hosted_zone_id" {
+  description = "Route53 hosted zone ID for DNS records"
+  type        = string
+  default     = ""
+}
+
+variable "existing_api_gateway_id" {
+  description = "Existing API Gateway ID to import (optional)"
+  type        = string
+  default     = ""
+}
+
+variable "existing_api_mapping_id" {
+  description = "Existing API Gateway mapping ID to import (optional)"
+  type        = string
+  default     = ""
 }

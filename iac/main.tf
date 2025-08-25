@@ -4,9 +4,40 @@ provider "aws" {
   # In CI/CD, AWS credentials will be provided via environment variables
 }
 
-# Local values for domain configuration
-locals {
-  full_domain = var.environment == "development" ? "dev.${var.subdomain}.${var.domain_name}" : "${var.subdomain}.${var.domain_name}"
+# Import the data sources from data-sources.tf
+# All local values and data sources are now defined there
+
+# Conditional import blocks based on detected resources
+# These will only attempt to import if the resource detection data sources find existing resources
+
+# Import ECR repository if detected as existing
+import {
+  to = aws_ecr_repository.lambda_repo
+  id = "${var.app_name}-${var.environment}"
+}
+
+# Import IAM role if detected as existing
+import {
+  to = aws_iam_role.lambda_exec_role
+  id = "${var.app_name}-${var.environment}-lambda-role"
+}
+
+# Import IAM policy if detected as existing
+import {
+  to = aws_iam_policy.lambda_policy
+  id = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:policy/${var.app_name}-${var.environment}-lambda-policy"
+}
+
+# Import CloudWatch log group if detected as existing
+import {
+  to = aws_cloudwatch_log_group.lambda_logs
+  id = "/aws/lambda/${var.app_name}-${var.environment}"
+}
+
+# Import Lambda function if detected as existing
+import {
+  to = aws_lambda_function.ai_handler
+  id = "${var.app_name}-${var.environment}"
 }
 
 # ECR Repository to store the Docker Image
@@ -72,7 +103,7 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
 resource "aws_lambda_function" "ai_handler" {
   function_name = "${var.app_name}-${var.environment}"
   package_type  = "Image"
-  image_uri     = "${aws_ecr_repository.lambda_repo.repository_url}:latest"
+  image_uri     = var.lambda_image_uri != "" ? var.lambda_image_uri : "${aws_ecr_repository.lambda_repo.repository_url}:latest"
   role          = aws_iam_role.lambda_exec_role.arn
   timeout       = var.lambda_timeout
   memory_size   = var.lambda_memory
@@ -144,11 +175,7 @@ resource "aws_lambda_permission" "allow_api_gateway" {
   source_arn    = "${aws_apigatewayv2_api.api_gw.execution_arn}/*"
 }
 
-# Data source to get the existing hosted zone
-data "aws_route53_zone" "main" {
-  count = var.create_route53_records ? 1 : 0
-  name  = var.domain_name
-}
+# Route53 zone is already defined in data-sources.tf
 
 # SSL Certificate for the custom domain
 resource "aws_acm_certificate" "api_cert" {

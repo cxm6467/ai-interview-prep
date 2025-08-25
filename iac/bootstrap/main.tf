@@ -128,7 +128,16 @@ resource "aws_iam_policy" "github_actions_policy" {
           "lambda:RemovePermission",
           "lambda:ListTags",
           "lambda:TagResource",
-          "lambda:UntagResource"
+          "lambda:UntagResource",
+          "lambda:ListVersionsByFunction",
+          "lambda:GetFunctionUrlConfig",
+          "lambda:CreateFunctionUrlConfig",
+          "lambda:UpdateFunctionUrlConfig",
+          "lambda:DeleteFunctionUrlConfig",
+          "lambda:GetPolicy",
+          "lambda:PutFunctionConcurrency",
+          "lambda:GetFunctionConcurrency",
+          "lambda:DeleteFunctionConcurrency"
         ]
         Resource = "*"
       },
@@ -146,7 +155,16 @@ resource "aws_iam_policy" "github_actions_policy" {
           "logs:PutRetentionPolicy",
           "logs:ListTagsLogGroup",
           "logs:TagLogGroup",
-          "logs:UntagLogGroup"
+          "logs:UntagLogGroup",
+          "logs:ListTagsForResource",
+          "logs:TagResource",
+          "logs:UntagResource",
+          "logs:CreateLogDelivery",
+          "logs:UpdateLogDelivery",
+          "logs:DeleteLogDelivery",
+          "logs:DescribeLogDeliveries",
+          "logs:GetLogDelivery",
+          "logs:ListLogDeliveries"
         ]
         Resource = "*"
       },
@@ -154,18 +172,72 @@ resource "aws_iam_policy" "github_actions_policy" {
       {
         Effect = "Allow"
         Action = [
-          "s3:*"
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket",
+          "s3:CreateBucket",
+          "s3:DeleteBucket",
+          "s3:GetBucketLocation",
+          "s3:GetBucketVersioning",
+          "s3:PutBucketVersioning",
+          "s3:GetBucketWebsite",
+          "s3:PutBucketWebsite",
+          "s3:DeleteBucketWebsite",
+          "s3:GetBucketPolicy",
+          "s3:PutBucketPolicy",
+          "s3:DeleteBucketPolicy",
+          "s3:GetBucketTagging",
+          "s3:PutBucketTagging",
+          "s3:GetBucketPublicAccessBlock",
+          "s3:PutBucketPublicAccessBlock",
+          "s3:PutBucketAcl",
+          "s3:GetBucketAcl",
+          "s3:PutBucketCORS",
+          "s3:GetBucketCORS",
+          "s3:GetAccelerateConfiguration",
+          "s3:PutAccelerateConfiguration",
+          "s3:GetBucketNotification",
+          "s3:PutBucketNotification",
+          "s3:GetBucketRequestPayment",
+          "s3:PutBucketRequestPayment",
+          "s3:GetBucketLogging",
+          "s3:PutBucketLogging",
+          "s3:GetLifecycleConfiguration",
+          "s3:PutLifecycleConfiguration",
+          "s3:GetReplicationConfiguration",
+          "s3:PutReplicationConfiguration",
+          "s3:GetEncryptionConfiguration",
+          "s3:PutEncryptionConfiguration",
+          "s3:GetBucketObjectLockConfiguration",
+          "s3:PutBucketObjectLockConfiguration"
         ]
         Resource = [
-          "arn:aws:s3:::${var.app_name}-${var.environment}-frontend",
-          "arn:aws:s3:::${var.app_name}-${var.environment}-frontend/*"
+          "arn:aws:s3:::${var.app_name}-*-frontend",
+          "arn:aws:s3:::${var.app_name}-*-frontend/*"
         ]
       },
       # CloudFront permissions
       {
         Effect = "Allow"
         Action = [
-          "cloudfront:*"
+          "cloudfront:CreateInvalidation",
+          "cloudfront:GetInvalidation",
+          "cloudfront:ListInvalidations",
+          "cloudfront:CreateDistribution",
+          "cloudfront:GetDistribution",
+          "cloudfront:GetDistributionConfig",
+          "cloudfront:UpdateDistribution",
+          "cloudfront:DeleteDistribution",
+          "cloudfront:ListDistributions",
+          "cloudfront:TagResource",
+          "cloudfront:UntagResource",
+          "cloudfront:ListTagsForResource",
+          "cloudfront:CreateOriginAccessControl",
+          "cloudfront:GetOriginAccessControl",
+          "cloudfront:UpdateOriginAccessControl",
+          "cloudfront:DeleteOriginAccessControl",
+          "cloudfront:ListOriginAccessControls"
         ]
         Resource = "*"
       },
@@ -232,6 +304,16 @@ resource "aws_iam_policy" "github_actions_policy" {
         Effect = "Allow"
         Action = [
           "apigateway:*"
+        ]
+        Resource = "*"
+      },
+      # Additional IAM permissions for resource management
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:CreateServiceLinkedRole",
+          "iam:GetServiceLinkedRoleDeletionStatus",
+          "iam:DeleteServiceLinkedRole"
         ]
         Resource = "*"
       },
