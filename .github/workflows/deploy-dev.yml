@@ -103,21 +103,10 @@ jobs:
         terraform init
 
 
-    - name: Import Existing Resources
+    - name: Clear State Lock
       run: |
         cd iac/environments/dev
         terraform force-unlock -force 5641d5f9-80d8-2505-48b8-9927011fd16b || echo "No stuck locks"
-        
-        # Fast import of only conflicting resources
-        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.lambda.aws_iam_policy.lambda_policy arn:aws:iam::276362266002:policy/ai-interview-prep-dev-policy || echo "Already imported"
-        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.lambda.aws_iam_policy.lambda_metrics_policy[0] arn:aws:iam::276362266002:policy/ai-interview-prep-dev-metrics-policy || echo "Already imported"  
-        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.lambda.aws_cloudwatch_log_group.lambda_logs /aws/lambda/ai-interview-prep-dev || echo "Already imported"
-        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.security.aws_iam_role.api_gateway_cloudwatch_role api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io || echo "Already imported"
-        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.security.aws_iam_policy.api_gateway_cloudwatch_policy arn:aws:iam::276362266002:policy/api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io || echo "Already imported"
-        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.security.aws_iam_role.route53_cert_validation_role route53-cert-validation-dev-ai-ip-chrismarasco-io || echo "Already imported"
-        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.security.aws_iam_policy.route53_cert_validation_policy arn:aws:iam::276362266002:policy/route53-cert-validation-dev-ai-ip-chrismarasco-io || echo "Already imported"
-        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.frontend.aws_s3_bucket.frontend ai-interview-prep-dev-frontend || echo "Already imported"
-        echo "🔄 Import completed"
 
     - name: Terraform Plan
       run: |
