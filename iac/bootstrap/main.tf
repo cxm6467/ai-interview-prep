@@ -129,7 +129,11 @@ resource "aws_iam_policy" "github_actions_policy" {
           "lambda:ListTags",
           "lambda:TagResource",
           "lambda:UntagResource",
-          "lambda:ListVersionsByFunction"
+          "lambda:ListVersionsByFunction",
+          "lambda:GetFunctionUrlConfig",
+          "lambda:CreateFunctionUrlConfig",
+          "lambda:UpdateFunctionUrlConfig",
+          "lambda:DeleteFunctionUrlConfig"
         ]
         Resource = "*"
       },
