@@ -69,3 +69,27 @@ variable "github_repository" {
   type        = string
   default     = "cxm6467/ai-interview-prep"
 }
+
+variable "import_existing_resources" {
+  description = "Whether to import existing resources instead of creating new ones"
+  type        = bool
+  default     = false
+}
+
+variable "hosted_zone_id" {
+  description = "Route53 hosted zone ID for DNS records"
+  type        = string
+  default     = ""
+}
+
+variable "existing_api_gateway_id" {
+  description = "Existing API Gateway ID to import (optional)"
+  type        = string
+  default     = ""
+}
+
+variable "existing_api_mapping_id" {
+  description = "Existing API Gateway mapping ID to import (optional)"
+  type        = string
+  default     = ""
+}
