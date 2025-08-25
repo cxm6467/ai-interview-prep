@@ -146,7 +146,10 @@ resource "aws_iam_policy" "github_actions_policy" {
           "logs:PutRetentionPolicy",
           "logs:ListTagsLogGroup",
           "logs:TagLogGroup",
-          "logs:UntagLogGroup"
+          "logs:UntagLogGroup",
+          "logs:ListTagsForResource",
+          "logs:TagResource",
+          "logs:UntagResource"
         ]
         Resource = "*"
       },
