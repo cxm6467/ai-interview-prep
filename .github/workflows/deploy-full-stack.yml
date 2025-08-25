@@ -135,10 +135,18 @@ jobs:
           }
           
           # Import key resources that commonly cause EntityAlreadyExists errors
-          import_resource "aws_ecr_repository.consolidated_ai_handler" "consolidated-ai-handler"
+          if [ "$ENVIRONMENT" = "production" ]; then
+            ECR_REPO="ai-interview-prep-prod"
+            LAMBDA_NAME="ai-interview-prep-prod"
+          else
+            ECR_REPO="ai-interview-prep-dev"
+            LAMBDA_NAME="ai-interview-prep-dev"
+          fi
+          
+          import_resource "aws_ecr_repository.lambda_repo" "$ECR_REPO"
           import_resource "aws_iam_role.lambda_execution_role" "lambda-execution-role"
           import_resource "aws_iam_policy.lambda_policy" "arn:aws:iam::276362266002:policy/lambda-policy"
-          import_resource "aws_cloudwatch_log_group.lambda_logs" "/aws/lambda/consolidated-ai-handler"
+          import_resource "aws_cloudwatch_log_group.lambda_logs" "/aws/lambda/$LAMBDA_NAME"
           
           echo "🔄 Import step completed - proceeding with apply"
           
