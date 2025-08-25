@@ -162,7 +162,8 @@ resource "aws_iam_policy" "github_actions_policy" {
           "logs:CreateLogDelivery",
           "logs:DeleteLogDelivery",
           "logs:DescribeLogDeliveries",
-          "logs:GetLogDelivery"
+          "logs:GetLogDelivery",
+          "logs:ListLogDeliveries"
         ]
         Resource = "*"
       },
