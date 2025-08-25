@@ -1,7 +1,0 @@
-
-Changes to Outputs:
-  + custom_domain_url = "https://dev.ai-ip.chrismarasco.io"
-  + full_domain       = "dev.ai-ip.chrismarasco.io"
-
-You can apply this plan to save these new output values to the Terraform
-state, without changing any real infrastructure.
