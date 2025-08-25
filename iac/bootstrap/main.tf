@@ -128,7 +128,8 @@ resource "aws_iam_policy" "github_actions_policy" {
           "lambda:RemovePermission",
           "lambda:ListTags",
           "lambda:TagResource",
-          "lambda:UntagResource"
+          "lambda:UntagResource",
+          "lambda:ListVersionsByFunction"
         ]
         Resource = "*"
       },
@@ -193,7 +194,9 @@ resource "aws_iam_policy" "github_actions_policy" {
           "s3:GetReplicationConfiguration",
           "s3:PutReplicationConfiguration",
           "s3:GetEncryptionConfiguration",
-          "s3:PutEncryptionConfiguration"
+          "s3:PutEncryptionConfiguration",
+          "s3:GetBucketObjectLockConfiguration",
+          "s3:PutBucketObjectLockConfiguration"
         ]
         Resource = [
           "arn:aws:s3:::${var.app_name}-*-frontend",
