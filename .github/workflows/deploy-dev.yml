@@ -89,10 +89,8 @@ jobs:
       run: |
         cd iac/environments/dev
         
-        # Force unlock state in case of previous failures
         terraform force-unlock -force 5641d5f9-80d8-2505-48b8-9927011fd16b || echo "No lock to release or already released"
         
-        # Function to safely import resources (ignores errors)
         import_resource() {
           local resource=$1
           local id=$2
@@ -105,8 +103,6 @@ jobs:
             echo "ℹ️  [$count/$total] Resource $resource already imported or doesn't exist, continuing..."
           fi
         }
-        
-        # Import key resources that commonly cause EntityAlreadyExists errors (dev environment)
         echo "🔄 Starting import of 10 resources..."
         import_resource "module.lambda.aws_ecr_repository.lambda_repo" "ai-interview-prep-dev" 1 10
         import_resource "module.lambda.aws_iam_role.lambda_exec_role" "ai-interview-prep-dev-role" 2 10
