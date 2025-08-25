@@ -97,18 +97,25 @@ jobs:
         
       - name: Build and push Docker image
         run: |
-          cd iac
-          
           # Get AWS account ID for ECR
           AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
           ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${{ vars.AWS_REGION || 'us-east-1' }}.amazonaws.com
+          ENVIRONMENT="${{ github.event.inputs.environment || 'production' }}"
+          # Map environment names to actual ECR repository names
+          if [ "$ENVIRONMENT" = "development" ]; then
+            ECR_REPO="ai-interview-prep-dev"
+          elif [ "$ENVIRONMENT" = "production" ]; then
+            ECR_REPO="ai-interview-prep-prod"
+          else
+            ECR_REPO="ai-interview-prep-dev"
+          fi
           
-          # Build and tag the image
-          docker build -f Dockerfile ../apps/backend -t consolidated-ai-handler:latest
-          docker tag consolidated-ai-handler:latest ${ECR_REGISTRY}/consolidated-ai-handler:latest
+          # Build and tag the image (from project root with correct Dockerfile path)
+          docker build -f iac/Dockerfile -t ${ECR_REPO}:latest .
+          docker tag ${ECR_REPO}:latest ${ECR_REGISTRY}/${ECR_REPO}:latest
           
           # Push to ECR
-          docker push ${ECR_REGISTRY}/consolidated-ai-handler:latest
+          docker push ${ECR_REGISTRY}/${ECR_REPO}:latest
           
       - name: Deploy backend infrastructure
         working-directory: iac
