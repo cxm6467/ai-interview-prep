@@ -134,7 +134,10 @@ resource "aws_iam_policy" "github_actions_policy" {
           "lambda:CreateFunctionUrlConfig",
           "lambda:UpdateFunctionUrlConfig",
           "lambda:DeleteFunctionUrlConfig",
-          "lambda:GetPolicy"
+          "lambda:GetPolicy",
+          "lambda:PutFunctionConcurrency",
+          "lambda:GetFunctionConcurrency",
+          "lambda:DeleteFunctionConcurrency"
         ]
         Resource = "*"
       },
