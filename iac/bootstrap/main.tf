@@ -179,7 +179,19 @@ resource "aws_iam_policy" "github_actions_policy" {
           "s3:PutBucketAcl",
           "s3:GetBucketAcl",
           "s3:PutBucketCORS",
-          "s3:GetBucketCORS"
+          "s3:GetBucketCORS",
+          "s3:GetAccelerateConfiguration",
+          "s3:PutAccelerateConfiguration",
+          "s3:GetBucketNotification",
+          "s3:PutBucketNotification",
+          "s3:GetBucketRequestPayment",
+          "s3:PutBucketRequestPayment",
+          "s3:GetBucketLogging",
+          "s3:PutBucketLogging",
+          "s3:GetLifecycleConfiguration",
+          "s3:PutLifecycleConfiguration",
+          "s3:GetReplicationConfiguration",
+          "s3:PutReplicationConfiguration"
         ]
         Resource = [
           "arn:aws:s3:::${var.app_name}-*-frontend",
