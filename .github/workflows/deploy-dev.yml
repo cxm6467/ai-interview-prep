@@ -116,6 +116,7 @@ jobs:
         terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.security.aws_iam_policy.api_gateway_cloudwatch_policy arn:aws:iam::276362266002:policy/api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io || echo "Already imported"
         terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.security.aws_iam_role.route53_cert_validation_role route53-cert-validation-dev-ai-ip-chrismarasco-io || echo "Already imported"
         terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.security.aws_iam_policy.route53_cert_validation_policy arn:aws:iam::276362266002:policy/route53-cert-validation-dev-ai-ip-chrismarasco-io || echo "Already imported"
+        terraform import -var="openai_api_key=${{ secrets.OPENAI_API_KEY }}" module.frontend.aws_s3_bucket.frontend ai-interview-prep-dev-frontend || echo "Already imported"
         echo "🔄 Import completed"
 
     - name: Terraform Plan
