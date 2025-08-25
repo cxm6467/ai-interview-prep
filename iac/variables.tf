@@ -22,6 +22,12 @@ variable "openai_api_key" {
   sensitive   = true
 }
 
+variable "lambda_image_uri" {
+  description = "The Lambda function container image URI (optional, defaults to latest)"
+  type        = string
+  default     = ""
+}
+
 variable "lambda_timeout" {
   description = "Lambda function timeout in seconds"
   type        = number

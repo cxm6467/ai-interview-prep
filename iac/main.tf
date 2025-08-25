@@ -47,6 +47,16 @@ import {
   id = "26d8r5k3sg" # Most recent ai-interview-prep-development-api
 }
 
+import {
+  to = aws_apigatewayv2_stage.api_stage
+  id = "26d8r5k3sg/$default"
+}
+
+import {
+  to = aws_route53_record.api_record[0]
+  id = "Z09619741MD1JY4BVC74L_dev.ai-ip.chrismarasco.io_A"
+}
+
 # ECR Repository to store the Docker Image
 resource "aws_ecr_repository" "lambda_repo" {
   name = "${var.app_name}-${var.environment}"
@@ -110,7 +120,7 @@ resource "aws_cloudwatch_log_group" "lambda_logs" {
 resource "aws_lambda_function" "ai_handler" {
   function_name = "${var.app_name}-${var.environment}"
   package_type  = "Image"
-  image_uri     = "${aws_ecr_repository.lambda_repo.repository_url}:latest"
+  image_uri     = var.lambda_image_uri != "" ? var.lambda_image_uri : "${aws_ecr_repository.lambda_repo.repository_url}:latest"
   role          = aws_iam_role.lambda_exec_role.arn
   timeout       = var.lambda_timeout
   memory_size   = var.lambda_memory
