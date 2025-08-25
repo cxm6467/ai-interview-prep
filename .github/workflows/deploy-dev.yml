@@ -100,13 +100,7 @@ jobs:
     - name: Terraform Init
       run: |
         cd iac/environments/dev
-        terraform init
-
-
-    - name: Clear State Lock
-      run: |
-        cd iac/environments/dev
-        terraform force-unlock -force 5641d5f9-80d8-2505-48b8-9927011fd16b || echo "No stuck locks"
+        terraform init -reconfigure
 
     - name: Terraform Plan
       run: |
