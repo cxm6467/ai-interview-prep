@@ -8,14 +8,12 @@ terraform {
     }
   }
 
-  # Remote state backend - update with your actual backend configuration
+  # S3 backend for remote state storage
   backend "s3" {
-    bucket = "ai-interview-prep-terraform-state"
-    key    = "prod/terraform.tfstate"
-    region = "us-east-1"
-    
-    # Optional: Enable state locking with DynamoDB
-    # dynamodb_table = "terraform-state-lock"
-    # encrypt        = true
+    bucket         = "ai-interview-prep-terraform-state-276362266002"
+    key            = "ai-interview-prep/prod/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "ai-interview-prep-terraform-state-lock"
   }
 }

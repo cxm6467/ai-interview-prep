@@ -23,8 +23,9 @@ provider "aws" {
   }
 }
 
-# Data source to get current AWS account ID
+# Data source to get current AWS account ID and region
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
 
 # GitHub OIDC Identity Provider
 resource "aws_iam_openid_connect_provider" "github" {
