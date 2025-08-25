@@ -91,6 +91,36 @@ jobs:
         terraform init
 
 
+    - name: Import Existing Resources
+      run: |
+        cd iac/environments/dev
+        
+        # Function to safely import resources (ignores errors)
+        import_resource() {
+          local resource=$1
+          local id=$2
+          echo "Attempting to import $resource..."
+          if terraform import "$resource" "$id" 2>/dev/null; then
+            echo "✅ Successfully imported $resource"
+          else
+            echo "ℹ️  Resource $resource already imported or doesn't exist, continuing..."
+          fi
+        }
+        
+        # Import key resources that commonly cause EntityAlreadyExists errors (dev environment)
+        import_resource "module.lambda.aws_ecr_repository.lambda_repo" "ai-interview-prep-dev"
+        import_resource "module.lambda.aws_iam_role.lambda_exec_role" "ai-interview-prep-dev-role" 
+        import_resource "module.lambda.aws_iam_role.lambda_execution_role_enhanced[0]" "ai-interview-prep-dev-execution-role"
+        import_resource "module.lambda.aws_iam_policy.lambda_policy" "arn:aws:iam::276362266002:policy/ai-interview-prep-dev-policy"
+        import_resource "module.lambda.aws_iam_policy.lambda_metrics_policy[0]" "arn:aws:iam::276362266002:policy/ai-interview-prep-dev-metrics-policy"
+        import_resource "module.lambda.aws_cloudwatch_log_group.lambda_logs" "/aws/lambda/ai-interview-prep-dev"
+        import_resource "module.security.aws_iam_role.api_gateway_cloudwatch_role" "api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io"
+        import_resource "module.security.aws_iam_policy.api_gateway_cloudwatch_policy" "arn:aws:iam::276362266002:policy/api-gateway-cloudwatch-dev-ai-ip-chrismarasco-io"
+        import_resource "module.security.aws_iam_role.route53_cert_validation_role" "route53-cert-validation-dev-ai-ip-chrismarasco-io"
+        import_resource "module.security.aws_iam_policy.route53_cert_validation_policy" "arn:aws:iam::276362266002:policy/route53-cert-validation-dev-ai-ip-chrismarasco-io"
+        
+        echo "🔄 Import step completed - proceeding with plan"
+
     - name: Terraform Plan
       run: |
         cd iac/environments/dev
