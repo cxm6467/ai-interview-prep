@@ -182,8 +182,8 @@ resource "aws_iam_policy" "github_actions_policy" {
           "s3:GetBucketCORS"
         ]
         Resource = [
-          "arn:aws:s3:::${var.app_name}-${var.environment}-frontend",
-          "arn:aws:s3:::${var.app_name}-${var.environment}-frontend/*"
+          "arn:aws:s3:::${var.app_name}-*-frontend",
+          "arn:aws:s3:::${var.app_name}-*-frontend/*"
         ]
       },
       # CloudFront permissions

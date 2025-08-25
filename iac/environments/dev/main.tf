@@ -109,3 +109,14 @@ module "frontend" {
 
   depends_on = [module.security]
 }
+
+# Import blocks for existing resources
+import {
+  to = module.lambda.aws_cloudwatch_log_group.lambda_logs
+  id = "/aws/lambda/ai-interview-prep-dev"
+}
+
+import {
+  to = module.frontend.aws_s3_bucket.frontend
+  id = "ai-interview-prep-dev-frontend"
+}
