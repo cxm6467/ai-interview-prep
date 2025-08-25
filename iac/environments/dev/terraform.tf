@@ -8,12 +8,12 @@ terraform {
     }
   }
 
-  # Uncomment and configure for remote state
-  # backend "s3" {
-  #   bucket = "your-terraform-state-bucket"
-  #   key    = "ai-interview-prep/dev/terraform.tfstate"
-  #   region = "us-east-1"
-  #   encrypt = true
-  #   dynamodb_table = "terraform-state-lock"
-  # }
+  # S3 backend for remote state storage
+  backend "s3" {
+    bucket         = "ai-interview-prep-terraform-state-276362266002"
+    key            = "ai-interview-prep/dev/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "ai-interview-prep-terraform-state-lock"
+  }
 }
