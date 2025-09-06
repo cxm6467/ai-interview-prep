@@ -1,0 +1,88 @@
+name: 'Infrastructure Deploy'
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'iac/**'
+      - '.github/workflows/terraform-deploy.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'iac/**'
+      - '.github/workflows/terraform-deploy.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - develop
+          - prod
+
+permissions:
+  id-token: write   # Required for AWS OIDC
+  contents: read    # Required for actions/checkout
+
+jobs:
+  terraform:
+    name: 'Terraform'
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || 'develop' }}
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: iac/environments/${{ inputs.environment || (github.ref == 'refs/heads/main' && 'prod') || 'develop' }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+        role-session-name: terraform-deploy-${{ github.run_id }}
+        aws-region: us-east-1
+
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.7.0
+
+    - name: Terraform Format Check
+      run: terraform fmt -check -recursive ../../
+
+    - name: Terraform Init
+      run: terraform init
+
+    - name: Terraform Validate
+      run: terraform validate
+
+    - name: Terraform Plan
+      run: |
+        terraform plan \
+          -out=tfplan
+      env:
+        TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+
+    - name: Terraform Apply (Auto-approve for develop)
+      if: github.ref == 'refs/heads/develop' && (inputs.environment == 'develop' || inputs.environment == '')
+      run: terraform apply tfplan
+
+    - name: Terraform Apply (Production - Manual approval required)
+      if: github.ref == 'refs/heads/main' || inputs.environment == 'prod'
+      run: terraform apply tfplan
+      # Note: Production environment should have protection rules requiring manual approval
+
+    - name: Output Infrastructure URLs
+      if: always() && steps.terraform.outcome == 'success'
+      run: |
+        echo "## Terraform Outputs" >> $GITHUB_STEP_SUMMARY
+        echo "### Deployment Information" >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        terraform output >> $GITHUB_STEP_SUMMARY
+        echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

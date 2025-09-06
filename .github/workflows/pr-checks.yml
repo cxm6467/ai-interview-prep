@@ -1,0 +1,70 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  terraform-lint:
+    name: Terraform Lint & Validate
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+          
+      - name: Terraform Format Check
+        run: |
+          echo "📋 Checking Terraform formatting..."
+          terraform fmt -check -recursive -diff iac/ || {
+            echo "❌ Terraform files are not properly formatted. Run 'terraform fmt -recursive iac/' to fix."
+            exit 1
+          }
+          
+      - name: Terraform Validate (Develop)
+        run: |
+          cd iac/environments/develop
+          terraform init -backend=false
+          terraform validate
+          
+      - name: Terraform Validate (Prod)
+        run: |
+          cd iac/environments/prod
+          terraform init -backend=false
+          terraform validate
+
+  lint-and-build:
+    name: Node.js Lint & Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Lint frontend code
+        run: npm run lint --workspace=ai-interview-prep-frontend
+        
+      - name: Type check backend
+        run: npm run type-check --workspace=ai-interview-prep-backend
+        
+      - name: Build frontend
+        run: npm run build --workspace=ai-interview-prep-frontend
+        
+      - name: Build backend
+        run: npm run build --workspace=ai-interview-prep-backend

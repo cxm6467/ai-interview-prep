@@ -1,0 +1,72 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LambdaPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunctionCodeSigningConfig",
+        "lambda:PutFunctionCodeSigningConfig",
+        "lambda:DeleteFunctionCodeSigningConfig"
+      ],
+      "Resource": [
+        "arn:aws:lambda:*:*:function:ai-interview-prep-dev-backend-api",
+        "arn:aws:lambda:*:*:function:ai-interview-prep-prod-backend-api"
+      ]
+    },
+    {
+      "Sid": "S3BucketPermissions", 
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetAccelerateConfiguration",
+        "s3:PutAccelerateConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:PutLifecycleConfiguration",
+        "s3:GetReplicationConfiguration",
+        "s3:PutReplicationConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ai-interview-prep-dev-frontend-*",
+        "arn:aws:s3:::ai-interview-prep-prod-frontend-*"
+      ]
+    },
+    {
+      "Sid": "CloudWatchMonitoring",
+      "Effect": "Allow",
+      "Action": [
+        "cloudwatch:PutMetricAlarm",
+        "cloudwatch:DeleteAlarms",
+        "cloudwatch:DescribeAlarms",
+        "cloudwatch:DescribeAlarmsForMetric",
+        "cloudwatch:PutDashboard",
+        "cloudwatch:GetDashboard",
+        "cloudwatch:DeleteDashboard",
+        "cloudwatch:ListDashboards",
+        "cloudwatch:TagResource",
+        "cloudwatch:UntagResource",
+        "cloudwatch:ListTagsForResource"
+      ],
+      "Resource": [
+        "arn:aws:cloudwatch:*:*:alarm:ai-interview-prep-dev-*",
+        "arn:aws:cloudwatch:*:*:alarm:ai-interview-prep-prod-*",
+        "arn:aws:cloudwatch::*:dashboard/ai-interview-prep-dev-dashboard",
+        "arn:aws:cloudwatch::*:dashboard/ai-interview-prep-prod-dashboard"
+      ]
+    },
+    {
+      "Sid": "CloudWatchLogMetricFilters",
+      "Effect": "Allow",
+      "Action": [
+        "logs:PutMetricFilter",
+        "logs:DeleteMetricFilter",
+        "logs:DescribeMetricFilters"
+      ],
+      "Resource": [
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ai-interview-prep-dev-backend-api",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ai-interview-prep-dev-backend-api:*",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ai-interview-prep-prod-backend-api",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ai-interview-prep-prod-backend-api:*"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+name: '⛵ Deploy to Production'
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_frontend:
+        description: 'Deploy frontend'
+        required: false
+        default: true
+        type: boolean
+      deploy_backend:
+        description: 'Deploy backend'
+        required: false
+        default: true
+        type: boolean
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  approval:
+    environment: prod
+    runs-on: ubuntu-latest
+    steps:
+      - name: Await Approval
+        run: echo "Production deployment approved"
+        
+  deploy:
+    needs: approval
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: prod
+      deploy_frontend: ${{ inputs.deploy_frontend || true }}
+      deploy_backend: ${{ inputs.deploy_backend || true }}
+    secrets: inherit

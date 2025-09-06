@@ -1,0 +1,44 @@
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .json-viewer {
+    @apply bg-gray-900 text-gray-100 rounded-lg overflow-auto max-h-[500px];
+    font-family: 'Fira Code', 'Menlo', 'Monaco', 'Courier New', monospace;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+  }
+
+  .json-pre {
+    @apply m-0 p-0 overflow-x-auto min-h-[100px] bg-transparent;
+    counter-reset: line;
+  }
+
+  .json-code {
+    @apply block whitespace-pre font-mono text-sm leading-relaxed tab-size-2 relative p-4 m-0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: transparent;
+  }
+
+  .json-line {
+    @apply transition-colors px-2 -mx-2 rounded;
+  }
+
+  .json-line:hover {
+    @apply bg-gray-800;
+  }
+
+  /* Scrollbar styling */
+  .json-pre::-webkit-scrollbar {
+    @apply h-2 w-2;
+  }
+
+  .json-pre::-webkit-scrollbar-track {
+    @apply bg-gray-800 rounded-full;
+  }
+
+  .json-pre::-webkit-scrollbar-thumb {
+    @apply bg-gray-600 rounded-full hover:bg-gray-500 transition-colors;
+  }
+}

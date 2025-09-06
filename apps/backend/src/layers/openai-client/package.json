@@ -1,0 +1,29 @@
+{
+  "name": "openai-client-layer",
+  "version": "1.0.0",
+  "description": "Shared OpenAI client Lambda layer for interview preparation services",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "dependencies": {
+    "openai": "^5.12.2"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.4",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist *.js *.d.ts"
+  },
+  "keywords": [
+    "openai",
+    "lambda-layer",
+    "aws",
+    "interview-prep"
+  ],
+  "license": "MIT"
+}

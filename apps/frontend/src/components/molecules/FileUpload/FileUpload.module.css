@@ -1,0 +1,132 @@
+.container {
+  width: 100%;
+  position: relative;
+}
+
+.label {
+  color: var(--accent-blue);
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  display: block;
+}
+
+.dropzone {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  border-radius: 12px;
+  border: 2px dashed var(--border);
+  background: var(--card-bg);
+  overflow: hidden;
+  position: relative;
+}
+
+.dropzone::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
+  opacity: 0.8;
+}
+
+.dropzoneContent {
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  position: relative;
+  z-index: 1;
+}
+
+.dragActive {
+  background: var(--bg-tertiary);
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.uploadPrompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.uploadIcon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--accent-blue);
+  animation: float 3s ease-in-out infinite;
+  transition: transform 0.3s ease;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.fileInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--accent-green);
+  padding: 1rem;
+  background: var(--bg-tertiary);
+  border-radius: 8px;
+  margin-top: 1rem;
+  width: 100%;
+  max-width: 300px;
+}
+
+.fileIcon {
+  font-size: 2rem;
+  color: var(--accent-green);
+}
+
+.fileName {
+  font-weight: 500;
+  color: var(--text-primary);
+  word-break: break-word;
+  max-width: 100%;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .dropzoneContent {
+    padding: 1.5rem 1rem;
+    min-height: 140px;
+  }
+  
+  .uploadIcon {
+    font-size: 2rem;
+  }
+}
+
+/* Hover states for desktop */
+@media (hover: hover) {
+  .dropzone:hover {
+    border-color: var(--accent-purple);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+  
+  .dropzone:hover .uploadIcon {
+    transform: scale(1.1);
+  }
+}
+
+/* Focus state for better accessibility */
+.dropzone:focus-within {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}

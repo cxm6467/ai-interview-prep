@@ -1,0 +1,536 @@
+
+name: 'Deploy to AWS'
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'apps/**'
+      - 'package.json'
+      - '.github/workflows/deploy.yml'
+  workflow_call:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: false
+        default: 'develop'
+        type: string
+      deploy_frontend:
+        description: 'Deploy frontend'
+        required: false
+        default: true
+        type: boolean
+      deploy_backend:
+        description: 'Deploy backend'
+        required: false
+        default: true
+        type: boolean
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        default: 'develop'
+        type: choice
+        options:
+          - develop
+          - prod
+      deploy_frontend:
+        description: 'Deploy frontend'
+        required: false
+        default: true
+        type: boolean
+      deploy_backend:
+        description: 'Deploy backend'
+        required: false
+        default: true
+        type: boolean
+permissions:
+  id-token: write # Required for AWS OIDC
+  contents: read # Required for actions/checkout
+jobs:
+  setup:
+    name: 'Setup Environment'
+    runs-on: ubuntu-latest
+    outputs:
+      environment: ${{ steps.env.outputs.environment }}
+      deploy_frontend: ${{ steps.deploy.outputs.deploy_frontend }}
+      deploy_backend: ${{ steps.deploy.outputs.deploy_backend }}
+    steps:
+      - name: Determine environment
+        id: env
+        run: |
+          if [ "${{ github.event.inputs.environment }}" != "" ]; then
+            echo "environment=${{ github.event.inputs.environment }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            echo "environment=prod" >> $GITHUB_OUTPUT
+          else
+            echo "environment=develop" >> $GITHUB_OUTPUT
+          fi
+      - name: Determine deployment scope
+        id: deploy
+        run: |
+          if [ "${{ github.event.inputs.deploy_frontend }}" != "" ]; then
+            echo "deploy_frontend=${{ github.event.inputs.deploy_frontend }}" >> $GITHUB_OUTPUT
+          else
+            echo "deploy_frontend=true" >> $GITHUB_OUTPUT
+          fi
+          
+          if [ "${{ github.event.inputs.deploy_backend }}" != "" ]; then
+            echo "deploy_backend=${{ github.event.inputs.deploy_backend }}" >> $GITHUB_OUTPUT
+          else
+            echo "deploy_backend=true" >> $GITHUB_OUTPUT
+          fi
+  deploy-backend:
+    name: 'Deploy Backend'
+    runs-on: ubuntu-latest
+    needs: setup
+    if: needs.setup.outputs.deploy_backend == 'true'
+    environment: ${{ needs.setup.outputs.environment }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: deploy-backend-${{ github.run_id }}
+          aws-region: us-east-1
+      - name: Install dependencies
+        run: |
+          npm ci
+      - name: Build backend TypeScript
+        run: |
+          cd apps/backend
+          npm run build
+      - name: Build and push Docker images
+        run: |
+          cd apps/backend
+          
+          # Get account ID and region
+          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          AWS_REGION=us-east-1
+          
+          # Define image names based on environment
+          ENV="${{ needs.setup.outputs.environment }}"
+          if [ "$ENV" = "develop" ]; then
+            ENV_NAME="dev"
+          else
+            ENV_NAME="$ENV"
+          fi
+          
+          MAIN_IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/ai-interview-prep-${ENV_NAME}-lambda-main"
+          CHAT_IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/ai-interview-prep-${ENV_NAME}-lambda-chat"
+          
+          # Login to ECR
+          echo "🔐 Logging into ECR..."
+          aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+          
+          # Get short commit SHA for image tags
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          
+          # Build and push main Lambda image
+          echo "🐳 Building main Lambda image..."
+          docker build --platform linux/amd64 -f Dockerfile.main -t ${MAIN_IMAGE_URI}:latest -t ${MAIN_IMAGE_URI}:${SHORT_SHA} .
+          
+          echo "⬆️ Pushing main Lambda image..."
+          docker push ${MAIN_IMAGE_URI}:latest
+          docker push ${MAIN_IMAGE_URI}:${SHORT_SHA}
+          
+          # Build and push chat Lambda image
+          echo "🐳 Building chat Lambda image..."
+          docker build --platform linux/amd64 -f Dockerfile.chat -t ${CHAT_IMAGE_URI}:latest -t ${CHAT_IMAGE_URI}:${SHORT_SHA} .
+          
+          echo "⬆️ Pushing chat Lambda image..."
+          docker push ${CHAT_IMAGE_URI}:latest
+          docker push ${CHAT_IMAGE_URI}:${SHORT_SHA}
+          
+          echo "✅ Docker images built and pushed successfully"
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+      - name: Bootstrap Terraform backend
+        run: |
+          BUCKET_NAME="ai-interview-prep-terraform-state"
+          AWS_REGION="us-east-1"
+          
+          echo "🔧 Bootstrapping Terraform Backend"
+          echo "Bucket: $BUCKET_NAME"
+          echo "Region: $AWS_REGION"
+          
+          echo "🔍 Checking AWS credentials..."
+          AWS_IDENTITY=$(aws sts get-caller-identity --output text --query 'Arn')
+          echo "✅ AWS credentials valid: $AWS_IDENTITY"
+          
+          echo "🪣 Creating S3 bucket for Terraform state..."
+          if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+            echo "✅ S3 bucket '$BUCKET_NAME' already exists"
+          else
+            # Create bucket
+            aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$AWS_REGION"
+            
+            # Enable versioning
+            aws s3api put-bucket-versioning --bucket "$BUCKET_NAME" \
+              --versioning-configuration Status=Enabled
+            
+            # Enable encryption
+            aws s3api put-bucket-encryption --bucket "$BUCKET_NAME" \
+              --server-side-encryption-configuration '{
+                "Rules": [{
+                  "ApplyServerSideEncryptionByDefault": {
+                    "SSEAlgorithm": "AES256"
+                  }
+                }]
+              }'
+            
+            # Block public access
+            aws s3api put-public-access-block --bucket "$BUCKET_NAME" \
+              --public-access-block-configuration \
+              BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+            
+            echo "✅ S3 bucket '$BUCKET_NAME' created and configured"
+          fi
+          
+          echo "✅ Terraform backend bootstrap completed successfully!"
+      - name: Lint and validate Terraform
+        run: |
+          cd iac/environments/${{ needs.setup.outputs.environment }}
+          
+          # Initialize Terraform with retry for state backend issues
+          echo "🔧 Initializing Terraform..."
+          terraform init -upgrade
+          
+          # Format check
+          echo "📋 Checking Terraform formatting..."
+          terraform fmt -check -recursive -diff || {
+            echo "❌ Terraform files are not properly formatted. Run 'terraform fmt -recursive' to fix."
+            exit 1
+          }
+          
+          # Validate configuration
+          echo "✅ Validating Terraform configuration..."
+          terraform validate || {
+            echo "❌ Terraform configuration validation failed"
+            exit 1
+          }
+          
+          echo "✅ Terraform linting and validation passed"
+      - name: Check and deploy infrastructure
+        run: |
+          cd iac/environments/${{ needs.setup.outputs.environment }}
+          
+          # Terraform is already initialized from the previous step
+          
+          # Clear any potential stale locks if needed (manual intervention may be required)
+          echo "🧹 Ready to deploy with S3-only backend (no DynamoDB locking)"
+          
+          # Function to handle Terraform with retry logic for state locks
+          terraform_with_retry() {
+            local cmd="$1"
+            local max_attempts=5
+            local wait_time=30
+            
+            for attempt in $(seq 1 $max_attempts); do
+              echo "Attempt $attempt/$max_attempts: Running $cmd"
+              
+              if eval "$cmd"; then
+                echo "✅ $cmd succeeded on attempt $attempt"
+                return 0
+              else
+                exit_code=$?
+                echo "❌ $cmd failed on attempt $attempt (exit code: $exit_code)"
+                
+                # Check if it's a state lock error
+                if [ $exit_code -eq 1 ] && [ $attempt -lt $max_attempts ]; then
+                  echo "🔄 Retrying in ${wait_time} seconds due to potential state lock..."
+                  sleep $wait_time
+                  # Increase wait time for next attempt (exponential backoff)
+                  wait_time=$((wait_time * 2))
+                else
+                  echo "💥 All attempts failed or non-recoverable error"
+                  return $exit_code
+                fi
+              fi
+            done
+            
+            return 1
+          }
+          
+          # Get short commit SHA for image tagging
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          echo "📝 Using commit SHA: $SHORT_SHA"
+          
+          # Get full commit SHA for source code hash
+          FULL_SHA=$(git rev-parse HEAD)
+          echo "📝 Using full SHA for source hash: $FULL_SHA"
+          
+          # Apply with retry logic (no saved plan to avoid staleness)
+          terraform_with_retry "terraform apply -auto-approve"
+          
+          echo "Infrastructure ready for backend deployment"
+        env:
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+      - name: Output backend info
+        run: |
+          cd iac/environments/${{ needs.setup.outputs.environment }}
+          echo "## Backend Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "### Environment: ${{ needs.setup.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "### API URL" >> $GITHUB_STEP_SUMMARY
+          echo "$(terraform output -raw api_gateway_url)" >> $GITHUB_STEP_SUMMARY
+  deploy-frontend:
+    name: 'Deploy Frontend'
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-backend]
+    if: needs.setup.outputs.deploy_frontend == 'true' && (success() || needs.deploy-backend.result == 'skipped')
+    environment: ${{ needs.setup.outputs.environment }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: deploy-frontend-${{ github.run_id }}
+          aws-region: us-east-1
+      - name: Install dependencies
+        run: |
+          npm ci
+          cd apps/frontend
+          npm ci
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+      - name: Get API URL for frontend build
+        run: |
+          cd iac/environments/${{ needs.setup.outputs.environment }}
+          terraform init
+          API_URL=$(terraform output -raw api_gateway_url 2>/dev/null || echo "")
+          if [ -n "$API_URL" ]; then
+            echo "VITE_API_URL=$API_URL" >> $GITHUB_ENV
+          fi
+      - name: Build frontend
+        run: |
+          cd apps/frontend
+          if [ "${{ needs.setup.outputs.environment }}" = "prod" ]; then
+            npm run build:production
+          else
+            npm run build:develop
+          fi
+      - name: Bootstrap Terraform backend
+        run: |
+          BUCKET_NAME="ai-interview-prep-terraform-state"
+          AWS_REGION="us-east-1"
+          
+          echo "🔧 Bootstrapping Terraform Backend"
+          echo "Bucket: $BUCKET_NAME"
+          echo "Region: $AWS_REGION"
+          
+          echo "🔍 Checking AWS credentials..."
+          AWS_IDENTITY=$(aws sts get-caller-identity --output text --query 'Arn')
+          echo "✅ AWS credentials valid: $AWS_IDENTITY"
+          
+          echo "🪣 Creating S3 bucket for Terraform state..."
+          if aws s3api head-bucket --bucket "$BUCKET_NAME" 2>/dev/null; then
+            echo "✅ S3 bucket '$BUCKET_NAME' already exists"
+          else
+            # Create bucket
+            aws s3api create-bucket --bucket "$BUCKET_NAME" --region "$AWS_REGION"
+            
+            # Enable versioning
+            aws s3api put-bucket-versioning --bucket "$BUCKET_NAME" \
+              --versioning-configuration Status=Enabled
+            
+            # Enable encryption
+            aws s3api put-bucket-encryption --bucket "$BUCKET_NAME" \
+              --server-side-encryption-configuration '{
+                "Rules": [{
+                  "ApplyServerSideEncryptionByDefault": {
+                    "SSEAlgorithm": "AES256"
+                  }
+                }]
+              }'
+            
+            # Block public access
+            aws s3api put-public-access-block --bucket "$BUCKET_NAME" \
+              --public-access-block-configuration \
+              BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true
+            
+            echo "✅ S3 bucket '$BUCKET_NAME' created and configured"
+          fi
+          
+          echo "✅ Terraform backend bootstrap completed successfully!"
+      - name: Check and deploy infrastructure
+        run: |
+          cd iac/environments/${{ needs.setup.outputs.environment }}
+          
+          # Initialize Terraform with retry for state backend issues
+          echo "🔧 Initializing Terraform..."
+          terraform init -upgrade
+          
+          # Function to handle Terraform with retry logic for state locks
+          terraform_with_retry() {
+            local cmd="$1"
+            local max_attempts=5
+            local wait_time=30
+            
+            for attempt in $(seq 1 $max_attempts); do
+              echo "Attempt $attempt/$max_attempts: Running $cmd"
+              
+              if eval "$cmd"; then
+                echo "✅ $cmd succeeded on attempt $attempt"
+                return 0
+              else
+                exit_code=$?
+                echo "❌ $cmd failed on attempt $attempt (exit code: $exit_code)"
+                
+                # Check if it's a state lock error
+                if [ $exit_code -eq 1 ] && [ $attempt -lt $max_attempts ]; then
+                  echo "🔄 Retrying in ${wait_time} seconds due to potential state lock..."
+                  sleep $wait_time
+                  # Increase wait time for next attempt (exponential backoff)
+                  wait_time=$((wait_time * 2))
+                else
+                  echo "💥 All attempts failed or non-recoverable error"
+                  return $exit_code
+                fi
+              fi
+            done
+            
+            return 1
+          }
+          
+          # Apply with retry logic (no saved plan to avoid staleness)
+          terraform_with_retry "terraform apply -auto-approve"
+          
+          echo "Infrastructure ready for frontend deployment"
+        env:
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+      - name: Get deployment info from Terraform
+        id: terraform-output
+        run: |
+          cd iac/environments/${{ needs.setup.outputs.environment }}
+          
+          # Get S3 bucket name and CloudFront distribution ID
+          S3_BUCKET=$(terraform output -raw s3_bucket_name 2>/dev/null || echo "")
+          CLOUDFRONT_DIST_ID=$(terraform output -raw cloudfront_distribution_id 2>/dev/null || echo "")
+          
+          if [[ -z "$S3_BUCKET" ]]; then
+            echo "❌ Could not get S3 bucket name from Terraform output"
+            exit 1
+          fi
+          
+          if [[ -z "$CLOUDFRONT_DIST_ID" ]]; then
+            echo "❌ Could not get CloudFront distribution ID from Terraform output"  
+            exit 1
+          fi
+          
+          echo "S3_BUCKET=$S3_BUCKET" >> $GITHUB_OUTPUT
+          echo "CLOUDFRONT_DIST_ID=$CLOUDFRONT_DIST_ID" >> $GITHUB_OUTPUT
+          
+          echo "📦 S3 Bucket: $S3_BUCKET"
+          echo "☁️ CloudFront Distribution: $CLOUDFRONT_DIST_ID"
+      
+      - name: Deploy to S3
+        run: |
+          cd apps/frontend
+          
+          echo "🚀 Deploying frontend to S3..."
+          aws s3 sync dist/ s3://${{ steps.terraform-output.outputs.S3_BUCKET }}/ --delete --exact-timestamps
+          
+          echo "✅ Frontend deployed to S3 successfully!"
+      
+      - name: Invalidate CloudFront cache
+        run: |
+          echo "♻️ Invalidating CloudFront cache..."
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id "${{ steps.terraform-output.outputs.CLOUDFRONT_DIST_ID }}" \
+            --paths "/*" \
+            --output text \
+            --query 'Invalidation.Id')
+          
+          if [[ $? -eq 0 ]]; then
+            echo "✅ CloudFront invalidation created: $INVALIDATION_ID"
+            echo "⏳ Cache invalidation may take a few minutes to complete"
+          else
+            echo "⚠️ Failed to create CloudFront invalidation"
+            echo "The deployment was successful, but cache may need manual clearing"
+          fi
+      - name: Output frontend info
+        run: |
+          cd iac/environments/${{ needs.setup.outputs.environment }}
+          echo "## Frontend Deployment" >> $GITHUB_STEP_SUMMARY
+          echo "### Environment: ${{ needs.setup.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "### Frontend URL" >> $GITHUB_STEP_SUMMARY
+          echo "$(terraform output -raw cloudfront_distribution_url)" >> $GITHUB_STEP_SUMMARY
+  deployment-summary:
+    name: 'Deployment Summary'
+    runs-on: ubuntu-latest
+    needs: [setup, deploy-backend, deploy-frontend]
+    if: always()
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-session-name: deployment-summary-${{ github.run_id }}
+          aws-region: us-east-1
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.0
+      - name: Generate deployment summary
+        run: |
+          cd iac/environments/${{ needs.setup.outputs.environment }}
+          terraform init
+          
+          echo "# 🚀 Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ needs.setup.outputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Backend status
+          if [ "${{ needs.deploy-backend.result }}" = "success" ]; then
+            echo "✅ **Backend:** Deployed successfully" >> $GITHUB_STEP_SUMMARY
+            API_URL=$(terraform output -raw api_gateway_url 2>/dev/null || echo "N/A")
+            echo " - API URL: $API_URL" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.deploy-backend.result }}" = "skipped" ]; then
+            echo "⏭️ **Backend:** Skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Backend:** Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          # Frontend status
+          if [ "${{ needs.deploy-frontend.result }}" = "success" ]; then
+            echo "✅ **Frontend:** Deployed successfully" >> $GITHUB_STEP_SUMMARY
+            FRONTEND_URL=$(terraform output -raw cloudfront_distribution_url 2>/dev/null || echo "N/A")
+            echo " - Frontend URL: $FRONTEND_URL" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ needs.deploy-frontend.result }}" = "skipped" ]; then
+            echo "⏭️ **Frontend:** Skipped" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **Frontend:** Failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "*Deployment completed at $(date)*" >> $GITHUB_STEP_SUMMARY

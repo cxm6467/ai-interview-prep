@@ -1,0 +1,19 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist/lambda",
+    "removeComments": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false
+  },
+  "include": [
+    "src/lambda/**/*",
+    "src/shared/**/*"
+  ],
+  "exclude": [
+    "src/local/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}

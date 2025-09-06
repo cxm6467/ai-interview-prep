@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Backend API Server
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_TARGET: local
+    image: ai-interview-prep-backend:latest
+    container_name: ai-interview-prep-backend
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=8080
+      - ENVIRONMENT=${ENVIRONMENT:-docker}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # OpenAI configuration
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # AWS configuration (for local AWS services)
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+    env_file:
+      - .env
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:8080/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ai-interview-prep
+    volumes:
+      # Optional: Mount source for development
+      # - ./src:/app/src:ro
+      - /app/node_modules
+    labels:
+      - "com.ai-interview-prep.service=backend"
+      - "com.ai-interview-prep.environment=${ENVIRONMENT:-docker}"
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: ai-interview-prep-redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - ai-interview-prep
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    labels:
+      - "com.ai-interview-prep.service=cache"
+
+networks:
+  ai-interview-prep:
+    driver: bridge
+    name: ai-interview-prep
+
+volumes:
+  redis_data:
+    name: ai-interview-prep-redis-data

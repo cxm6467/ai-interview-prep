@@ -1,0 +1,23 @@
+.toastContainer {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toastWrapper {
+  margin-bottom: 0.5rem;
+  pointer-events: auto;
+  transform: translateY(calc(var(--toast-index, 0) * -4px));
+  transition: transform 0.3s ease;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .toastContainer {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+}

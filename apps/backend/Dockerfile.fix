@@ -1,0 +1,7 @@
+FROM public.ecr.aws/lambda/nodejs:20
+
+# Copy the compiled distribution  
+COPY dist/ ${LAMBDA_TASK_ROOT}/
+
+# Set the CMD to the handler
+CMD ["lambda/handler.handler"]

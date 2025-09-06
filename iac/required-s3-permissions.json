@@ -1,0 +1,49 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "S3BucketAccelerateConfiguration",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetAccelerateConfiguration",
+        "s3:PutAccelerateConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ai-interview-prep-*",
+        "arn:aws:s3:::ai-interview-prep-develop-*",
+        "arn:aws:s3:::ai-interview-prep-prod-*"
+      ]
+    },
+    {
+      "Sid": "S3BucketManagement",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetBucketVersioning",
+        "s3:PutBucketVersioning",
+        "s3:GetLifecycleConfiguration",
+        "s3:PutLifecycleConfiguration",
+        "s3:GetReplicationConfiguration",
+        "s3:PutReplicationConfiguration",
+        "s3:GetBucketNotification",
+        "s3:PutBucketNotification",
+        "s3:GetBucketRequestPayment",
+        "s3:PutBucketRequestPayment",
+        "s3:GetBucketLogging",
+        "s3:PutBucketLogging",
+        "s3:GetBucketCORS",
+        "s3:PutBucketCORS",
+        "s3:GetBucketWebsite",
+        "s3:PutBucketWebsite",
+        "s3:GetBucketPublicAccessBlock",
+        "s3:PutBucketPublicAccessBlock",
+        "s3:GetEncryptionConfiguration",
+        "s3:PutEncryptionConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ai-interview-prep-*",
+        "arn:aws:s3:::ai-interview-prep-develop-*",
+        "arn:aws:s3:::ai-interview-prep-prod-*"
+      ]
+    }
+  ]
+}

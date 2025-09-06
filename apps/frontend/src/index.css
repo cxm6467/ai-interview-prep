@@ -1,0 +1,280 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Semantic color variables - Default Dark Theme */
+  --color-primary: #AB9DF2;
+  --color-primary-hover: #9A8BF0;
+  --color-primary-subtle: rgba(171, 157, 242, 0.1);
+  
+  --color-secondary: #78DCE8;
+  --color-secondary-hover: #6BCFE0;
+  --color-secondary-subtle: rgba(120, 220, 232, 0.1);
+  
+  --color-success: #A9DC76;
+  --color-success-hover: #9CD464;
+  --color-success-subtle: rgba(169, 220, 118, 0.1);
+  
+  --color-warning: #FFD866;
+  --color-warning-hover: #FFCF54;
+  --color-warning-subtle: rgba(255, 216, 102, 0.1);
+  
+  --color-error: #FF6188;
+  --color-error-hover: #FF4F76;
+  --color-error-subtle: rgba(255, 97, 136, 0.1);
+  
+  --color-info: #FC9867;
+  --color-info-hover: #FB8655;
+  --color-info-subtle: rgba(252, 152, 103, 0.1);
+  
+  --color-background: #2D2A2E;
+  --color-background-secondary: #221F22;
+  --color-background-tertiary: #403E41;
+  
+  --color-surface: #363437;
+  --color-surface-hover: #403E41;
+  --color-surface-secondary: #19181A;
+  
+  --color-text: #FCFCFA;
+  --color-text-secondary: #939293;
+  --color-text-tertiary: #727072;
+  --color-text-inverse: #2D2A2E;
+  
+  --color-border: #19181A;
+  --color-border-hover: #403E41;
+  --color-border-secondary: #727072;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+  
+  /* Legacy variables for backward compatibility */
+  --bg-primary: var(--color-background);
+  --bg-secondary: var(--color-background-secondary);
+  --bg-tertiary: var(--color-background-tertiary);
+  --text-primary: var(--color-text);
+  --text-secondary: var(--color-text-secondary);
+  --text-tertiary: var(--color-text-tertiary);
+  --accent-yellow: var(--color-warning);
+  --accent-green: var(--color-success);
+  --accent-orange: var(--color-info);
+  --accent-purple: var(--color-primary);
+  --accent-pink: var(--color-error);
+  --accent-blue: var(--color-secondary);
+  --border: var(--color-border);
+  --shadow: var(--shadow-lg);
+  --card-bg: var(--color-surface);
+  --hover-bg: var(--color-surface-hover);
+  --code-bg: var(--color-surface-secondary);
+  
+  /* Spacing system */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Typography scale - mobile first */
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  
+  /* Breakpoints */
+  --mobile: 320px;
+  --tablet: 768px;
+  --desktop: 1024px;
+  --wide: 1400px;
+}
+
+/* ==================== THEME VARIANTS ==================== */
+
+.light {
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-subtle: rgba(37, 99, 235, 0.1);
+  
+  --color-secondary: #3498DB;
+  --color-secondary-hover: #2E86C1;
+  --color-secondary-subtle: rgba(52, 152, 219, 0.1);
+  
+  --color-success: #27AE60;
+  --color-success-hover: #229954;
+  --color-success-subtle: rgba(39, 174, 96, 0.1);
+  
+  --color-warning: #F39C12;
+  --color-warning-hover: #E67E22;
+  --color-warning-subtle: rgba(243, 156, 18, 0.1);
+  
+  --color-error: #E91E63;
+  --color-error-hover: #C2185B;
+  --color-error-subtle: rgba(233, 30, 99, 0.1);
+  
+  --color-info: #17A2B8;
+  --color-info-hover: #138496;
+  --color-info-subtle: rgba(23, 162, 184, 0.1);
+  
+  --color-background: #FAFAFA;
+  --color-background-secondary: #FFFFFF;
+  --color-background-tertiary: #F5F5F5;
+  
+  --color-surface: #FFFFFF;
+  --color-surface-hover: #F8F8F8;
+  --color-surface-secondary: #F5F5F5;
+  
+  --color-text: #2D2A2E;
+  --color-text-secondary: #4A474B;
+  --color-text-tertiary: #6B6669;
+  --color-text-inverse: #FFFFFF;
+  
+  --color-border: #D1D5DB;
+  --color-border-hover: #9CA3AF;
+  --color-border-secondary: #6B7280;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.dark {
+  /* Uses root variables (default dark theme) */
+}
+
+
+/* Reset and base styles - mobile first */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px; /* Base for rem units */
+  background: var(--color-background);
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', monospace;
+  line-height: 1.6;
+  color: var(--color-text);
+  background: var(--color-background);
+  min-height: 100vh;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Prevent horizontal scroll on mobile */
+  overflow-x: hidden;
+}
+
+/* Mobile-first container */
+.container {
+  width: 100%;
+  padding: var(--space-md);
+  margin: 0 auto;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .container {
+    padding: var(--space-lg);
+    max-width: 768px;
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .container {
+    padding: var(--space-xl);
+    max-width: 1024px;
+  }
+}
+
+/* Wide screens */
+@media (min-width: 1400px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+/* Utility classes */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+
+.grid { display: grid; }
+.gap-sm { gap: var(--space-sm); }
+.gap-md { gap: var(--space-md); }
+.gap-lg { gap: var(--space-lg); }
+
+/* Hide on mobile, show on tablet */
+@media (max-width: 767px) {
+  .hide-mobile { display: none !important; }
+}
+
+@media (min-width: 768px) {
+  .hide-tablet { display: none !important; }
+}
+
+@media (min-width: 1024px) {
+  .hide-desktop { display: none !important; }
+}
+
+/* Responsive typography */
+h1 {
+  font-size: var(--text-2xl);
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: var(--text-xl);
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: var(--text-lg);
+  line-height: 1.4;
+}
+
+@media (min-width: 768px) {
+  h1 { font-size: var(--text-3xl); }
+  h2 { font-size: var(--text-2xl); }
+  h3 { font-size: var(--text-xl); }
+}
+
+@media (min-width: 1024px) {
+  h1 { font-size: var(--text-4xl); }
+}
+
+/* Touch-friendly tap targets */
+button, a, input, textarea, select {
+  min-height: 44px; /* iOS recommendation */
+  min-width: 44px;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Ensure all elements inherit theme colors properly */
+*, *::before, *::after {
+  color: inherit;
+}
+

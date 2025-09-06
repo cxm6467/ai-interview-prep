@@ -1,0 +1,77 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LambdaPermissions",
+      "Effect": "Allow",
+      "Action": [
+        "lambda:GetFunctionCodeSigningConfig",
+        "lambda:PutFunctionCodeSigningConfig",
+        "lambda:DeleteFunctionCodeSigningConfig"
+      ],
+      "Resource": [
+        "arn:aws:lambda:*:*:function:ai-interview-prep-dev-backend-api",
+        "arn:aws:lambda:*:*:function:ai-interview-prep-prod-backend-api"
+      ]
+    },
+    {
+      "Sid": "S3BucketPermissions", 
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetAccelerateConfiguration",
+        "s3:PutAccelerateConfiguration",
+        "s3:GetLifecycleConfiguration",
+        "s3:PutLifecycleConfiguration",
+        "s3:GetReplicationConfiguration",
+        "s3:PutReplicationConfiguration",
+        "s3:GetEncryptionConfiguration",
+        "s3:PutEncryptionConfiguration"
+      ],
+      "Resource": [
+        "arn:aws:s3:::ai-interview-prep-dev-frontend-*",
+        "arn:aws:s3:::ai-interview-prep-prod-frontend-*"
+      ]
+    },
+    {
+      "Sid": "Route53Management",
+      "Effect": "Allow",
+      "Action": [
+        "route53:GetHostedZone",
+        "route53:ListHostedZones",
+        "route53:ChangeResourceRecordSets",
+        "route53:GetChange",
+        "route53:ListResourceRecordSets"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "ACMCertificateManagement",
+      "Effect": "Allow",
+      "Action": [
+        "acm:RequestCertificate",
+        "acm:DeleteCertificate",
+        "acm:DescribeCertificate",
+        "acm:ListCertificates",
+        "acm:GetCertificate",
+        "acm:TagCertificate",
+        "acm:ListTagsForCertificate"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CloudWatchLogMetricFilters",
+      "Effect": "Allow",
+      "Action": [
+        "logs:PutMetricFilter",
+        "logs:DeleteMetricFilter",
+        "logs:DescribeMetricFilters"
+      ],
+      "Resource": [
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ai-interview-prep-dev-backend-api",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ai-interview-prep-dev-backend-api:*",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ai-interview-prep-prod-backend-api",
+        "arn:aws:logs:*:*:log-group:/aws/lambda/ai-interview-prep-prod-backend-api:*"
+      ]
+    }
+  ]
+}

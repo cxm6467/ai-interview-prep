@@ -1,0 +1,29 @@
+# Example Terraform Variables File
+# Copy this file to terraform.tfvars and customize for your deployment
+
+# AWS Configuration
+aws_region  = "us-east-1"
+environment = "dev"
+
+# Project Configuration
+project_name = "ai-interview-prep"
+
+# Optional: Custom domain name for frontend
+# domain_name = "myapp.example.com"
+
+# Lambda Configuration
+lambda_runtime     = "nodejs20.x"
+lambda_timeout     = 30
+lambda_memory_size = 512
+
+# Application Configuration
+log_level = "INFO"
+
+# IMPORTANT: Set your OpenAI API key
+# openai_api_key = "sk-your-openai-api-key-here"
+
+# S3 Configuration
+s3_force_destroy = false  # Set to true only for dev environments
+
+# CloudFront Configuration
+cloudfront_price_class = "PriceClass_100"  # Use PriceClass_All for global distribution

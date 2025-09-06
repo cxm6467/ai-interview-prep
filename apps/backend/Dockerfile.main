@@ -1,0 +1,29 @@
+# AWS Lambda Container Image for Main API
+# This builds specifically for the main API Lambda function
+
+FROM public.ecr.aws/lambda/nodejs:20
+
+# Set environment variables for Lambda
+ENV NODE_ENV=production
+
+# Copy package files and tsconfig
+COPY package*.json ./
+COPY tsconfig.docker.json ./tsconfig.json
+
+# Install all dependencies (including dev dependencies for TypeScript compilation)
+RUN NODE_ENV=development npm install
+
+# Copy source code
+COPY src/ ./src/
+
+# Build TypeScript (before removing dev dependencies)
+RUN echo "Building TypeScript..." && npm run build
+RUN echo "Built files:" && ls -la dist/
+
+# Remove dev dependencies after build to reduce image size
+RUN npm prune --production && npm cache clean --force
+
+# Built files are already in the container from npm run build
+
+# Lambda Runtime Interface Client for Node.js
+CMD [ "dist/lambda/handler.handler" ]

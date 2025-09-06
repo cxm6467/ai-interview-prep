@@ -1,0 +1,30 @@
+name: '🔧 Deploy to Develop'
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_frontend:
+        description: 'Deploy frontend'
+        required: false
+        default: true
+        type: boolean
+      deploy_backend:
+        description: 'Deploy backend'  
+        required: false
+        default: true
+        type: boolean
+  push:
+    branches: [ develop ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: develop
+      deploy_frontend: ${{ inputs.deploy_frontend || true }}
+      deploy_backend: ${{ inputs.deploy_backend || true }}
+    secrets: inherit
